@@ -14,7 +14,7 @@ import java.util.*;
 import java.awt.color.ColorSpace;
 
 @RestController
-@RequestMapping("/busOpt")
+@RequestMapping("/busOpt") //Must initial after the port number to use this class//
 public class BusController {
 
     //Initializes busList which holds information of buses optional//
@@ -26,6 +26,7 @@ public class BusController {
         busList.add(bus);
         return "A new Bus has been added successfully: " + bus.getBusName();
     }
+
 
     // Get all buses
     @GetMapping("/all")
@@ -89,16 +90,6 @@ public class BusController {
         }
     return "Bus stop was not found for this bus!";
     }
-
-
-
-
-
-
-
-
-
-
 
 
 }
