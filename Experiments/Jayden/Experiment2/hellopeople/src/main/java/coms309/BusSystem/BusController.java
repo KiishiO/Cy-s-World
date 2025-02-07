@@ -56,11 +56,12 @@ public class BusController {
     }
 
     @PutMapping("/{busName}/updateStop")
-    public String updateStopLocation(@PathVariable String busName, @RequestBody String newStopLocation) {
+    public String updateStopLocation(@PathVariable String busName, @RequestBody StopLocationRequest stopLocationRequest) {
+        String newStopLocation = stopLocationRequest.getStopLocation();
         for (Bus bus : busList) {
-            if (bus.getBusName().equalsIgnoreCase(busName)) {  // Allow case-insensitive comparison
+            if (bus.getBusName().equalsIgnoreCase(busName)) {
                 bus.updateStopLocation(newStopLocation);
-                return newStopLocation + bus.getLastReportTime();
+                return "Stop location updated to: " + newStopLocation + " at " + bus.getLastReportTime();
             }
         }
         throw new RuntimeException("Bus not found");
@@ -76,6 +77,17 @@ public class BusController {
         } else {
             return "That is not a valid bus!";
         }
+    }
+
+    @DeleteMapping("removeStop/{stopLocation}")
+    public String deleteLocation(@PathVariable String stopLocation){
+        for(Bus bus : busList){
+            if(bus.getStopLocation().equalsIgnoreCase(stopLocation)){
+                bus.setStopLocation("");
+                return "Bus stop Location has been removed from the bus: " + bus.getBusName();
+            }
+        }
+    return "Bus stop was not found for this bus!";
     }
 
 
