@@ -1,7 +1,5 @@
 package com.example.androidexample;
 
-import static kotlin.random.RandomKt.Random;
-
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -9,8 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
-import kotlin.random.Random;
+import java.util.Random;
 
 
 public class DiceActivity extends AppCompatActivity {
@@ -18,6 +15,8 @@ public class DiceActivity extends AppCompatActivity {
     private Button homeButton;
     private TextView displayText;
     private TextView numberText;
+
+    private int randNum;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,14 +30,18 @@ public class DiceActivity extends AppCompatActivity {
 
         // Extract data passed into this activity
         Bundle extras = getIntent().getExtras();
+
         if(extras == null) {
             displayText.setText("Your lucky number is...");
             numberText.setText("?");
         } else {
             String number = extras.getString("NUM");
-            Random rand = Random(Integer.parseInt(number));
+            Random randomGenerator = new Random();
+            int randomInt = randomGenerator.nextInt(Integer.parseInt(number));
+            randNum = randomInt;
+            String text = String.valueOf(randomInt);
             displayText.setText("Your lucky number is...");
-            numberText.setText(rand.toString());
+            numberText.setText(text);
         }
 
         // Set click listener for home button
@@ -48,8 +51,11 @@ public class DiceActivity extends AppCompatActivity {
                 Intent intent = new Intent(DiceActivity.this, MainActivity.class);
                 // Be careful here - extras might be null
                 if (extras != null) {
-                    String number = extras.getString("NUM");
-                    intent.putExtra("NUM", number);
+                    //String number = extras.getString("NUM");
+                    //Random randomGenerator = new Random();
+                    //int randomInt = randomGenerator.nextInt(Integer.parseInt(number));
+                    //String number = extras.getString("NUM");
+                    intent.putExtra("NUM", String.valueOf(randNum));
                 }
                 startActivity(intent);
             }
