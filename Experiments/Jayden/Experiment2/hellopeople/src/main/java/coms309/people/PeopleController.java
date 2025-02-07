@@ -49,7 +49,21 @@ public class PeopleController {
     public  String createPerson(@RequestBody Person person) {
         System.out.println(person);
         peopleList.put(person.getFirstName(), person);
-        return "New person "+ person.getFirstName() + " Saved";
+
+        return "New person "+ person.getFirstName() + " Saved\n";
+    }
+
+    @PostMapping("/peoples")
+    public  String createsPerson(@RequestBody Person person) {
+        System.out.println(person);
+//        peopleList.put(person.getLastName(), person);
+//        peopleList.put(person.getAddress(), person);
+        peopleList.put(person.getFirstName(), person);
+//        peopleList.put(person.getTelephone(), person);
+
+        return "Hello " + person.getFirstName() + "\nWhats you last name? " + person.getLastName() +
+                "\nI heard you live at " + person.getAddress() + "\nWhats a good number to contact you? " + person.getTelephone() ;
+//        return "New person's last name is "+ person.getLastName() + ".\n";
     }
 
     // THIS IS THE READ OPERATION
