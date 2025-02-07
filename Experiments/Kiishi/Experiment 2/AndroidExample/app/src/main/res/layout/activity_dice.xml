@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#DEC1DB"
+    android:backgroundTint="#DEC1DB"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/dice_display_txt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="200dp"
+        android:layout_marginRight="20dp"
+        android:text="Your lucky number is..."
+        android:textAlignment="center"
+        android:textColor="#3F51B5"
+        android:textSize="30sp">
+
+    </TextView>
+
+    <TextView
+        android:id="@+id/dice_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="50dp"
+        android:text="?"
+        android:textColor="#6DA0E1"
+        android:textSize="150sp">
+
+    </TextView>
+
+    <Button
+        android:id="@+id/dice_back_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="50dp"
+        android:text="Back to Main">
+
+    </Button>
+
+
+</androidx.appcompat.widget.LinearLayoutCompat>

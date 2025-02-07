@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#DEC1DB"
+    android:backgroundTint="#DEC1DB"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/counter_display_txt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="75dp"
+        android:layout_marginRight="20dp"
+        android:text="Select Your Dice Limit"
+        android:textAlignment="center"
+        android:textColor="#3F51B5"
+        android:textSize="30sp">
+
+    </TextView>
+
+    <TextView
+        android:id="@+id/number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="25dp"
+        android:text="0"
+        android:textColor="#6DA0E1"
+        android:textSize="150sp"></TextView>
+
+    <Button
+        android:id="@+id/counter_increase_btn"
+        android:layout_width="250dp"
+        android:layout_height="80dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="50dp"
+        android:text="Increase"></Button>
+
+    <Button
+        android:id="@+id/counter_decrease_btn"
+        android:layout_width="250dp"
+        android:layout_height="80dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:text="Decrease"></Button>
+
+    <Button
+        android:id="@+id/counter_results_btn"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:text="See Results!">
+
+    </Button>
+
+    <Button
+        android:id="@+id/counter_back_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:text="Back to Main">
+
+    </Button>
+
+</androidx.appcompat.widget.LinearLayoutCompat>
