@@ -3,39 +3,83 @@ package coms309.dininghall;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.Map;
+
 
 @RestController
 @RequestMapping("/dininghalls")
 public class DiningHallController {
 
-    private static final Map<String, Menu> diningHalls = new HashMap<>();
+    private static final HashMap<String, DiningHall> diningHalls = new HashMap<>();
 
-    @PostMapping("/")
-    public String createDiningHall(@RequestParam String hallName) {
-        if(diningHalls.containsKey(hallName)) {
-            return "Dining hall already exists.";
+    // Create a new dining hall
+    @PostMapping("/dininghalls")
+    public String createDiningHall(@RequestBody DiningHall diningHall) {
+        diningHalls.put(diningHall.getName(), diningHall);
+        return "Dining Hall " + diningHall.getName() + " created.";
+    }
+
+    // Get all dining halls
+    @GetMapping("/dininghalls")
+    public HashMap<String, DiningHall> getAllDiningHalls() {
+        return diningHalls;
+    }
+
+    // Get a specific dining hall by name
+    @GetMapping("/dininghalls/{diningHallName}")
+    public DiningHall getDiningHall(@PathVariable String diningHallName) {
+        return diningHalls.get(diningHallName);
+    }
+
+    // Add a meal to a specific dining hall
+    @PostMapping("/dininghalls/{diningHallName}/meals")
+    public String addMeal(@PathVariable String diningHallName, @RequestBody Meal meal) {
+        DiningHall diningHall = diningHalls.get(diningHallName);
+        if (diningHall != null) {
+            diningHall.addMeal(meal);
+            return "Meal " + meal.getName() + " added to " + diningHallName + ".";
         } else {
-            diningHalls.put(hallName, new Menu());
-            return "Dining hall: " + hallName + "created successfully!";
+            return "Dining hall not found.";
         }
     }
 
-    @PostMapping("/{hallName}/menu")
-    public String addFoodToMenu(@PathVariable String hallName, @RequestParam String name, @RequestParam String description) {
-        if(!diningHalls.containsKey(hallName)) {
-            return "Dining hall " + hallName + "does not exist.";
+    // Get all meals from a specific dining hall
+    @GetMapping("/dininghalls/{diningHallName}/meals")
+    public HashMap<String, Meal> getMeals(@PathVariable String diningHallName) {
+        DiningHall diningHall = diningHalls.get(diningHallName);
+        if (diningHall != null) {
+            return diningHall.getMeals();
+        } else {
+            return null;
         }
-        Menu menu = diningHalls.get(hallName);
-        Food newFood = new Food(name, description);
-        menu.addDish(newFood);
-        return "Dish added to " + hallName + "menu!";
     }
 
-    @GetMapping("{hallName}/menu")
-    public Menu getMenu(@PathVariable String hallName) {
-        return diningHalls.getOrDefault(hallName, new Menu());
+    // Get a specific meal from a dining hall
+    @GetMapping("/dininghalls/{diningHallName}/meals/{mealName}")
+    public Meal getMeal(@PathVariable String diningHallName, @PathVariable String mealName) {
+        DiningHall diningHall = diningHalls.get(diningHallName);
+        if (diningHall != null) {
+            return diningHall.getMeal(mealName);
+        } else {
+            return null;
+        }
     }
 
+    // Remove a meal from a dining hall
+    @DeleteMapping("/dininghalls/{diningHallName}/meals/{mealName}")
+    public String removeMeal(@PathVariable String diningHallName, @PathVariable String mealName) {
+        DiningHall diningHall = diningHalls.get(diningHallName);
+        if (diningHall != null) {
+            diningHall.removeMeal(mealName);
+            return "Meal " + mealName + " removed from " + diningHallName + ".";
+        } else {
+            return "Dining hall or meal not found.";
+        }
+    }
 
+    // Delete a dining hall
+    @DeleteMapping("/dininghalls/{diningHallName}")
+    public String deleteDiningHall(@PathVariable String diningHallName) {
+        diningHalls.remove(diningHallName);
+        return "Dining hall " + diningHallName + " deleted.";
+    }
 }
