@@ -1,14 +1,17 @@
 package coms309.BusSystem;
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.Date;
+import java.util.*;
 import java.awt.color.ColorSpace;
-import java.util.Calendar;
-import java.util.TimeZone;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/busOpt")
@@ -57,7 +60,7 @@ public class BusController {
         for (Bus bus : busList) {
             if (bus.getBusName().equalsIgnoreCase(busName)) {  // Allow case-insensitive comparison
                 bus.updateStopLocation(newStopLocation);
-                return "Bus stop location updated to " + newStopLocation + " at " + bus.getLastReportTime();
+                return newStopLocation + bus.getLastReportTime();
             }
         }
         throw new RuntimeException("Bus not found");
@@ -66,8 +69,24 @@ public class BusController {
     // Delete a bus by Name
     @DeleteMapping("/{busName}")
     public String deleteBus(@PathVariable String busName) {
-        busList.removeIf(bus -> bus.getBusName().equals(busName));
-        return "Bus deleted successfully!";
+        boolean removed = busList.removeIf(bus -> bus.getBusName().equalsIgnoreCase(busName));
+
+        if (removed) {
+            return "Bus deleted successfully!";
+        } else {
+            return "That is not a valid bus!";
+        }
     }
+
+
+
+
+
+
+
+
+
+
+
 
 }
