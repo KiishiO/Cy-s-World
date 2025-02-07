@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.LinearLayoutCompat
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    tools:context=".MainActivity"
-    android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent"
+    android:background="#DEC1DB"
+    android:backgroundTint="#DEC1DB"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
 
     <TextView
         android:id="@+id/main_msg_txt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="200dp"
         android:layout_marginLeft="20dp"
+        android:layout_marginTop="200dp"
         android:layout_marginRight="20dp"
         android:text="Welcome!\n\nPick a dice limit and roll your lucky number!"
         android:textAlignment="center"
@@ -26,22 +27,20 @@
         android:id="@+id/main_counter_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
         android:layout_gravity="center"
+        android:layout_marginTop="100dp"
         android:text="Start"
-        android:textSize="20sp"
-        android:textColor="#ffffff">
-    </Button>
+        android:textColor="#ffffff"
+        android:textSize="20sp"></Button>
 
     <Button
         android:id="@+id/main_reset_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
         android:layout_gravity="center"
+        android:layout_marginTop="100dp"
         android:text="Reset"
-        android:textSize="20sp"
-        android:textColor="#ffffff">
-    </Button>
+        android:textColor="#ffffff"
+        android:textSize="20sp"></Button>
 
 </androidx.appcompat.widget.LinearLayoutCompat>
