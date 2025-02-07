@@ -3,8 +3,11 @@ package coms309.dininghall;
 import java.util.HashMap;
 
 public class DiningHall {
+
     private String name;
+
     private String location;
+
     private HashMap<String, Meal> mealList = new HashMap<>();
 
     public DiningHall(String name, String location) {
@@ -47,5 +50,11 @@ public class DiningHall {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    @Override
+    public String toString() {
+        return name + " "
+        + location;
     }
 }

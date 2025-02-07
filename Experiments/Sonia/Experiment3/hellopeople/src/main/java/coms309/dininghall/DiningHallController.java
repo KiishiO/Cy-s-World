@@ -1,12 +1,19 @@
 package coms309.dininghall;
 
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.HashMap;
 
 
 @RestController
-@RequestMapping("/dininghalls")
+//@RequestMapping("/dininghalls")
 public class DiningHallController {
 
     private static final HashMap<String, DiningHall> diningHalls = new HashMap<>();
@@ -14,6 +21,7 @@ public class DiningHallController {
     // Create a new dining hall
     @PostMapping("/dininghalls")
     public String createDiningHall(@RequestBody DiningHall diningHall) {
+        System.out.println(diningHall);
         diningHalls.put(diningHall.getName(), diningHall);
         return "Dining Hall " + diningHall.getName() + " created.";
     }
