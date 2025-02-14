@@ -1,5 +1,7 @@
 package coms309.BusSystem;
 
+//Add class for getting the updated stopLocation for the put in BusController//
+//Before the put
 public class StopLocationRequest {
     private String stopLocation;
 

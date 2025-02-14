@@ -1,8 +1,13 @@
 package coms309.BusSystem;
+import jakarta.persistence.Entity;
+
+
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDateTime;
 
-
+@Entity
 public class Bus {
 
     private String busName;
