@@ -15,6 +15,7 @@
         android:layout_marginBottom="600sp"
         app:srcCompat="@drawable/iowa_state_logo" />
 
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -72,7 +73,6 @@
             android:inputType="textPassword"
             android:layout_marginLeft="10sp"
             android:layout_marginRight="10sp"></EditText>
-
 
     </LinearLayout>
 
