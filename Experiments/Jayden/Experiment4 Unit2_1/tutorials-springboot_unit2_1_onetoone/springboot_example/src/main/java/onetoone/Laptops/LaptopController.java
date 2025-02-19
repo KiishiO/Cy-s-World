@@ -30,8 +30,8 @@ public class LaptopController {
     @Autowired
     PersonRepository personRepository;
     
-    private String success = "{\"message\":\"success\"}";
-    private String failure = "{\"message\":\"failure\"}";
+    private final String success = "{\"message\":\"success\"}";
+    private final String failure = "{\"message\":\"failure\"}";
 
     @GetMapping(path = "/laptops")
     List<Laptop> getAllLaptops(){
@@ -65,7 +65,7 @@ public class LaptopController {
 
         // Check if there is an object depending on Person and then remove the dependency
         Person person = personRepository.findByLaptop_Id(id);
-        person.setLaptop(null);
+//        person.setLaptop(null);
         personRepository.save(person);
 
         // delete the laptop if the changes have not been reflected by the above statement

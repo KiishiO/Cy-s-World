@@ -1,5 +1,6 @@
 package onetoone.Login;
 
+import onetoone.Persons.Person;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,13 +49,27 @@ public class LoginController {
     /**
      * Get a login by email.
      */
-    @GetMapping("/email/{email}")
+    @GetMapping("/{email}")
     public ResponseEntity<Login> getLoginByEmail(@PathVariable String email) {
         Optional<Login> login = loginService.getUserByEmail(email);
         return login.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    /**
+     * Gets login at that currently active
+     *
+     */
+//    @GetMapping("/active/{status}")
+//    public ResponseEntity<List<Login>> getActiveLogins(@PathVariable Boolean status) {
+//        List<Login> activeLogins = loginRepository.findByIfActive(status);
+//
+//        if (activeLogins.isEmpty()) {
+//            return ResponseEntity.notFound().build();
+//        }
+//
+//        return ResponseEntity.ok(activeLogins);
+//    }
     /**
      * Register a new login.
      */
@@ -74,9 +89,24 @@ public class LoginController {
     public ResponseEntity<Login> updateLogin(@PathVariable Long id, @RequestBody Login updatedLogin) {
         return loginRepository.findById(id)
                 .map(existingLogin -> {
+                    // Update basic Login details
                     existingLogin.setName(updatedLogin.getName());
                     existingLogin.setEmailId(updatedLogin.getEmailId());
                     existingLogin.setIfActive(updatedLogin.getIfActive());
+
+                    // Check if the request contains a new Person
+                    if (updatedLogin.getPerson() != null) {
+                        Person updatedPerson = updatedLogin.getPerson();
+
+                        if (existingLogin.getPerson() != null) {
+                            // Update existing Person fields
+                            existingLogin.getPerson().setName(updatedPerson.getName());
+                            existingLogin.getPerson().setPhoneNumber(updatedPerson.getPhoneNumber());
+                        } else {
+                            // Assign a new Person if none exists
+                            existingLogin.setPerson(updatedPerson);
+                        }
+                    }
 
                     loginRepository.save(existingLogin);
                     return ResponseEntity.ok(existingLogin);

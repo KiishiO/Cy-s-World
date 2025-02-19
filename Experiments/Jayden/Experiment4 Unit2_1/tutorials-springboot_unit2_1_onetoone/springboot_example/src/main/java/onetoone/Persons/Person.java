@@ -93,13 +93,13 @@ public class Person {
         this.ifActive = ifActive;
     }
 
-    public Laptop getLaptop(){
-        return laptop;
-    }
-
-    public void setLaptop(Laptop laptop){
-        this.laptop = laptop;
-    }
+//    public Laptop getLaptop(){
+//        return laptop;
+//    }
+//
+//    public void setLaptop(Laptop laptop){
+//        this.laptop = laptop;
+//    }
     public Login getLogin() {
         return login;
     }
