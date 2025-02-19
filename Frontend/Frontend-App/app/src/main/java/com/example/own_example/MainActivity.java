@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
@@ -15,6 +16,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -34,8 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar passwordStrengthBar;
     private CircularProgressIndicator loadingProgress;
     private MaterialCheckBox rememberMeCheckbox;
-    private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu/"; // Update with server URL
-
+    private static final String BASE_URL = "http://localhost:8080/new";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +74,26 @@ public class MainActivity extends AppCompatActivity {
                                 .setInterpolator(new AccelerateDecelerateInterpolator())
                 );
 
+        // Password strength watcher
+        etPassword.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String password = s.toString();
+                if (password.isEmpty()) {
+                    passwordStrengthBar.setVisibility(View.GONE);
+                } else {
+                    passwordStrengthBar.setVisibility(View.VISIBLE);
+                    updatePasswordStrength(password);
+                }
+            }
+        });
+
         // Add click listener for sign in button
         btnSignIn.setOnClickListener(v -> {
             String username = etUsername.getText().toString();
@@ -85,44 +107,124 @@ public class MainActivity extends AppCompatActivity {
                 performLogin(username, password);
             }
         });
+
+        // Add click listener for forgot password
+        tvForgotPassword.setOnClickListener(v -> {
+            String username = etUsername.getText().toString();
+            if (username.isEmpty()) {
+                showError("Please enter your Net-ID first");
+                shakeView(etUsername);
+            } else {
+                sendPasswordResetRequest(username);
+            }
+        });
+    }
+
+    private void updatePasswordStrength(String password) {
+        int strength = calculatePasswordStrength(password);
+        passwordStrengthBar.setProgress(strength);
+        int color;
+        if (strength < 33) {
+            color = Color.RED;
+        } else if (strength < 66) {
+            color = Color.YELLOW;
+        } else {
+            color = Color.GREEN;
+        }
+        passwordStrengthBar.setProgressTintList(ColorStateList.valueOf(color));
+    }
+
+    private int calculatePasswordStrength(String password) {
+        int score = 0;
+        if (password.length() >= 8) score += 20;
+        if (password.matches(".*[A-Z].*")) score += 20;
+        if (password.matches(".*[a-z].*")) score += 20;
+        if (password.matches(".*\\d.*")) score += 20;
+        if (password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*")) score += 20;
+        return score;
     }
 
     private void performLogin(String username, String password) {
         String url = BASE_URL + "users/login";
+        Log.d("Login", "Attempting login to: " + url);
 
         JSONObject jsonBody = new JSONObject();
         try {
             jsonBody.put("username", username);
             jsonBody.put("password", password);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
 
-        JsonObjectRequest request = new JsonObjectRequest(
-                Request.Method.POST, url, jsonBody,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
+            Log.d("Login", "Sending data: " + jsonBody.toString());
+
+            JsonObjectRequest request = new JsonObjectRequest(
+                    Request.Method.POST,
+                    url,
+                    jsonBody,
+                    response -> {
+                        Log.d("Login", "Success response: " + response.toString());
                         try {
                             String message = response.getString("message");
                             showSuccess(message);
-                            // Handle successful login
-                            // You might get a token from response
-                            // String token = response.getString("token");
                         } catch (JSONException e) {
                             showError("Error parsing response");
                         }
+                    },
+                    error -> {
+                        Log.e("Login", "Error: " + error.toString());
+                        NetworkResponse networkResponse = error.networkResponse;
+                        if (networkResponse != null && networkResponse.data != null) {
+                            String errorResponse = new String(networkResponse.data);
+                            Log.e("Login", "Error response: " + errorResponse);
+                        }
+                        showError("Login failed: " + getVolleyErrorMessage(error));
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        showError("Login failed: " + error.getMessage());
-                    }
-                }
-        );
+            );
 
-        VolleySingleton.getInstance(this).addToRequestQueue(request);
+            request.setRetryPolicy(new DefaultRetryPolicy(
+                    10000, // 10 seconds timeout
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+            ));
+
+            VolleySingleton.getInstance(this).addToRequestQueue(request);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            showError("Error creating request");
+        }
+    }
+
+    private void sendPasswordResetRequest(String username) {
+        String url = BASE_URL + "users/forgot-password";
+
+        JSONObject jsonBody = new JSONObject();
+        try {
+            jsonBody.put("username", username);
+
+            JsonObjectRequest request = new JsonObjectRequest(
+                    Request.Method.POST,
+                    url,
+                    jsonBody,
+                    response -> showSuccess("Password reset instructions sent"),
+                    error -> showError("Failed to send reset instructions: " + getVolleyErrorMessage(error))
+            );
+
+            VolleySingleton.getInstance(this).addToRequestQueue(request);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            showError("Error processing request");
+        }
+    }
+
+    private String getVolleyErrorMessage(VolleyError error) {
+        if (error.networkResponse != null) {
+            switch (error.networkResponse.statusCode) {
+                case 404: return "Server not found";
+                case 401: return "Invalid credentials";
+                case 400: return "Invalid request";
+                case 500: return "Server error";
+                default: return "Network error " + error.networkResponse.statusCode;
+            }
+        }
+        return error.getMessage() != null ? error.getMessage() : "Unknown error occurred";
     }
 
     private void shakeView(View view) {
@@ -170,6 +272,16 @@ public class MainActivity extends AppCompatActivity {
                 Snackbar.LENGTH_LONG
         );
         snackbar.setBackgroundTint(Color.parseColor("#4CAF50"));
+        snackbar.show();
+    }
+
+    private void showInfo(String message) {
+        Snackbar snackbar = Snackbar.make(
+                findViewById(android.R.id.content),
+                message,
+                Snackbar.LENGTH_LONG
+        );
+        snackbar.setBackgroundTint(Color.parseColor("#2196F3"));
         snackbar.show();
     }
 }
