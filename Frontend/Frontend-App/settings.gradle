@@ -20,5 +20,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Own_Example"
-include(":app")
- 
+include ':app'
