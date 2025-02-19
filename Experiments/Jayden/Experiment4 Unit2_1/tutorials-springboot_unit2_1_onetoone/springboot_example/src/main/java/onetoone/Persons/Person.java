@@ -1,5 +1,6 @@
 package onetoone.Persons;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -41,8 +42,9 @@ public class Person {
     @JoinColumn(name = "laptop_id")
     private Laptop laptop;
 
-    @OneToOne(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Login login;  // Associating `Person` with `Login`
+    @OneToOne(mappedBy = "person")
+    @JsonBackReference
+    private Login login; // Associating `Person` with `Login`
 
     // =============================== Constructors ================================== //
 

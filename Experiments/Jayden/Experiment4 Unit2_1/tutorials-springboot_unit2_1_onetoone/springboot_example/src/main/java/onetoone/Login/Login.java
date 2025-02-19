@@ -1,5 +1,6 @@
 package onetoone.Login;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,7 +18,7 @@ public class Login {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(nullable = false)
     private String name;
@@ -30,6 +31,7 @@ public class Login {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "person_id", referencedColumnName = "id")
+    @JsonManagedReference
     private Person person;  // Storing related person details
 
     // =============================== Constructors ================================== //
@@ -47,7 +49,7 @@ public class Login {
 
     // =============================== Getters and Setters ================================== //
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 

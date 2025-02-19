@@ -24,67 +24,71 @@ public class LoginController {
     private final String failure = "{\"message\":\"failure\"}";
 
     /**
-     * Get all users.
+     * Get all logins.
      */
     @GetMapping
-    public List<Login> getAllUsers() {
-        return loginRepository.findAll();
+    public ResponseEntity<List<Login>> getAllLogins() {
+        List<Login> logins = loginRepository.findAll();
+        if (logins.isEmpty()) {
+            return ResponseEntity.noContent().build(); // Returns 204 if no users exist
+        }
+        return ResponseEntity.ok(logins);
     }
 
     /**
-     * Get user by ID.
+     * Get a login by ID.
      */
-//    @GetMapping("/{id}")
-//    public ResponseEntity<Login> getUserById(@PathVariable int id) {
-//        return loginRepository.findById(id)
-//                .map(ResponseEntity::ok)
-//                .orElseGet(() -> ResponseEntity.notFound().build());
-//    }
+    @GetMapping("/{id}")
+    public ResponseEntity<Login> getLoginById(@PathVariable Long id) {
+        return loginRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 
     /**
-     * Get user by email.
+     * Get a login by email.
      */
     @GetMapping("/email/{email}")
-    public ResponseEntity<Login> getUserByEmail(@PathVariable String email) {
-        Optional<Login> user = loginService.getUserByEmail(email);
-        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<Login> getLoginByEmail(@PathVariable String email) {
+        Optional<Login> login = loginService.getUserByEmail(email);
+        return login.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     /**
-     * Register a new user.
+     * Register a new login.
      */
-    @PostMapping
-    public ResponseEntity<Login> registerUser(@RequestBody Login login) {
-        if (login == null) return ResponseEntity.badRequest().build();
-        Login savedUser = loginService.registerUser(login);
-        return ResponseEntity.ok(savedUser);
+    @PostMapping("/new")
+    public ResponseEntity<Login> registerLogin(@RequestBody Login login) {
+        if (login == null || login.getEmailId() == null || login.getName() == null) {
+            return ResponseEntity.badRequest().body(null); // 400 Bad Request if login is invalid
+        }
+        Login savedLogin = loginService.registerUser(login);
+        return ResponseEntity.ok(savedLogin);
     }
 
     /**
-     * Update an existing user's information.
+     * Update an existing login.
      */
-//    @PutMapping("/{id}")
-//    public ResponseEntity<Login> updateUser(@PathVariable int id, @RequestBody Login login) {
-//        if (login == null) return ResponseEntity.badRequest().build();
-//
-//        return loginRepository.findById(id)
-//                .map(existingUser -> {
-//                    // Update fields
-//                    existingUser.setName(login.getName());
-//                    existingUser.setEmailId(login.getEmailId());
-//                    existingUser.setIfActive(login.getIfActive());
-//
-//                    loginRepository.save(existingUser);
-//                    return ResponseEntity.ok(existingUser);
-//                })
-//                .orElseGet(() -> ResponseEntity.notFound().build());
-//    }
+    @PutMapping("/{id}")
+    public ResponseEntity<Login> updateLogin(@PathVariable Long id, @RequestBody Login updatedLogin) {
+        return loginRepository.findById(id)
+                .map(existingLogin -> {
+                    existingLogin.setName(updatedLogin.getName());
+                    existingLogin.setEmailId(updatedLogin.getEmailId());
+                    existingLogin.setIfActive(updatedLogin.getIfActive());
+
+                    loginRepository.save(existingLogin);
+                    return ResponseEntity.ok(existingLogin);
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 
     /**
-     * Delete a user by ID.
+     * Delete a login by ID.
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable int id) {
+    public ResponseEntity<String> deleteLogin(@PathVariable Long id) {
         if (!loginRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
