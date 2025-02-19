@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar passwordStrengthBar;
     private CircularProgressIndicator loadingProgress;
     private MaterialCheckBox rememberMeCheckbox;
-    private static final String BASE_URL = "http://localhost:8080/new";
+    private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu/";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
