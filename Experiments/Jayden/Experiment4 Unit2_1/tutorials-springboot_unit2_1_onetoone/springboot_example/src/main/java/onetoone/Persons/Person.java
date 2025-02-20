@@ -1,5 +1,6 @@
 package onetoone.Persons;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 
 import onetoone.Laptops.Laptop;
+import onetoone.Login.Login;
 
 /**
  * 
@@ -27,7 +29,7 @@ public class Person {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String name;
-    private String emailId;
+    private String phoneNumber;
     private boolean ifActive;
 
     /*
@@ -40,14 +42,22 @@ public class Person {
     @JoinColumn(name = "laptop_id")
     private Laptop laptop;
 
-    public Person(String name, String emailId) {
-        this.name = name;
-        this.emailId = emailId;
+    @OneToOne(mappedBy = "person")
+    @JsonBackReference
+    private Login login; // Associating `Person` with `Login`
+
+    // =============================== Constructors ================================== //
+
+    public Person() {
         this.ifActive = true;
     }
 
-    public Person() {
+    public Person(String name, String phoneNumber) {
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.ifActive = true;
     }
+
 
     // =============================== Getters and Setters for each field ================================== //
 
@@ -67,12 +77,12 @@ public class Person {
         this.name = name;
     }
 
-    public String getEmailId(){
-        return emailId;
+    public String getPhoneNumber(){
+        return phoneNumber;
     }
 
-    public void setEmailId(String emailId){
-        this.emailId = emailId;
+    public void setPhoneNumber(String phoneNumber){
+        this.phoneNumber = phoneNumber;
     }
 
     public boolean getIsActive(){
@@ -83,12 +93,19 @@ public class Person {
         this.ifActive = ifActive;
     }
 
-    public Laptop getLaptop(){
-        return laptop;
+//    public Laptop getLaptop(){
+//        return laptop;
+//    }
+//
+//    public void setLaptop(Laptop laptop){
+//        this.laptop = laptop;
+//    }
+    public Login getLogin() {
+        return login;
     }
 
-    public void setLaptop(Laptop laptop){
-        this.laptop = laptop;
+    public void setLogin(Login login) {
+        this.login = login;
     }
     
 }

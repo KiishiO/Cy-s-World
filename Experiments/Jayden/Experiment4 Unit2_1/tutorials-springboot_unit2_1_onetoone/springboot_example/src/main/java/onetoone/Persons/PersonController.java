@@ -83,7 +83,7 @@ public class PersonController {
         if(Person == null || laptop == null)
             return failure;
         laptop.setPerson(Person);
-        Person.setLaptop(laptop);
+//        Person.setLaptop(laptop);
         PersonRepository.save(Person);
         return success;
     }
