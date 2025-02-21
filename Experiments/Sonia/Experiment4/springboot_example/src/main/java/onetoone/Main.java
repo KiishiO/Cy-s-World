@@ -46,7 +46,6 @@ class Main {
             PersonRepository.save(Person1);
             PersonRepository.save(Person2);
             PersonRepository.save(Person3);
-
         };
     }
 
