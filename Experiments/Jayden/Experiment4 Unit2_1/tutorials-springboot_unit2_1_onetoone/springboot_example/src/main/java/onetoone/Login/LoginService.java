@@ -3,6 +3,7 @@ package onetoone.Login;
 import onetoone.Persons.Person;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +18,16 @@ public class LoginService {
         this.loginRepository = loginRepository;
     }
 
+    public Login registerPassword(Login login, String password) {
+        if (login.getPassword() != null) {
+            login.setPassword(password);
+            return loginRepository.save(login);
+        }
+        return null; // Or throw an exception if needed
+    }
+
+
+
     /**
      * Registers a new user and ensures Person association.
      */
@@ -28,9 +39,6 @@ public class LoginService {
         return loginRepository.save(login);
     }
 
-//    public List<Login> getIfActive(Boolean ifactive){
-//        return loginRepository.findByIfActive(ifactive);
-//    }
     /**
      * Gets a user by ID, returns Optional to handle cases where the user doesn't exist.
      */
@@ -81,4 +89,13 @@ public class LoginService {
         }
         return false;
     }
+
+//    public Optional<Login> findById(Long id) {
+//        return loginRepository.findById(id); // Fetches login object by ID from the database
+//    }
+
+//    public Login registerPassword(Login login, String password) {
+//        login.setPassword(password); // Update password field
+//        return loginRepository.save(login); // Save and return updated object
+//    }
 }

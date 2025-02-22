@@ -22,6 +22,7 @@ public class Login {
 
     @Column(nullable = false)
     private String name;
+    private String password;
 
     @Column(unique = true, nullable = false)
     private String emailId;
@@ -40,9 +41,10 @@ public class Login {
         this.ifActive = true;  // Default active state
     }
 
-    public Login(String name, String emailId, Person person) {
+    public Login(String name, String emailId, String password, Person person) {
         this.name = name;
         this.emailId = emailId;
+        this.password = password;
         this.ifActive = true;
         this.person = person;
     }
@@ -75,6 +77,14 @@ public class Login {
 
     public void setIfActive(boolean ifActive) {
         this.ifActive = ifActive;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password){
+        this.password = password;
     }
 
     public Person getPerson() {

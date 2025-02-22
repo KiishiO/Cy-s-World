@@ -78,9 +78,9 @@ class Main {
             personRepository.save(person3);
 
             // Creating associated Login entities
-            Login login1 = new Login("mjohnson", "mjohnson123@example.com", person1);
-            Login login2 = new Login("sarah_a", "sarah123@example.com", person2);
-            Login login3 = new Login("dwilliams", "davidw@example.com", person3);
+            Login login1 = new Login("mjohnson", "mjohnson123@example.com", "MjOhNsOn", person1);
+            Login login2 = new Login("sarah_a", "sarah123@example.com","A_HARAS", person2);
+            Login login3 = new Login("dwilliams", "davidw@example.com","Davidw545", person3);
 
             // Saving Login details
             loginRepository.save(login1);

@@ -19,5 +19,6 @@ public interface LoginRepository extends JpaRepository<Login, Long> {
 
     Login findByEmailId(String emailId);
 
+    Login findByPassword(String password);
 //    List<Login> findByIfActive(Boolean ifActive);}
 }
