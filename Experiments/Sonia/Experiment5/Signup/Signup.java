@@ -1,44 +1,28 @@
 package onetoone.Signup;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import onetoone.Persons.Person;
 
 @Entity
-@Table(name = "signup")
 public class Signup {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String name;
-
-    @Column(unique = true, nullable = false)
-    private String emailId;
-
-    @Column(nullable = false)
-    private boolean ifActive;
-
-    @OneToOne(cascade = CascadeType.All)
-    @JoinColumn(name = "person_id", referencedColumnName = "id")
-    @JsonManagedReference
-    private Person person; //Storing related person details
+    private String username;
+    private String email;
+    private String password;
 
     public Signup() {
-        //do I need to add a boolean for this part we'll see
     }
 
-    public Signup(String name, String emailId, Person person) {
-        this.name = name;
-        this.emailId = emailId;
-        this.person = person;
+    public Signup(String username, String email, String password) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
     }
 
     // Getters and Setters
-
-
     public Long getId() {
         return id;
     }
@@ -47,27 +31,27 @@ public class Signup {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getUsername() {
+        return username;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public String getEmailId() {
-        return emailId;
+    public String getEmail() {
+        return email;
     }
 
-    public void setEmailId(String emailId) {
-        this.emailId = emailId;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public Person getPerson() {
-        return person;
+    public String getPassword() {
+        return password;
     }
 
-    public void setPerson(Person person) {
-        this.person = person;
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

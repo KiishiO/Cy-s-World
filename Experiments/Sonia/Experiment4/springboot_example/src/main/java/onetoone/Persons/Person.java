@@ -1,21 +1,25 @@
 package onetoone.Persons;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 
 import onetoone.Laptops.Laptop;
-import onetoone.Signup.Signup;
 
 /**
- * 
+ *
  * @author Vivek Bengre
- * 
- */ 
+ *
+ */
 
 @Entity
 public class Person {
 
-     /* 
+    /*
      * The annotation @ID marks the field below as the primary key for the table created by springboot
      * The @GeneratedValue generates a value if not already present, The strategy in this case is to start from 1 and increment for each table
      */
@@ -24,7 +28,7 @@ public class Person {
     private int id;
     private String name;
     private String emailId;
-    private boolean newSignup;
+    private boolean ifActive;
 
     /*
      * @OneToOne creates a relation between the current entity/table(Laptop) with the entity/table defined below it(Person)
@@ -36,23 +40,13 @@ public class Person {
     @JoinColumn(name = "laptop_id")
     private Laptop laptop;
 
-    /*
-    Associates all the Persons with when they Signup
-     */
-    @ManyToOne(fetch = FetchType.EAGER)
-    //@ManyToOne(cascade = CascadeType.ALL)
-    //@OneToOne(cascade = CascadeType.ALL)
-    @JsonBackReference
-    private Signup signup;
-
     public Person(String name, String emailId) {
         this.name = name;
         this.emailId = emailId;
-        this.newSignup = true;
+        this.ifActive = true;
     }
 
     public Person() {
-        this.newSignup = true;
     }
 
     // =============================== Getters and Setters for each field ================================== //
@@ -81,6 +75,14 @@ public class Person {
         this.emailId = emailId;
     }
 
+    public boolean getIsActive(){
+        return ifActive;
+    }
+
+    public void setIfActive(boolean ifActive){
+        this.ifActive = ifActive;
+    }
+
     public Laptop getLaptop(){
         return laptop;
     }
@@ -89,19 +91,4 @@ public class Person {
         this.laptop = laptop;
     }
 
-    public boolean isNewSignup() {
-        return newSignup;
-    }
-
-    public void setNewSignup(boolean newSignup) {
-        this.newSignup = newSignup;
-    }
-
-    public Signup getSignup() {
-        return signup;
-    }
-
-    public void setSignup(Signup signup) {
-        this.signup = signup;
-    }
 }
