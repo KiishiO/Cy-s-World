@@ -1,13 +1,14 @@
 package onetoone.Signup;
 
-import java.util.List;
-
+import onetoone.Persons.Person;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import onetoone.Persons.Person;
-import onetoone.Persons.PersonRepository;
+import java.util.List;
+import java.util.Optional;
+
 
 /**
  * @author Sonia Patil
@@ -21,7 +22,13 @@ public class SignupController {
     SignupRepository signupRepository;
 
     @Autowired
-    private
+    private SignupService signupService;
+
+    private final String success = "{\"message\":\"success\"}";
+    private final String failure = "{\"message\":\"failure\"}";
+
+
+
 
 
 

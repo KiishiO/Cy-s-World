@@ -1,14 +1,10 @@
 package onetoone.Persons;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
 
 import onetoone.Laptops.Laptop;
+import onetoone.Signup.Signup;
 
 /**
  * 
@@ -28,7 +24,7 @@ public class Person {
     private int id;
     private String name;
     private String emailId;
-    private boolean ifActive;
+    private boolean newSignup;
 
     /*
      * @OneToOne creates a relation between the current entity/table(Laptop) with the entity/table defined below it(Person)
@@ -40,13 +36,23 @@ public class Person {
     @JoinColumn(name = "laptop_id")
     private Laptop laptop;
 
+    /*
+    Associates all the Persons with when they Signup
+     */
+    @ManyToOne(fetch = FetchType.EAGER)
+    //@ManyToOne(cascade = CascadeType.ALL)
+    //@OneToOne(cascade = CascadeType.ALL)
+    @JsonBackReference
+    private Signup signup;
+
     public Person(String name, String emailId) {
         this.name = name;
         this.emailId = emailId;
-        this.ifActive = true;
+        this.newSignup = true;
     }
 
     public Person() {
+        this.newSignup = true;
     }
 
     // =============================== Getters and Setters for each field ================================== //
@@ -75,14 +81,6 @@ public class Person {
         this.emailId = emailId;
     }
 
-    public boolean getIsActive(){
-        return ifActive;
-    }
-
-    public void setIfActive(boolean ifActive){
-        this.ifActive = ifActive;
-    }
-
     public Laptop getLaptop(){
         return laptop;
     }
@@ -90,5 +88,20 @@ public class Person {
     public void setLaptop(Laptop laptop){
         this.laptop = laptop;
     }
-    
+
+    public boolean isNewSignup() {
+        return newSignup;
+    }
+
+    public void setNewSignup(boolean newSignup) {
+        this.newSignup = newSignup;
+    }
+
+    public Signup getSignup() {
+        return signup;
+    }
+
+    public void setSignup(Signup signup) {
+        this.signup = signup;
+    }
 }
