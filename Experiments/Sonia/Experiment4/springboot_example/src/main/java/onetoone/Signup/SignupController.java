@@ -42,20 +42,38 @@ public class SignupController {
         return signupRepository.findById(id);
     }
 
-    @PostMapping(path = "/signups")
+    @PostMapping(path = "/signup")
     String createSignup(@RequestBody Signup signup){
-        if (signup == null)
+        if (signup == null || signup.getUsername() == null || signup.getEmail() == null)
             return failure;
+
+
+        Person newPerson = new Person(signup.getFirstAndLastName(), signup.getEmail());
+        newPerson.setSignupInfo(signup);
+        personRepository.save(newPerson);
         signupRepository.save(signup);
+
         return success;
     }
 
     @PutMapping(path = "/signup/{id}")
     Signup updateSignupInfo(@PathVariable int id, @RequestBody Signup request){
-        Signup signup = signupRepository.findById(id);
-        if(signup == null)
+        Signup currentSignup = signupRepository.findById(id);
+        if(currentSignup == null)
             return null;
-        signupRepository.save(request);
+
+        //check if the information that is being updated can be updated
+        if(request.getUsername() != null) {
+            currentSignup.setUsername(request.getUsername());
+        }
+        if(request.getEmail() != null) {
+            currentSignup.setEmail(request.getEmail());
+        }
+        //ensures that the user does not save the same password when they are changing it for security purposes
+        if(request.getPassword() != null && !request.getPassword().equals(currentSignup.getPassword())) {
+            currentSignup.setPassword(request.getPassword());
+        }
+        signupRepository.save(currentSignup);
         return signupRepository.findById(id);
     }
 
@@ -65,7 +83,8 @@ public class SignupController {
         // Check if there is an object depending on Person and then remove the dependency
         Person person = personRepository.findBySignup_Id(id);
         person.setSignupInfo(null);
-        personRepository.save(person);
+        //personRepository.save(person);
+        personRepository.deleteById(id);
 
         // delete the laptop if the changes have not been reflected by the above statement
         signupRepository.deleteById(id);

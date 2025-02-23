@@ -9,6 +9,7 @@ import jakarta.persistence.OneToOne;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import onetoone.Persons.Person;
+import onetoone.Persons.PersonRepository;
 
 /**
  * 
@@ -28,6 +29,7 @@ public class Signup {
     private String username;
     private String email;
     private String password;
+    private String firstAndLastName;
 
     /*
      * @OneToOne creates a relation between the current entity/table(Laptop) with the entity/table defined below it(Person)
@@ -37,11 +39,15 @@ public class Signup {
     @JsonIgnore
     private Person person;
 
-    public Signup(String username, String email, String password, Person person) {
+    public Signup(String firstAndLastName, String username, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
-        this.person = person;
+        this.firstAndLastName = firstAndLastName;
+        //this.person = person;
+        //createNewPerson
+        this.person = new Person(firstAndLastName, email);
+
     }
 
     public Signup() {
@@ -49,6 +55,14 @@ public class Signup {
 
     // =============================== Getters and Setters for each field ================================== //
 
+
+    public String getFirstAndLastName() {
+        return firstAndLastName;
+    }
+
+    public void setFirstAndLastName(String firstAndLastName) {
+        this.firstAndLastName = firstAndLastName;
+    }
 
     public int getId() {
         return id;
