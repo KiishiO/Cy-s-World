@@ -1,5 +1,6 @@
 package onetoone;
 
+import onetoone.Signup.Signup;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -46,6 +47,7 @@ class Main {
             PersonRepository.save(Person1);
             PersonRepository.save(Person2);
             PersonRepository.save(Person3);
+            Signup signup1 = new Signup("johnBandLastname", "jbl123@gmail.com", "123456789", Person1);
         };
     }
 
