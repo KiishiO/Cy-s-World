@@ -15,7 +15,7 @@ import java.util.Optional;
  */
 
 @RestController
-@RequestMapping("/Signup") // Base URL for all endpoints
+//@RequestMapping("/Signup") // Base URL for all endpoints
 public class SignupController {
 
     @Autowired
@@ -27,9 +27,31 @@ public class SignupController {
     private final String success = "{\"message\":\"success\"}";
     private final String failure = "{\"message\":\"failure\"}";
 
+    /**
+     * Get all signups
+     */
+    public ResponseEntity<List<Signup>> getAllLogins() {
+        List<Signup> signups = signupRepository.findAll();
+        if(signups.isEmpty()) {
+            return ResponseEntity.noContent().build(); //Returns 204 if no users exist
+        }
+        return ResponseEntity.ok(signups);
+    }
 
+    /**
+     * Create a new user (new user in signing up)
+     */
+    @PostMapping("/new")
+    public ResponseEntity<Signup> newUserSignup(@RequestBody Signup signup) {
+        if(signup == null || signup.getEmailId() == null || signup.getName() == null || signup.getPassword() == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
 
+        //Make sure the server knows that there is a new user
+        Signup newSignup = signupService.newUser(signup);
 
-
-
+        //return the new user with a 201 created status
+        //return ResponseEntity.status((HttpStatus.CREATED).body(newSignup));
+        return null;
+    }
 }
