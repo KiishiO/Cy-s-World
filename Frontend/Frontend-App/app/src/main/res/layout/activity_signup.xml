@@ -63,7 +63,7 @@
                     android:id="@+id/signUp_etUsername"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Net-ID"
+                    android:hint="Full Name"
                     android:inputType="text"
                     android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -81,7 +81,7 @@
                     android:id="@+id/signUp_etEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Email Address"
+                    android:hint="Net-ID @iastate.edu"
                     android:inputType="text"
                     android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -90,7 +90,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
+                android:layout_marginBottom="16dp"
                 android:textColorHint="@color/white"
                 app:boxStrokeColor="@color/cardinal_red"
                 app:hintTextColor="@color/cardinal_red"
@@ -102,6 +102,26 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Create Password"
+                    android:inputType="textPassword"
+                    android:textColor="@color/white" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Confirm Password Input -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                android:textColorHint="@color/white"
+                app:boxStrokeColor="@color/cardinal_red"
+                app:hintTextColor="@color/cardinal_red"
+                app:passwordToggleEnabled="true"
+                app:passwordToggleTint="@color/white">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/signUp_et_Confirm_Password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Confirm Password"
                     android:inputType="textPassword"
                     android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>

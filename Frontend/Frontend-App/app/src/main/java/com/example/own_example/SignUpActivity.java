@@ -37,7 +37,7 @@ public class SignUpActivity extends AppCompatActivity{
     private ProgressBar passwordStrengthBar;
     private CircularProgressIndicator loadingProgress;
     //private MaterialCheckBox rememberMeCheckbox;
-    private static final String BASE_URL = "http://localhost:8080/new";
+    private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu/";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,7 +46,8 @@ public class SignUpActivity extends AppCompatActivity{
         // Initialize views
         MaterialCardView signUpCard = findViewById(R.id.signUpCard);
         TextInputEditText etUsername = findViewById(R.id.signUp_etUsername);
-        TextInputEditText etPassword = findViewById(R.id.signUp_etPassword);
+        TextInputEditText etConfirmPassword = findViewById(R.id.signUp_et_Confirm_Password);
+        TextInputEditText etPassword = findViewById((R.id.signUp_etPassword));
         TextInputEditText etEmail = findViewById(R.id.signUp_etEmail);
         MaterialButton btnNext = findViewById(R.id.signUp_btnNext);
         TextView tvAlreadyHaveAccount = findViewById(R.id.signUp_tvAlreadyHaveAccount);
@@ -76,7 +77,7 @@ public class SignUpActivity extends AppCompatActivity{
                 );
 
         // Password strength watcher
-        etPassword.addTextChangedListener(new TextWatcher() {
+        etConfirmPassword.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
@@ -95,18 +96,21 @@ public class SignUpActivity extends AppCompatActivity{
             }
         });
 
-        // Add click listener for sign in button
+        // Add click listener for next button
         btnNext.setOnClickListener(v -> {
             String username = etUsername.getText().toString();
             String password = etPassword.getText().toString();
+            String passwordConfirmed = etConfirmPassword.getText().toString();
             String email = etEmail.getText().toString();
 
-            if (username.isEmpty() || password.isEmpty() || email.isEmpty()) {
+            if (username.isEmpty() || password.isEmpty() || email.isEmpty() || passwordConfirmed.isEmpty()) {
                 showError("Please fill in all fields");
                 shakeView(username.isEmpty() ? etUsername : etPassword);
-            } else {
-                showLoginAnimation(btnNext);
-                performLogin(username, password);   //will I need to change this later considering it does nothing with the email
+            } else if (isPasswordMatch(password, passwordConfirmed) == false){
+                showError("Passwords do not match");
+            } else{
+                    showSignUpAnimation(btnNext);
+                    performSignUp(username, password, email);
             }
         });
 
@@ -151,23 +155,31 @@ public class SignUpActivity extends AppCompatActivity{
         return score;
     }
 
-    private void performLogin(String username, String password) {
+    private Boolean isPasswordMatch(String password, String confirm){
+        if(password.equals(confirm)){
+            return true;
+        }
+        return false;
+    }
+
+    private void performSignUp(String username, String password, String email) {
         String url = BASE_URL + "users/login";
-        Log.d("Login", "Attempting login to: " + url);
+        Log.d("Sign Up", "Attempting sign up to: " + url);
 
         JSONObject jsonBody = new JSONObject();
         try {
             jsonBody.put("username", username);
             jsonBody.put("password", password);
+            jsonBody.put("email", email);
 
-            Log.d("Login", "Sending data: " + jsonBody.toString());
+            Log.d("Sign Up", "Sending data: " + jsonBody.toString());
 
             JsonObjectRequest request = new JsonObjectRequest(
                     Request.Method.POST,
                     url,
                     jsonBody,
                     response -> {
-                        Log.d("Login", "Success response: " + response.toString());
+                        Log.d("Sign Up", "Success response: " + response.toString());
                         try {
                             String message = response.getString("message");
                             showSuccess(message);
@@ -176,13 +188,13 @@ public class SignUpActivity extends AppCompatActivity{
                         }
                     },
                     error -> {
-                        Log.e("Login", "Error: " + error.toString());
+                        Log.e("Sign Up", "Error: " + error.toString());
                         NetworkResponse networkResponse = error.networkResponse;
                         if (networkResponse != null && networkResponse.data != null) {
                             String errorResponse = new String(networkResponse.data);
-                            Log.e("Login", "Error response: " + errorResponse);
+                            Log.e("Sign Up", "Error response: " + errorResponse);
                         }
-                        showError("Login failed: " + getVolleyErrorMessage(error));
+                        showError("Sign up failed: " + getVolleyErrorMessage(error));
                     }
             );
 
@@ -250,14 +262,14 @@ public class SignUpActivity extends AppCompatActivity{
                 );
     }
 
-    private void showLoginAnimation(MaterialButton button) {
+    private void showSignUpAnimation(MaterialButton button) {
         button.setEnabled(false);
         button.setText("");
         loadingProgress.setVisibility(View.VISIBLE);
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             loadingProgress.setVisibility(View.GONE);
-            button.setText("Sign In");
+            button.setText("Next");
             button.setEnabled(true);
         }, 2000);
     }
