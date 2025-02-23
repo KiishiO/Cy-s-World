@@ -1,9 +1,8 @@
-package onetoone.Laptops;
+package onetoone.Signup;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,10 +21,10 @@ import onetoone.Persons.PersonRepository;
  */ 
 
 @RestController
-public class LaptopController {
+public class SignupController {
 
     @Autowired
-    LaptopRepository laptopRepository;
+    SignupRepository signupRepository;
 
     @Autowired
     PersonRepository personRepository;
@@ -33,43 +32,43 @@ public class LaptopController {
     private String success = "{\"message\":\"success\"}";
     private String failure = "{\"message\":\"failure\"}";
 
-    @GetMapping(path = "/laptops")
-    List<Laptop> getAllLaptops(){
-        return laptopRepository.findAll();
+    @GetMapping(path = "/signup")
+    List<Signup> getAllSignups(){
+        return signupRepository.findAll();
     }
 
-    @GetMapping(path = "/laptops/{id}")
-    Laptop getLaptopById(@PathVariable int id){
-        return laptopRepository.findById(id);
+    @GetMapping(path = "/signup/{id}")
+    Signup getSignupById(@PathVariable int id){
+        return signupRepository.findById(id);
     }
 
-    @PostMapping(path = "/laptops")
-    String createLaptop(@RequestBody Laptop Laptop){
-        if (Laptop == null)
+    @PostMapping(path = "/signups")
+    String createSignup(@RequestBody Signup signup){
+        if (signup == null)
             return failure;
-        laptopRepository.save(Laptop);
+        signupRepository.save(signup);
         return success;
     }
 
-    @PutMapping(path = "/laptops/{id}")
-    Laptop updateLaptop(@PathVariable int id, @RequestBody Laptop request){
-        Laptop laptop = laptopRepository.findById(id);
-        if(laptop == null)
+    @PutMapping(path = "/signup/{id}")
+    Signup updateSignupInfo(@PathVariable int id, @RequestBody Signup request){
+        Signup signup = signupRepository.findById(id);
+        if(signup == null)
             return null;
-        laptopRepository.save(request);
-        return laptopRepository.findById(id);
+        signupRepository.save(request);
+        return signupRepository.findById(id);
     }
 
-    @DeleteMapping(path = "/laptops/{id}")
-    String deleteLaptop(@PathVariable int id){
+    @DeleteMapping(path = "/signup/{id}")
+    String deleteSignupInfo(@PathVariable int id){
 
         // Check if there is an object depending on Person and then remove the dependency
-        Person person = personRepository.findByLaptop_Id(id);
-        person.setLaptop(null);
+        Person person = personRepository.findBySignup_Id(id);
+        person.setSignupInfo(null);
         personRepository.save(person);
 
         // delete the laptop if the changes have not been reflected by the above statement
-        laptopRepository.deleteById(id);
+        signupRepository.deleteById(id);
         return success;
     }
 }

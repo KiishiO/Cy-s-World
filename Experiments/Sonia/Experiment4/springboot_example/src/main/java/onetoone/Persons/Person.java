@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 
-import onetoone.Laptops.Laptop;
+import onetoone.Signup.Signup;
 
 /**
  *
@@ -37,8 +37,8 @@ public class Person {
      * @JoinColumn defines the ownership of the foreign key i.e. the Person table will have a field called laptop_id
      */
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "laptop_id")
-    private Laptop laptop;
+    @JoinColumn(name = "signup_id")
+    private Signup signup;
 
     public Person(String name, String emailId) {
         this.name = name;
@@ -83,12 +83,12 @@ public class Person {
         this.ifActive = ifActive;
     }
 
-    public Laptop getLaptop(){
-        return laptop;
+    public Signup getSignupInfo(){
+        return signup;
     }
 
-    public void setLaptop(Laptop laptop){
-        this.laptop = laptop;
+    public void setSignupInfo(Signup signup){
+        this.signup = signup;
     }
 
 }
