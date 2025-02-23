@@ -90,8 +90,12 @@ public class LoginController {
         if (login == null || login.getEmailId() == null || login.getName() == null || login.getPassword() == null) {
             return ResponseEntity.badRequest().body(null); // 400 Bad Request if login is invalid
         }
+
+        // Call the service to register the user
         Login savedLogin = loginService.registerUser(login);
-        return ResponseEntity.ok(savedLogin);
+
+        // Return the created login with a 201 Created status
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedLogin); // 201 Created status
     }
 
     /**

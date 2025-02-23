@@ -30,6 +30,7 @@ public class Login {
     @Column(nullable = false)
     private boolean ifActive;
 
+    @ManyToOne(fetch = FetchType.EAGER) //Allows to GET dummy data
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "person_id", referencedColumnName = "id")
     @JsonManagedReference

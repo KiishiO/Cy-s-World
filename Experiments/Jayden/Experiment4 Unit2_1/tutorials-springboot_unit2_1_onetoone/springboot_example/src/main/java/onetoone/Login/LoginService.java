@@ -1,6 +1,7 @@
 package onetoone.Login;
 
 import onetoone.Persons.Person;
+import onetoone.Persons.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,10 +13,12 @@ import java.util.Optional;
 public class LoginService {
 
     private final LoginRepository loginRepository;
+    private final PersonRepository personRepository;
 
     @Autowired
-    public LoginService(LoginRepository loginRepository) {
+    public LoginService(LoginRepository loginRepository, PersonRepository personRepository) {
         this.loginRepository = loginRepository;
+        this.personRepository = personRepository;
     }
 
     public Login registerPassword(Login login, String password) {
@@ -32,10 +35,17 @@ public class LoginService {
      * Registers a new user and ensures Person association.
      */
     public Login registerUser(Login login) {
-        if (login.getPerson() != null) {
-            // Ensure bidirectional mapping if necessary
-            login.getPerson().setLogin(login);
+        if (login.getPerson() != null && login.getPerson().getId() == 0) {
+            // If Person is new, save the Person first
+            personRepository.save(login.getPerson());
         }
+
+        // Ensure bidirectional mapping if necessary
+        if (login.getPerson() != null) {
+            login.getPerson().setLogin(login); // Link Login to the Person
+        }
+
+        // Save the Login entity
         return loginRepository.save(login);
     }
 

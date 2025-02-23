@@ -8,8 +8,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
-import onetoone.Laptops.Laptop;
-import onetoone.Laptops.LaptopRepository;
+//import onetoone.Laptops.Laptop;
+//import onetoone.Laptops.LaptopRepository;
 import onetoone.Persons.Person;
 import onetoone.Persons.PersonRepository;
 
@@ -63,19 +63,22 @@ class Main {
      */
 
 
-//    @Bean
-//    @Transactional // Ensures entity relationships are properly persisted
+    @Bean
+    @Transactional // Ensures entity relationships are properly persisted
     CommandLineRunner initData(LoginRepository loginRepository, PersonRepository personRepository) {
         return args -> {
             // Creating Person entities
-            Person person1 = new Person("Michael Johnson", "michael.johnson@example.com");
-            Person person2 = new Person("Sarah Adams", "sarah.adams@example.com");
-            Person person3 = new Person("David Williams", "david.williams@example.com");
+            Person person1 = new Person("Michael Johnson", "515-789-9852");
+            Person person2 = new Person("Sarah Adams", "515-888-3579");
+            Person person3 = new Person("David Williams", "515-777-0707");
 
             // Saving Persons first (ensuring they exist before login is created)
             personRepository.save(person1);
             personRepository.save(person2);
             personRepository.save(person3);
+
+            // Force database commit before proceeding
+//            personRepository.flush();
 
             // Creating associated Login entities
             Login login1 = new Login("mjohnson", "mjohnson123@example.com", "MjOhNsOn", person1);

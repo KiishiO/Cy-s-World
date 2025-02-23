@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import onetoone.Laptops.Laptop;
-import onetoone.Laptops.LaptopRepository;
+//import onetoone.Laptops.Laptop;
+//import onetoone.Laptops.LaptopRepository;
 
 /**
  * 
@@ -27,8 +27,8 @@ public class PersonController {
     @Autowired
     PersonRepository PersonRepository;
 
-    @Autowired
-    LaptopRepository laptopRepository;
+//    @Autowired
+//    LaptopRepository laptopRepository;
 
     private String success = "{\"message\":\"success\"}";
     private String failure = "{\"message\":\"failure\"}";
@@ -76,17 +76,17 @@ public class PersonController {
         return PersonRepository.findById(id);
     }
 
-    @PutMapping("/Persons/{PersonId}/laptops/{laptopId}")
-    String assignLaptopToPerson(@PathVariable int PersonId,@PathVariable int laptopId){
-        Person Person = PersonRepository.findById(PersonId);
-        Laptop laptop = laptopRepository.findById(laptopId);
-        if(Person == null || laptop == null)
-            return failure;
-        laptop.setPerson(Person);
-//        Person.setLaptop(laptop);
-        PersonRepository.save(Person);
-        return success;
-    }
+//    @PutMapping("/Persons/{PersonId}/laptops/{laptopId}")
+//    String assignLaptopToPerson(@PathVariable int PersonId,@PathVariable int laptopId){
+//        Person Person = PersonRepository.findById(PersonId);
+//        Laptop laptop = laptopRepository.findById(laptopId);
+//        if(Person == null || laptop == null)
+//            return failure;
+//        laptop.setPerson(Person);
+////        Person.setLaptop(laptop);
+//        PersonRepository.save(Person);
+//        return success;
+//    }
 
     @DeleteMapping(path = "/Persons/{id}")
     String deletePerson(@PathVariable int id){

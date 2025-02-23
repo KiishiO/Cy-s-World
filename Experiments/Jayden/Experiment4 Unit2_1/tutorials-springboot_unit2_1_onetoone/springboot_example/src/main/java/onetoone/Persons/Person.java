@@ -1,13 +1,7 @@
 package onetoone.Persons;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 
 import onetoone.Laptops.Laptop;
 import onetoone.Login.Login;
@@ -42,7 +36,9 @@ public class Person {
     @JoinColumn(name = "laptop_id")
     private Laptop laptop;
 
-    @OneToOne(mappedBy = "person")
+    @ManyToOne(fetch = FetchType.EAGER)
+//    @ManyToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     @JsonBackReference
     private Login login; // Associating `Person` with `Login`
 
