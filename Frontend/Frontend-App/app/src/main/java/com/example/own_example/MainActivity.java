@@ -13,13 +13,10 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.material.button.MaterialButton;
@@ -28,7 +25,6 @@ import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -37,11 +33,13 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar passwordStrengthBar;
     private CircularProgressIndicator loadingProgress;
     private MaterialCheckBox rememberMeCheckbox;
-    private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu/";
+    private static final String BASE_URL = "https://b74aa9ab-3964-429f-9cf7-3da23ad11f42.mock.pstmn.io/Logins/new";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        Log.d("MainActivity", "Starting app...");
 
         // Initialize views
         MaterialCardView loginCard = findViewById(R.id.loginCard);
@@ -55,26 +53,35 @@ public class MainActivity extends AppCompatActivity {
         loadingProgress = findViewById(R.id.loadingProgress);
         rememberMeCheckbox = findViewById(R.id.rememberMeCheckbox);
 
-        // Set initial states
+        // Set initial states and animations
+        setupInitialAnimations(loginCard, logo);
+
+        // Password strength watcher
+        setupPasswordStrengthWatcher(etPassword);
+
+        // Button click listeners
+        setupClickListeners(btnSignIn, tvForgotPassword, etUsername, etPassword);
+    }
+
+    private void setupInitialAnimations(MaterialCardView loginCard, ImageView logo) {
         loginCard.setTranslationY(1000f);
         logo.setScaleX(0f);
         logo.setScaleY(0f);
 
-        // Animate logo
         logo.animate()
                 .scaleX(1f)
                 .scaleY(1f)
                 .setDuration(1000)
                 .setInterpolator(new AccelerateDecelerateInterpolator())
                 .withEndAction(() ->
-                        // Animate login card after logo animation
                         loginCard.animate()
                                 .translationY(0f)
                                 .setDuration(1000)
                                 .setInterpolator(new AccelerateDecelerateInterpolator())
                 );
+    }
 
-        // Password strength watcher
+    private void setupPasswordStrengthWatcher(TextInputEditText etPassword) {
         etPassword.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -93,8 +100,10 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
 
-        // Add click listener for sign in button
+    private void setupClickListeners(MaterialButton btnSignIn, TextView tvForgotPassword,
+                                     TextInputEditText etUsername, TextInputEditText etPassword) {
         btnSignIn.setOnClickListener(v -> {
             String username = etUsername.getText().toString();
             String password = etPassword.getText().toString();
@@ -108,7 +117,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Add click listener for forgot password
         tvForgotPassword.setOnClickListener(v -> {
             String username = etUsername.getText().toString();
             if (username.isEmpty()) {
@@ -118,6 +126,56 @@ public class MainActivity extends AppCompatActivity {
                 sendPasswordResetRequest(username);
             }
         });
+    }
+
+    private void performLogin(String username, String password) {
+        String url = BASE_URL;
+        Log.d("Login", "Full URL: " + url);
+        Log.d("Login", "Username: " + username);
+
+        JSONObject jsonBody = new JSONObject();
+        try {
+            jsonBody.put("name", "password");     // Using static values that work with mock
+            jsonBody.put("emailId", "netid");     // Using static values that work with mock
+            jsonBody.put("ifActive", true);
+
+            Log.d("Login", "Sending data: " + jsonBody.toString());
+
+            JsonObjectRequest request = new JsonObjectRequest(
+                    Request.Method.POST,
+                    url,
+                    jsonBody,
+                    response -> {
+                        Log.d("Login", "Success response: " + response.toString());
+                        try {
+                            String message = response.getString("message");
+                            showSuccess("Login successful");
+                        } catch (JSONException e) {
+                            showError("Error parsing response");
+                        }
+                    },
+                    error -> {
+                        Log.e("Login", "Error: " + error.toString());
+                        NetworkResponse networkResponse = error.networkResponse;
+                        if (networkResponse != null && networkResponse.data != null) {
+                            String errorResponse = new String(networkResponse.data);
+                            Log.e("Login", "Error response: " + errorResponse);
+                        }
+                        showError("Login failed: " + getVolleyErrorMessage(error));
+                    }
+            );
+
+            request.setRetryPolicy(new DefaultRetryPolicy(
+                    10000,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+            ));
+
+            VolleySingleton.getInstance(this).addToRequestQueue(request);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            showError("Error creating request");
+        }
     }
 
     private void updatePasswordStrength(String password) {
@@ -144,60 +202,13 @@ public class MainActivity extends AppCompatActivity {
         return score;
     }
 
-    private void performLogin(String username, String password) {
-        String url = BASE_URL + "users/login";
-        Log.d("Login", "Attempting login to: " + url);
-
-        JSONObject jsonBody = new JSONObject();
-        try {
-            jsonBody.put("username", username);
-            jsonBody.put("password", password);
-
-            Log.d("Login", "Sending data: " + jsonBody.toString());
-
-            JsonObjectRequest request = new JsonObjectRequest(
-                    Request.Method.POST,
-                    url,
-                    jsonBody,
-                    response -> {
-                        Log.d("Login", "Success response: " + response.toString());
-                        try {
-                            String message = response.getString("message");
-                            showSuccess(message);
-                        } catch (JSONException e) {
-                            showError("Error parsing response");
-                        }
-                    },
-                    error -> {
-                        Log.e("Login", "Error: " + error.toString());
-                        NetworkResponse networkResponse = error.networkResponse;
-                        if (networkResponse != null && networkResponse.data != null) {
-                            String errorResponse = new String(networkResponse.data);
-                            Log.e("Login", "Error response: " + errorResponse);
-                        }
-                        showError("Login failed: " + getVolleyErrorMessage(error));
-                    }
-            );
-
-            request.setRetryPolicy(new DefaultRetryPolicy(
-                    10000, // 10 seconds timeout
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-            ));
-
-            VolleySingleton.getInstance(this).addToRequestQueue(request);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            showError("Error creating request");
-        }
-    }
-
     private void sendPasswordResetRequest(String username) {
-        String url = BASE_URL + "users/forgot-password";
+        String url = BASE_URL + "/forgot-password";  // Updated to match mock server
+        Log.d("Login", "Reset password URL: " + url);
 
         JSONObject jsonBody = new JSONObject();
         try {
-            jsonBody.put("username", username);
+            jsonBody.put("emailId", username);
 
             JsonObjectRequest request = new JsonObjectRequest(
                     Request.Method.POST,
