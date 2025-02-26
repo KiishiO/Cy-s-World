@@ -28,7 +28,7 @@ public class Person {
     private int id;
     private String name;
     private String emailId;
-    private boolean ifActive;
+    //private boolean ifActive;
 
     /*
      * @OneToOne creates a relation between the current entity/table(Laptop) with the entity/table defined below it(Person)
@@ -43,7 +43,7 @@ public class Person {
     public Person(String name, String emailId) {
         this.name = name;
         this.emailId = emailId;
-        this.ifActive = true;
+        //this.ifActive = true;
     }
 
     public Person() {
@@ -75,13 +75,13 @@ public class Person {
         this.emailId = emailId;
     }
 
-    public boolean getIsActive(){
-        return ifActive;
-    }
-
-    public void setIfActive(boolean ifActive){
-        this.ifActive = ifActive;
-    }
+//    public boolean getIsActive(){
+//        return ifActive;
+//    }
+//
+//    public void setIfActive(boolean ifActive){
+//        this.ifActive = ifActive;
+//    }
 
     public Signup getSignupInfo(){
         return signup;
