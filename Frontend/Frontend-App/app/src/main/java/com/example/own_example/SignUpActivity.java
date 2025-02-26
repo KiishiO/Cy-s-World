@@ -37,7 +37,7 @@ public class SignUpActivity extends AppCompatActivity{
     private ProgressBar passwordStrengthBar;
     private CircularProgressIndicator loadingProgress;
     //private MaterialCheckBox rememberMeCheckbox;
-    private static final String BASE_URL = "http://10.2.2:8080/signup";
+    private static final String BASE_URL = "https://f49570a7-61b6-48be-ab64-48b271041323.mock.pstmn.io/";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
