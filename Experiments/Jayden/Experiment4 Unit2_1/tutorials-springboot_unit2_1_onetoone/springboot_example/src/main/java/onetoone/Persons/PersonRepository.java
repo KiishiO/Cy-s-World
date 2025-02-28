@@ -16,7 +16,7 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
     void deleteById(int id);
 
-
+    Person findBySignup_Id(int id);
 
     Person findByLaptop_Id(int id);
 }

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 
 import onetoone.Laptops.Laptop;
 import onetoone.Login.Login;
+import onetoone.Signup.Signup;
 
 /**
  * 
@@ -41,6 +42,11 @@ public class Person {
     @OneToOne(cascade = CascadeType.ALL)
     @JsonBackReference
     private Login login; // Associating `Person` with `Login`
+
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "signup_id")
+    private Signup signup;
 
     // =============================== Constructors ================================== //
 
@@ -102,6 +108,14 @@ public class Person {
 
     public void setLogin(Login login) {
         this.login = login;
+    }
+
+    public Signup getSignupInfo(){
+        return signup;
+    }
+
+    public void setSignupInfo(Signup signup){
+        this.signup = signup;
     }
     
 }
