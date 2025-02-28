@@ -16,16 +16,12 @@ public class Profiles {
     private String name;
     private String userClasses;
     private char gradesFromClasses;
-    private String emailId;
 
-    @ManyToOne(fetch = FetchType.EAGER) //Allows to GET dummy data
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "person_id", referencedColumnName = "id")
     @JsonManagedReference
     private Person person;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-//    @ManyToOne(cascade = CascadeType.ALL)
     @OneToOne(cascade = CascadeType.ALL)
     @JsonBackReference
     private Login login;
@@ -56,9 +52,8 @@ public class Profiles {
         return person;
     }
 
-    public Person setPerson(Person person){
+    public void setPerson(Person person){
         this.person = person;
-        return person;
     }
 
     public String getName(){

@@ -12,13 +12,17 @@ import java.util.Optional;
 public class ProfileController {
 
     @Autowired
-    private ProfileRepository profileRepository;
+    private final ProfileRepository profileRepository;
+
+    public ProfileController(ProfileRepository profileRepository) {
+        this.profileRepository = profileRepository;
+    }
 
     @GetMapping
     public ResponseEntity<List<Profiles>> getAllProfiles() {
         List<Profiles> profiles = profileRepository.findAll();
         if (profiles.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.noContent().build(); // 404 Not found
         }
         return ResponseEntity.ok(profiles);
     }
@@ -30,7 +34,7 @@ public class ProfileController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping
+    @PostMapping("/new")
     public ResponseEntity<Profiles> createProfile(@RequestBody Profiles profile) {
         Profiles savedProfile = profileRepository.save(profile);
         return ResponseEntity.ok(savedProfile);

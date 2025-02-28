@@ -8,9 +8,9 @@ public interface ProfileRepository extends JpaRepository<Profiles, Long> {
 
     Optional<Profiles> findById(Long id);
 
-    Profiles findByClasses(String userClasses);
+    Profiles findByUserClasses(String userClasses);
 
-    Profiles findBygradedClass(char gradesFromClasses);
+//    Profiles findBygradedClass(char gradesFromClasses);
 
 
 
