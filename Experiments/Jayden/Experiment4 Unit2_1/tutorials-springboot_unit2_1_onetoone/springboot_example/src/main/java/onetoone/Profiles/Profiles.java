@@ -1,6 +1,10 @@
 package onetoone.Profiles;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import onetoone.Login.Login;
+import onetoone.Persons.Person;
 
 @Entity
 @Table(name = "profiles")
@@ -14,15 +18,28 @@ public class Profiles {
     private char gradesFromClasses;
     private String emailId;
 
+    @ManyToOne(fetch = FetchType.EAGER) //Allows to GET dummy data
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "person_id", referencedColumnName = "id")
+    @JsonManagedReference
+    private Person person;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+//    @ManyToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
+    @JsonBackReference
+    private Login login;
+
     public Profiles(){
 
     }
 
-    public Profiles(Long id, String name, String userClasses, char gradesFromClasses){
+    public Profiles(Long id, String name, String userClasses, char gradesFromClasses, Person person){
         this.id = id;
         this.name = name;
         this.userClasses = userClasses;
         this.gradesFromClasses = gradesFromClasses;
+        this.person = person;
 
     }
 
@@ -35,17 +52,39 @@ public class Profiles {
     public void setId(int id){
         this.id = id;
     }
+    public Person getPerson(){
+        return person;
+    }
+
+    public Person setPerson(Person person){
+        this.person = person;
+        return person;
+    }
 
     public String getName(){
         return name;
     }
 
+    public void setName(String name){
+        this.name = name;
+    }
 
+    public String getUserClasses(){
+        return userClasses;
+    }
 
+    public void setUserClasses(String userClasses){
+        this.userClasses = userClasses;
+    }
 
+    public char getGradesFromClasses(){
+        return gradesFromClasses;
+    }
 
+    public void setGradesFromClasses(char gradesFromClasses){
+        this.gradesFromClasses = gradesFromClasses;
 
-
+    }
 
 
 }
