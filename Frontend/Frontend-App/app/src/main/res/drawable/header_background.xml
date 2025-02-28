@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background gradient -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="270"
+                android:endColor="@color/dark_background"
+                android:startColor="@color/cardinal_red" />
+        </shape>
+    </item>
+
+    <!-- Skyline silhouette -->
+    <item
+        android:bottom="0dp"
+        android:left="0dp"
+        android:right="0dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/black" />
+            <path android:pathData="M0,120 L60,120 L80,100 L100,110 L120,90 L140,95 L160,80 L180,85 L200,70 L220,75 L240,60 L260,65 L280,50 L300,55 L320,40 L340,45 L360,30 L380,35 L400,20 L400,120 Z" />
+        </shape>
+    </item>
+</layer-list>

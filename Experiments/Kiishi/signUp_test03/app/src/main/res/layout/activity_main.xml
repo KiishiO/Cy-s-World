@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0D0C0C">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="100sp"
+        android:layout_marginTop="40sp"
+        android:layout_marginRight="100sp"
+        android:layout_marginBottom="600sp"
+        app:srcCompat="@drawable/iowa_state_logo" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="150sp"
+        android:background="#831F30"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/editTextText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40sp"
+            android:ems="10"
+            android:inputType="text"
+            android:textSize="35dp"
+            android:textStyle="bold"
+            android:text="Create Account"
+            android:layout_marginLeft="10sp"
+            android:layout_marginRight="10sp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            style="@style/TextAppearance.AppCompat.Headline"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50sp"
+            android:layout_marginLeft="10sp"
+            android:text="username: "
+            android:textColor="#0D0C0C"
+            android:textSize="25dp"></TextView>
+
+        <EditText
+            android:id="@+id/signup_username_edt"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:textSize="20dp"
+            android:hint="Enter Username Here"
+            android:layout_marginLeft="10sp"
+            android:layout_marginRight="10sp">
+        </EditText>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50sp"
+            android:layout_marginLeft="10sp"
+            android:text="password: "
+            android:textColor="#0D0C0C"
+            android:textSize="25dp"></TextView>
+
+        <EditText
+            android:id="@+id/signup_password_edt"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:hint="Enter Password Here"
+            android:inputType="textPassword"
+            android:layout_marginLeft="10sp"
+            android:layout_marginRight="10sp"></EditText>
+
+    </LinearLayout>
+
+
+</RelativeLayout>
