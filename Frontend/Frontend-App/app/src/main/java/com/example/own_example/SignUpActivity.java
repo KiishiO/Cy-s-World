@@ -1,5 +1,6 @@
 package com.example.own_example;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -13,7 +14,9 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
@@ -25,64 +28,56 @@ import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MainActivity extends AppCompatActivity {
+public class SignUpActivity extends AppCompatActivity{
 
     private ProgressBar passwordStrengthBar;
     private CircularProgressIndicator loadingProgress;
-    private MaterialCheckBox rememberMeCheckbox;
-    private static final String BASE_URL = "https://b74aa9ab-3964-429f-9cf7-3da23ad11f42.mock.pstmn.io/Logins/new";
-
+    //private MaterialCheckBox rememberMeCheckbox;
+    private static final String BASE_URL = "https://f49570a7-61b6-48be-ab64-48b271041323.mock.pstmn.io/";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-        Log.d("MainActivity", "Starting app...");
+        setContentView(R.layout.activity_signup);
 
         // Initialize views
-        MaterialCardView loginCard = findViewById(R.id.loginCard);
-        TextInputEditText etUsername = findViewById(R.id.etUsername);
-        TextInputEditText etPassword = findViewById(R.id.etPassword);
-        MaterialButton btnSignIn = findViewById(R.id.btnSignIn);
-        TextView tvForgotPassword = findViewById(R.id.tvForgotPassword);
-        ImageView logo = findViewById(R.id.ivLogo);
+        MaterialCardView signUpCard = findViewById(R.id.signUpCard);
+        TextInputEditText etUsername = findViewById(R.id.signUp_etUsername);
+        TextInputEditText etConfirmPassword = findViewById(R.id.signUp_et_Confirm_Password);
+        TextInputEditText etPassword = findViewById((R.id.signUp_etPassword));
+        TextInputEditText etEmail = findViewById(R.id.signUp_etEmail);
+        MaterialButton btnNext = findViewById(R.id.signUp_btnNext);
+        TextView tvAlreadyHaveAccount = findViewById(R.id.signUp_tvAlreadyHaveAccount);
+        ImageView logo = findViewById(R.id.signUp_ivLogo);
 
-        passwordStrengthBar = findViewById(R.id.passwordStrengthBar);
-        loadingProgress = findViewById(R.id.loadingProgress);
-        rememberMeCheckbox = findViewById(R.id.rememberMeCheckbox);
+        passwordStrengthBar = findViewById(R.id.signUp_passwordStrengthBar);
+        loadingProgress = findViewById(R.id.signUp_loadingProgress);
+        //rememberMeCheckbox = findViewById(R.id.rememberMeCheckbox);
 
-        // Set initial states and animations
-        setupInitialAnimations(loginCard, logo);
-
-        // Password strength watcher
-        setupPasswordStrengthWatcher(etPassword);
-
-        // Button click listeners
-        setupClickListeners(btnSignIn, tvForgotPassword, etUsername, etPassword);
-    }
-
-    private void setupInitialAnimations(MaterialCardView loginCard, ImageView logo) {
-        loginCard.setTranslationY(1000f);
+        // Set initial states
+        signUpCard.setTranslationY(1000f);
         logo.setScaleX(0f);
         logo.setScaleY(0f);
 
+        // Animate logo
         logo.animate()
                 .scaleX(1f)
                 .scaleY(1f)
                 .setDuration(1000)
                 .setInterpolator(new AccelerateDecelerateInterpolator())
                 .withEndAction(() ->
-                        loginCard.animate()
+                        // Animate login card after logo animation
+                        signUpCard.animate()
                                 .translationY(0f)
                                 .setDuration(1000)
                                 .setInterpolator(new AccelerateDecelerateInterpolator())
                 );
-    }
 
-    private void setupPasswordStrengthWatcher(TextInputEditText etPassword) {
-        etPassword.addTextChangedListener(new TextWatcher() {
+        // Password strength watcher
+        etConfirmPassword.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
@@ -100,82 +95,40 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-    }
 
-    private void setupClickListeners(MaterialButton btnSignIn, TextView tvForgotPassword,
-                                     TextInputEditText etUsername, TextInputEditText etPassword) {
-        btnSignIn.setOnClickListener(v -> {
+        // Add click listener for next button
+        btnNext.setOnClickListener(v -> {
             String username = etUsername.getText().toString();
             String password = etPassword.getText().toString();
+            String passwordConfirmed = etConfirmPassword.getText().toString();
+            String email = etEmail.getText().toString();
 
-            if (username.isEmpty() || password.isEmpty()) {
+            if (username.isEmpty() || password.isEmpty() || email.isEmpty() || passwordConfirmed.isEmpty()) {
                 showError("Please fill in all fields");
                 shakeView(username.isEmpty() ? etUsername : etPassword);
-            } else {
-                showLoginAnimation(btnSignIn);
-                performLogin(username, password);
+            } else if (isPasswordMatch(password, passwordConfirmed) == false){
+                showError("Passwords do not match");
+            } else{
+                    showSignUpAnimation(btnNext);
+                    performSignUp(username, password, email);
             }
         });
 
-        tvForgotPassword.setOnClickListener(v -> {
-            String username = etUsername.getText().toString();
-            if (username.isEmpty()) {
-                showError("Please enter your Net-ID first");
-                shakeView(etUsername);
-            } else {
-                sendPasswordResetRequest(username);
-            }
+        // Add click listener for forgot password
+        tvAlreadyHaveAccount.setOnClickListener(v -> {
+
+            /* when pressed, use intent to switch to Login Activity */
+            Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
+            startActivity(intent);
+
+            //String username = etUsername.getText().toString();
+            //if (username.isEmpty()) {
+              //  showError("Please enter your Net-ID first");
+                //shakeView(etUsername);
+            //} else {
+            //    sendPasswordResetRequest(username);
+            //}
         });
-    }
-
-    private void performLogin(String username, String password) {
-        String url = BASE_URL;
-        Log.d("Login", "Full URL: " + url);
-        Log.d("Login", "Username: " + username);
-
-        JSONObject jsonBody = new JSONObject();
-        try {
-            jsonBody.put("name", "password");     // Using static values that work with mock
-            jsonBody.put("emailId", "netid");     // Using static values that work with mock
-            jsonBody.put("ifActive", true);
-
-            Log.d("Login", "Sending data: " + jsonBody.toString());
-
-            JsonObjectRequest request = new JsonObjectRequest(
-                    Request.Method.POST,
-                    url,
-                    jsonBody,
-                    response -> {
-                        Log.d("Login", "Success response: " + response.toString());
-                        try {
-                            String message = response.getString("message");
-                            showSuccess("Login successful");
-                        } catch (JSONException e) {
-                            showError("Error parsing response");
-                        }
-                    },
-                    error -> {
-                        Log.e("Login", "Error: " + error.toString());
-                        NetworkResponse networkResponse = error.networkResponse;
-                        if (networkResponse != null && networkResponse.data != null) {
-                            String errorResponse = new String(networkResponse.data);
-                            Log.e("Login", "Error response: " + errorResponse);
-                        }
-                        showError("Login failed: " + getVolleyErrorMessage(error));
-                    }
-            );
-
-            request.setRetryPolicy(new DefaultRetryPolicy(
-                    10000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-            ));
-
-            VolleySingleton.getInstance(this).addToRequestQueue(request);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            showError("Error creating request");
-        }
     }
 
     private void updatePasswordStrength(String password) {
@@ -202,13 +155,68 @@ public class MainActivity extends AppCompatActivity {
         return score;
     }
 
-    private void sendPasswordResetRequest(String username) {
-        String url = BASE_URL + "/forgot-password";  // Updated to match mock server
-        Log.d("Login", "Reset password URL: " + url);
+    private Boolean isPasswordMatch(String password, String confirm){
+        if(password.equals(confirm)){
+            return true;
+        }
+        return false;
+    }
+
+    private void performSignUp(String username, String password, String email) {
+        String url = BASE_URL + "users/login";
+        Log.d("Sign Up", "Attempting sign up to: " + url);
 
         JSONObject jsonBody = new JSONObject();
         try {
-            jsonBody.put("emailId", username);
+            jsonBody.put("username", username);
+            jsonBody.put("password", password);
+            jsonBody.put("email", email);
+
+            Log.d("Sign Up", "Sending data: " + jsonBody.toString());
+
+            JsonObjectRequest request = new JsonObjectRequest(
+                    Request.Method.POST,
+                    url,
+                    jsonBody,
+                    response -> {
+                        Log.d("Sign Up", "Success response: " + response.toString());
+                        try {
+                            String message = response.getString("message");
+                            showSuccess(message);
+                        } catch (JSONException e) {
+                            showError("Error parsing response");
+                        }
+                    },
+                    error -> {
+                        Log.e("Sign Up", "Error: " + error.toString());
+                        NetworkResponse networkResponse = error.networkResponse;
+                        if (networkResponse != null && networkResponse.data != null) {
+                            String errorResponse = new String(networkResponse.data);
+                            Log.e("Sign Up", "Error response: " + errorResponse);
+                        }
+                        showError("Sign up failed: " + getVolleyErrorMessage(error));
+                    }
+            );
+
+            request.setRetryPolicy(new DefaultRetryPolicy(
+                    10000, // 10 seconds timeout
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+            ));
+
+            VolleySingleton.getInstance(this).addToRequestQueue(request);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            showError("Error creating request");
+        }
+    }
+
+    private void sendPasswordResetRequest(String username) {
+        String url = BASE_URL + "users/forgot-password";
+
+        JSONObject jsonBody = new JSONObject();
+        try {
+            jsonBody.put("username", username);
 
             JsonObjectRequest request = new JsonObjectRequest(
                     Request.Method.POST,
@@ -254,14 +262,14 @@ public class MainActivity extends AppCompatActivity {
                 );
     }
 
-    private void showLoginAnimation(MaterialButton button) {
+    private void showSignUpAnimation(MaterialButton button) {
         button.setEnabled(false);
         button.setText("");
         loadingProgress.setVisibility(View.VISIBLE);
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             loadingProgress.setVisibility(View.GONE);
-            button.setText("Sign In");
+            button.setText("Next");
             button.setEnabled(true);
         }, 2000);
     }

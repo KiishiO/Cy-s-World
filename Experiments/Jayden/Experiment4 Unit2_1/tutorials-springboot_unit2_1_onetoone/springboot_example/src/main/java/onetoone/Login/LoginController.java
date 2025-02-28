@@ -2,6 +2,7 @@ package onetoone.Login;
 
 import onetoone.Persons.Person;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,6 +57,17 @@ public class LoginController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @PutMapping("/registerPassword/{id}")
+    public ResponseEntity<Login> registerPassword(@PathVariable Long id, @RequestParam String password) {
+
+        Optional<Login> login = loginService.getUserById(id);
+        if (login.isPresent()) {
+            Login updatedLogin = loginService.registerPassword(login.get(), password);
+            return ResponseEntity.ok(updatedLogin);
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
     /**
      * Gets login at that currently active
      *
@@ -75,11 +87,15 @@ public class LoginController {
      */
     @PostMapping("/new")
     public ResponseEntity<Login> registerLogin(@RequestBody Login login) {
-        if (login == null || login.getEmailId() == null || login.getName() == null) {
+        if (login == null || login.getEmailId() == null || login.getName() == null || login.getPassword() == null) {
             return ResponseEntity.badRequest().body(null); // 400 Bad Request if login is invalid
         }
+
+        // Call the service to register the user
         Login savedLogin = loginService.registerUser(login);
-        return ResponseEntity.ok(savedLogin);
+
+        // Return the created login with a 201 Created status
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedLogin); // 201 Created status
     }
 
     /**
@@ -93,6 +109,7 @@ public class LoginController {
                     existingLogin.setName(updatedLogin.getName());
                     existingLogin.setEmailId(updatedLogin.getEmailId());
                     existingLogin.setIfActive(updatedLogin.getIfActive());
+                    existingLogin.setPassword(updatedLogin.getPassword());
 
                     // Check if the request contains a new Person
                     if (updatedLogin.getPerson() != null) {
