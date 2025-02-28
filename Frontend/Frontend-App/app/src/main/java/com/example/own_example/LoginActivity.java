@@ -18,22 +18,38 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LoginActivity extends AppCompatActivity {
 
     private ProgressBar passwordStrengthBar;
     private CircularProgressIndicator loadingProgress;
     private MaterialCheckBox rememberMeCheckbox;
-    private static final String BASE_URL = "https://b74aa9ab-3964-429f-9cf7-3da23ad11f42.mock.pstmn.io/Logins/new";
+    private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu:8080/Logins";
+    private String directIPUrl = null; // Will be set if IP lookup is successful
+
+    // Store fetched users
+    private List<JSONObject> usersList = new ArrayList<>();
+    private boolean isDataLoaded = false;
+    private int connectionAttempts = 0;
+    private static final int MAX_CONNECTION_ATTEMPTS = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +74,12 @@ public class LoginActivity extends AppCompatActivity {
 
         // Password strength watcher
         setupPasswordStrengthWatcher(etPassword);
+
+        // Try IP lookup to get a direct IP for the server
+        lookupServerIP();
+
+        // Fetch users data from server
+        fetchAllUsers();
 
         // Button click listeners
         setupClickListeners(btnSignIn, tvForgotPassword, etUsername, etPassword);
@@ -113,7 +135,19 @@ public class LoginActivity extends AppCompatActivity {
                 shakeView(username.isEmpty() ? etUsername : etPassword);
             } else {
                 showLoginAnimation(btnSignIn);
-                performLogin(username, password);
+                if (isDataLoaded) {
+                    validateLogin(username, password);
+                } else {
+                    // If data isn't loaded yet, try to fetch it again
+                    retryConnection();
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        if (isDataLoaded) {
+                            validateLogin(username, password);
+                        } else {
+                            showError("Unable to connect to server. Please try again later.");
+                        }
+                    }, 2000);
+                }
             }
         });
 
@@ -128,54 +162,226 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void performLogin(String username, String password) {
-        String url = BASE_URL;
-        Log.d("Login", "Full URL: " + url);
-        Log.d("Login", "Username: " + username);
+    private void validateLogin(String username, String password) {
+        boolean loginSuccess = false;
+        String fullName = "";
+        JSONObject loggedInUser = null;
 
-        JSONObject jsonBody = new JSONObject();
+        // Log all usernames for debugging
         try {
-            jsonBody.put("name", "password");     // Using static values that work with mock
-            jsonBody.put("emailId", "netid");     // Using static values that work with mock
-            jsonBody.put("ifActive", true);
-
-            Log.d("Login", "Sending data: " + jsonBody.toString());
-
-            JsonObjectRequest request = new JsonObjectRequest(
-                    Request.Method.POST,
-                    url,
-                    jsonBody,
-                    response -> {
-                        Log.d("Login", "Success response: " + response.toString());
-                        try {
-                            String message = response.getString("message");
-                            showSuccess("Login successful");
-                        } catch (JSONException e) {
-                            showError("Error parsing response");
-                        }
-                    },
-                    error -> {
-                        Log.e("Login", "Error: " + error.toString());
-                        NetworkResponse networkResponse = error.networkResponse;
-                        if (networkResponse != null && networkResponse.data != null) {
-                            String errorResponse = new String(networkResponse.data);
-                            Log.e("Login", "Error response: " + errorResponse);
-                        }
-                        showError("Login failed: " + getVolleyErrorMessage(error));
-                    }
-            );
-
-            request.setRetryPolicy(new DefaultRetryPolicy(
-                    10000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-            ));
-
-            VolleySingleton.getInstance(this).addToRequestQueue(request);
+            Log.d("Login", "Attempting login with username: '" + username + "' and password: '" + password + "'");
+            Log.d("Login", "Available users:");
+            for (JSONObject user : usersList) {
+                Log.d("Login", "User: '" + user.getString("name") + "' Pass: '" + user.getString("password") + "'");
+            }
         } catch (JSONException e) {
-            e.printStackTrace();
-            showError("Error creating request");
+            Log.e("Login", "Error logging user data", e);
         }
+
+        for (JSONObject user : usersList) {
+            try {
+                String storedUsername = user.getString("name").trim(); // Trim to handle spaces
+                String storedPassword = user.getString("password");
+
+                // Try case-insensitive comparison for username and exact match for password
+                if ((storedUsername.equalsIgnoreCase(username.trim()) ||
+                        storedUsername.equals(username)) &&
+                        storedPassword.equals(password)) {
+
+                    loginSuccess = true;
+                    loggedInUser = user;
+                    if (user.has("person")) {
+                        JSONObject personData = user.getJSONObject("person");
+                        fullName = personData.getString("name");
+                    }
+                    break;
+                }
+            } catch (JSONException e) {
+                Log.e("Login", "Error parsing user data", e);
+            }
+        }
+
+        if (loginSuccess) {
+            final String welcomeName = fullName.isEmpty() ? username : fullName;
+            showSuccess("Login successful! Welcome, " + welcomeName);
+            // TODO: Navigate to main activity or dashboard and pass the user data
+            // Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            // intent.putExtra("USER_DATA", loggedInUser.toString());
+            // startActivity(intent);
+            // finish();
+        } else {
+            showError("Invalid username or password. Please check your credentials.");
+        }
+    }
+
+    private void lookupServerIP() {
+        new Thread(() -> {
+            try {
+                String hostName = "coms-3090-032.class.las.iastate.edu";
+                Log.d("IPLookup", "Looking up IP for " + hostName);
+
+                InetAddress address = InetAddress.getByName(hostName);
+                String ipAddress = address.getHostAddress();
+
+                runOnUiThread(() -> {
+                    Log.d("IPLookup", "IP Address: " + ipAddress);
+                    directIPUrl = "http://" + ipAddress + ":8080/Logins";
+                    Log.d("IPLookup", "Direct IP URL: " + directIPUrl);
+
+                    // If we haven't loaded data yet, try with the direct IP
+                    if (!isDataLoaded) {
+                        fetchAllUsersWithIP(directIPUrl);
+                    }
+                });
+            } catch (Exception e) {
+                Log.e("IPLookup", "Error resolving hostname", e);
+                runOnUiThread(() -> {
+                    Log.d("IPLookup", "IP lookup failed, continuing with hostname");
+                });
+            }
+        }).start();
+    }
+
+    private void retryConnection() {
+        connectionAttempts++;
+        if (connectionAttempts > MAX_CONNECTION_ATTEMPTS) {
+            showError("Failed to connect after multiple attempts. Please check your connection.");
+            return;
+        }
+
+        Log.d("Login", "Retry attempt " + connectionAttempts);
+
+        if (directIPUrl != null) {
+            // Try with direct IP if available
+            fetchAllUsersWithIP(directIPUrl);
+        } else {
+            // Otherwise try with hostname
+            fetchAllUsers();
+        }
+    }
+
+    private void fetchAllUsers() {
+        showInfo("Connecting to server...");
+        String url = BASE_URL;
+        Log.d("Login", "Fetching users from: " + url);
+
+        // Use StringRequest for more robust handling
+        StringRequest request = new StringRequest(
+                Request.Method.GET,
+                url,
+                response -> {
+                    // Success! Got string response
+                    Log.d("Login", "Raw response received, length: " + response.length());
+
+                    try {
+                        JSONArray jsonArray = new JSONArray(response);
+                        usersList.clear();
+
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject user = jsonArray.getJSONObject(i);
+                            usersList.add(user);
+                        }
+
+                        isDataLoaded = true;
+                        Log.d("Login", "Successfully loaded " + usersList.size() + " users");
+                        showInfo("Connected to server");
+
+                        // Debug the fetched user data
+                        debugUserData();
+                    } catch (JSONException e) {
+                        Log.e("Login", "Error parsing JSON: " + e.getMessage());
+                        showError("Error parsing server data");
+                    }
+                },
+                error -> {
+                    Log.e("Login", "Error fetching users: " + error.toString());
+
+                    // If we have a direct IP url and haven't tried it yet, use it now
+                    if (directIPUrl != null && !directIPUrl.equals(url)) {
+                        Log.d("Login", "Trying with direct IP instead");
+                        fetchAllUsersWithIP(directIPUrl);
+                    } else {
+                        isDataLoaded = false;
+                        showError("Cannot connect to server. Please check your internet connection.");
+                    }
+                }
+        );
+
+        // Set longer timeout and more retries
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                15000, // 15 seconds timeout
+                2,     // 2 retries
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        ));
+
+        VolleySingleton.getInstance(this).addToRequestQueue(request);
+    }
+
+    private void fetchAllUsersWithIP(String directUrl) {
+        showInfo("Connecting via direct IP...");
+        Log.d("Login", "Fetching users from IP URL: " + directUrl);
+
+        StringRequest request = new StringRequest(
+                Request.Method.GET,
+                directUrl,
+                response -> {
+                    Log.d("Login", "Got response via IP! Length: " + response.length());
+                    try {
+                        JSONArray usersArray = new JSONArray(response);
+                        usersList.clear();
+
+                        for (int i = 0; i < usersArray.length(); i++) {
+                            usersList.add(usersArray.getJSONObject(i));
+                        }
+
+                        isDataLoaded = true;
+                        Log.d("Login", "Loaded " + usersList.size() + " users from server via IP");
+                        showSuccess("Connected to server");
+
+                        // Debug the fetched user data
+                        debugUserData();
+                    } catch (JSONException e) {
+                        Log.e("Login", "Error parsing JSON from IP", e);
+                        showError("Error parsing server data");
+                    }
+                },
+                error -> {
+                    Log.e("Login", "Error fetching users via IP: " + error.toString());
+                    isDataLoaded = false;
+                    showError("Failed to connect: " + getVolleyErrorMessage(error));
+                }
+        );
+
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                15000, // 15 seconds timeout
+                2,     // 2 retries
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        ));
+
+        VolleySingleton.getInstance(this).addToRequestQueue(request);
+    }
+
+    private void debugUserData() {
+        StringBuilder debug = new StringBuilder("Available Users:\n");
+
+        for (int i = 0; i < usersList.size(); i++) {
+            try {
+                JSONObject user = usersList.get(i);
+                String name = user.getString("name");
+                String password = user.getString("password");
+                String personName = user.has("person") ?
+                        user.getJSONObject("person").getString("name") : "N/A";
+
+                debug.append(i+1).append(". Username: '").append(name)
+                        .append("', Password: '").append(password)
+                        .append("', Person: ").append(personName).append("\n");
+
+            } catch (JSONException e) {
+                debug.append(i+1).append(". Error parsing user\n");
+            }
+        }
+
+        Log.d("UserData", debug.toString());
     }
 
     private void updatePasswordStrength(String password) {
@@ -203,7 +409,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void sendPasswordResetRequest(String username) {
-        String url = BASE_URL + "/forgot-password";  // Updated to match mock server
+        String url = BASE_URL + "/forgot-password";
         Log.d("Login", "Reset password URL: " + url);
 
         JSONObject jsonBody = new JSONObject();
