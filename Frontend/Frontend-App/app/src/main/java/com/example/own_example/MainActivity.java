@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
-        /* click listener on sign up button pressed */
+        /* click listener when sign up button is pressed */
         signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
