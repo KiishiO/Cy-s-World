@@ -38,9 +38,9 @@ class Main {
             Person Person1 = new Person("John", "john@somemail.com");
             Person Person2 = new Person("Jane", "jane@somemail.com");
             Person Person3 = new Person("Justin", "justin@somemail.com");
-            Signup signup1 = new Signup( "Sonia Patil", "test", "john@somemail.com", "123456789");
-            Signup signup2 = new Signup( "Sonia Patil", "test", "john@somemail.com", "123456789");
-            Signup signup3 = new Signup( "Sonia Patil", "test", "john@somemail.com", "123456789");
+            Signup signup1 = new Signup( "Sonia Patil",  "john@somemail.com", "123456789");
+            Signup signup2 = new Signup( "Sonia Patil",  "john@somemail.com", "123456789");
+            Signup signup3 = new Signup( "Sonia Patil",  "john@somemail.com", "123456789");
             Person1.setSignupInfo(signup1);
             Person2.setSignupInfo(signup2);
             Person3.setSignupInfo(signup3);

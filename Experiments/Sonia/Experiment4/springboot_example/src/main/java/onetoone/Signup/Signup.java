@@ -39,14 +39,15 @@ public class Signup {
     @JsonIgnore
     private Person person;
 
-    public Signup(String firstAndLastName, String username, String email, String password) {
+    //String firstAndLastName
+    public Signup(String username, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
-        this.firstAndLastName = firstAndLastName;
+        //this.firstAndLastName = firstAndLastName;
         //this.person = person;
         //createNewPerson
-        this.person = new Person(firstAndLastName, email);
+        this.person = new Person(username, email);
 
     }
 
