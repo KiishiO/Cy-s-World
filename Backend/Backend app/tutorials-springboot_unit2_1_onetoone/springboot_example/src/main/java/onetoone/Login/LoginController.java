@@ -142,4 +142,19 @@ public class LoginController {
         loginRepository.deleteById(id);
         return ResponseEntity.ok(success);
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        try {
+            Optional<Login> login = loginService.getUserByEmail(loginRequest.getEmailId());
+            if (login.isPresent()) {
+                // For now, just check if user exists
+                return ResponseEntity.ok().body("{\"message\":\"Login successful\"}");
+            } else {
+                return ResponseEntity.status(401).body("{\"message\":\"Invalid credentials\"}");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("{\"message\":\"Server error\"}");
+        }
+    }
 }
