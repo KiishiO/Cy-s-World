@@ -37,7 +37,7 @@ public class SignUpActivity extends AppCompatActivity{
     private ProgressBar passwordStrengthBar;
     private CircularProgressIndicator loadingProgress;
     //private MaterialCheckBox rememberMeCheckbox;
-    private static final String BASE_URL = "https://f49570a7-61b6-48be-ab64-48b271041323.mock.pstmn.io/";
+    private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu:8080/signup";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -163,7 +163,7 @@ public class SignUpActivity extends AppCompatActivity{
     }
 
     private void performSignUp(String username, String password, String email) {
-        String url = BASE_URL + "users/login";
+        String url = BASE_URL;
         Log.d("Sign Up", "Attempting sign up to: " + url);
 
         JSONObject jsonBody = new JSONObject();

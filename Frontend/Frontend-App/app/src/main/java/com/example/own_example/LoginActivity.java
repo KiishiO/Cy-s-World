@@ -33,8 +33,8 @@ public class LoginActivity extends AppCompatActivity {
     private ProgressBar passwordStrengthBar;
     private CircularProgressIndicator loadingProgress;
     private MaterialCheckBox rememberMeCheckbox;
-    private static final String BASE_URL = "https://b74aa9ab-3964-429f-9cf7-3da23ad11f42.mock.pstmn.io/Logins/new";
-
+    private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu:8080/Logins";
+//coms-3090-017.class.las@iastate.edu:8080/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -1,4 +1,4 @@
-package com.example.profile_interface;
+package com.example.own_example;
 
 import androidx.appcompat.app.AppCompatActivity;
 
