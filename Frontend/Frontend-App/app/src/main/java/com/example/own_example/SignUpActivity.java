@@ -199,7 +199,7 @@ public class SignUpActivity extends AppCompatActivity{
             );
 
             request.setRetryPolicy(new DefaultRetryPolicy(
-                    10000, // 10 seconds timeout
+                    30000, // 30 seconds timeout
                     DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                     DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
             ));
