@@ -85,6 +85,8 @@ class Main {
             Login login2 = new Login("sarah_a", "sarah123@example.com","A_HARAS", person2);
             Login login3 = new Login("dwilliams", "davidw@example.com","Davidw545", person3);
 
+            Signup signup3 = new Signup( "Sonia Patil",  "john@somemail.com", "123456789");
+
             // Saving Login details
             loginRepository.save(login1);
             loginRepository.save(login2);
