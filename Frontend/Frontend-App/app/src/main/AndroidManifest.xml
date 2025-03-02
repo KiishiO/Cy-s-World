@@ -32,12 +32,5 @@
         <activity
             android:name=".SignUpActivity"
             android:exported="false" />
-
-        <!-- Add this to your manifest if network troubleshooting is needed -->
-        <!--
-        <activity
-            android:name=".NetworkTestActivity"
-            android:exported="false" />
-        -->
     </application>
 </manifest>

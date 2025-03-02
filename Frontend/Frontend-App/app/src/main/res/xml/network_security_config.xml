@@ -8,12 +8,10 @@
         </trust-anchors>
     </base-config>
 
-    <!-- Specifically allow your server domains with subdomains included -->
+    <!-- Specifically allow server domains with subdomains included -->
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">coms-3090-017.class.las.iastate.edu</domain>
         <domain includeSubdomains="true">class.las.iastate.edu</domain>
         <domain includeSubdomains="true">iastate.edu</domain>
-        <!-- If you know the IP address, add it here -->
-        <!-- <domain includeSubdomains="false">192.168.1.1</domain> -->
     </domain-config>
 </network-security-config>
