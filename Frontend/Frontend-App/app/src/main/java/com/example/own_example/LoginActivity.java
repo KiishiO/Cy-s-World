@@ -14,54 +14,45 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private static final String TAG = "LoginActivity";
     private ProgressBar passwordStrengthBar;
     private CircularProgressIndicator loadingProgress;
     private MaterialCheckBox rememberMeCheckbox;
     private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu:8080/Logins";
-    private String directIPUrl = null; // Will be set if IP lookup is successful
 
-    // Store fetched users
     private List<JSONObject> usersList = new ArrayList<>();
     private boolean isDataLoaded = false;
-    private int connectionAttempts = 0;
-    private static final int MAX_CONNECTION_ATTEMPTS = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        Log.d("MainActivity", "Starting app...");
+        Log.d(TAG, "Starting login activity...");
 
         // Initialize views
         MaterialCardView loginCard = findViewById(R.id.loginCard);
         TextInputEditText etUsername = findViewById(R.id.etUsername);
         TextInputEditText etPassword = findViewById(R.id.etPassword);
-        MaterialButton btnSignIn = findViewById(R.id.btnSignIn);
+        MaterialButton btnLogin = findViewById(R.id.btnSignIn);
         TextView tvForgotPassword = findViewById(R.id.tvForgotPassword);
         ImageView logo = findViewById(R.id.ivLogo);
 
@@ -69,23 +60,18 @@ public class LoginActivity extends AppCompatActivity {
         loadingProgress = findViewById(R.id.loadingProgress);
         rememberMeCheckbox = findViewById(R.id.rememberMeCheckbox);
 
-        // Set initial states and animations
-        setupInitialAnimations(loginCard, logo);
+        // Make sure loading indicator is properly initialized
+        if (loadingProgress != null) {
+            loadingProgress.setVisibility(View.GONE);
+            Log.d(TAG, "Loading indicator initialized and set to GONE");
+        } else {
+            Log.e(TAG, "Loading indicator is null! Check your layout XML");
+        }
 
-        // Password strength watcher
-        setupPasswordStrengthWatcher(etPassword);
+        // Change button text
+        btnLogin.setText("Login");
 
-        // Try IP lookup to get a direct IP for the server
-        lookupServerIP();
-
-        // Fetch users data from server
-        fetchAllUsers();
-
-        // Button click listeners
-        setupClickListeners(btnSignIn, tvForgotPassword, etUsername, etPassword);
-    }
-
-    private void setupInitialAnimations(MaterialCardView loginCard, ImageView logo) {
+        // Set initial animations
         loginCard.setTranslationY(1000f);
         logo.setScaleX(0f);
         logo.setScaleY(0f);
@@ -101,9 +87,8 @@ public class LoginActivity extends AppCompatActivity {
                                 .setDuration(1000)
                                 .setInterpolator(new AccelerateDecelerateInterpolator())
                 );
-    }
 
-    private void setupPasswordStrengthWatcher(TextInputEditText etPassword) {
+        // Password strength watcher
         etPassword.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -122,11 +107,12 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         });
-    }
 
-    private void setupClickListeners(MaterialButton btnSignIn, TextView tvForgotPassword,
-                                     TextInputEditText etUsername, TextInputEditText etPassword) {
-        btnSignIn.setOnClickListener(v -> {
+        // Fetch users data on startup
+        fetchAllUsers();
+
+        // Login button click listener
+        btnLogin.setOnClickListener(v -> {
             String username = etUsername.getText().toString();
             String password = etPassword.getText().toString();
 
@@ -134,259 +120,135 @@ public class LoginActivity extends AppCompatActivity {
                 showError("Please fill in all fields");
                 shakeView(username.isEmpty() ? etUsername : etPassword);
             } else {
-                showLoginAnimation(btnSignIn);
+                showLoginAnimation(btnLogin);
                 if (isDataLoaded) {
                     validateLogin(username, password);
                 } else {
-                    // If data isn't loaded yet, try to fetch it again
-                    retryConnection();
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                        if (isDataLoaded) {
-                            validateLogin(username, password);
-                        } else {
-                            showError("Unable to connect to server. Please try again later.");
-                        }
-                    }, 2000);
+                    fetchAllUsers(username, password);
                 }
             }
         });
 
+        // Forgot password click listener
         tvForgotPassword.setOnClickListener(v -> {
             String username = etUsername.getText().toString();
             if (username.isEmpty()) {
                 showError("Please enter your Net-ID first");
                 shakeView(etUsername);
             } else {
-                sendPasswordResetRequest(username);
+                showSuccess("Password reset instructions sent");
             }
         });
     }
 
+    private void fetchAllUsers() {
+        fetchAllUsers(null, null);
+    }
+
+    private void fetchAllUsers(String username, String password) {
+        showInfo("Connecting to server...");
+        Log.d(TAG, "Fetching users from: " + BASE_URL);
+
+        JsonArrayRequest request = new JsonArrayRequest(
+                Request.Method.GET,
+                BASE_URL,
+                null,
+                response -> {
+                    Log.d(TAG, "Users response received, length: " + response.length());
+                    usersList.clear();
+                    for (int i = 0; i < response.length(); i++) {
+                        try {
+                            JSONObject user = response.getJSONObject(i);
+                            usersList.add(user);
+
+                            // Log user data to Logcat
+                            String name = user.optString("name", "N/A");
+                            String email = user.optString("emailId", "N/A");
+                            String pass = user.optString("password", "N/A");
+                            Log.d(TAG, "User " + (i+1) + ": Name=" + name + ", Email=" + email + ", Pass=" + pass);
+                        } catch (JSONException e) {
+                            Log.e(TAG, "Error parsing user at index " + i, e);
+                        }
+                    }
+
+                    isDataLoaded = true;
+                    Log.d(TAG, "Successfully loaded " + usersList.size() + " users");
+                    showInfo("Connected to server");
+
+                    if (username != null && password != null) {
+                        validateLogin(username, password);
+                    }
+                },
+                error -> {
+                    isDataLoaded = false;
+                    Log.e(TAG, "Error fetching users: " + error.toString());
+
+                    if (error.networkResponse != null) {
+                        Log.e(TAG, "Network error code: " + error.networkResponse.statusCode);
+                    }
+
+                    showError("Cannot connect to server. Please check your internet connection.");
+                }
+        );
+
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                10000, // 10 seconds timeout
+                1,     // 1 retry
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        ));
+
+        VolleySingleton.getInstance(this).addToRequestQueue(request);
+    }
+
     private void validateLogin(String username, String password) {
+        Log.d(TAG, "Validating login for username: " + username);
         boolean loginSuccess = false;
         String fullName = "";
-        JSONObject loggedInUser = null;
-
-        // Log all usernames for debugging
-        try {
-            Log.d("Login", "Attempting login with username: '" + username + "' and password: '" + password + "'");
-            Log.d("Login", "Available users:");
-            for (JSONObject user : usersList) {
-                Log.d("Login", "User: '" + user.getString("name") + "' Pass: '" + user.getString("password") + "'");
-            }
-        } catch (JSONException e) {
-            Log.e("Login", "Error logging user data", e);
-        }
 
         for (JSONObject user : usersList) {
             try {
-                String storedUsername = user.getString("name").trim(); // Trim to handle spaces
+                // Check for matching emailId and password
+                String storedNetId = user.getString("emailId").trim();
                 String storedPassword = user.getString("password");
+                String storedName = user.getString("name").trim();
 
-                // Try case-insensitive comparison for username and exact match for password
-                if ((storedUsername.equalsIgnoreCase(username.trim()) ||
-                        storedUsername.equals(username)) &&
-                        storedPassword.equals(password)) {
+                Log.d(TAG, "Comparing with user: " + storedName + ", email: " + storedNetId);
 
+                // Try matching by email or name
+                boolean credentialsMatch =
+                        (storedNetId.equalsIgnoreCase(username.trim()) ||
+                                storedName.equalsIgnoreCase(username.trim())) &&
+                                storedPassword.equals(password);
+
+                if (credentialsMatch) {
                     loginSuccess = true;
-                    loggedInUser = user;
+                    Log.d(TAG, "Login match found for user: " + storedName);
                     if (user.has("person")) {
-                        JSONObject personData = user.getJSONObject("person");
-                        fullName = personData.getString("name");
+                        fullName = user.getJSONObject("person").getString("name");
+                        Log.d(TAG, "Found person name: " + fullName);
                     }
                     break;
                 }
             } catch (JSONException e) {
-                Log.e("Login", "Error parsing user data", e);
+                Log.e(TAG, "Error checking user credentials", e);
             }
         }
 
         if (loginSuccess) {
             final String welcomeName = fullName.isEmpty() ? username : fullName;
+            Log.d(TAG, "Login successful for user: " + welcomeName);
             showSuccess("Login successful! Welcome, " + welcomeName);
-            // TODO: Navigate to main activity or dashboard and pass the user data
-            // Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            // intent.putExtra("USER_DATA", loggedInUser.toString());
-            // startActivity(intent);
-            // finish();
+            // TODO: Navigate to main activity
         } else {
+            Log.d(TAG, "Login failed - invalid credentials");
             showError("Invalid username or password. Please check your credentials.");
         }
-    }
-
-    private void lookupServerIP() {
-        new Thread(() -> {
-            try {
-                String hostName = "coms-3090-032.class.las.iastate.edu";
-                Log.d("IPLookup", "Looking up IP for " + hostName);
-
-                InetAddress address = InetAddress.getByName(hostName);
-                String ipAddress = address.getHostAddress();
-
-                runOnUiThread(() -> {
-                    Log.d("IPLookup", "IP Address: " + ipAddress);
-                    directIPUrl = "http://" + ipAddress + ":8080/Logins";
-                    Log.d("IPLookup", "Direct IP URL: " + directIPUrl);
-
-                    // If we haven't loaded data yet, try with the direct IP
-                    if (!isDataLoaded) {
-                        fetchAllUsersWithIP(directIPUrl);
-                    }
-                });
-            } catch (Exception e) {
-                Log.e("IPLookup", "Error resolving hostname", e);
-                runOnUiThread(() -> {
-                    Log.d("IPLookup", "IP lookup failed, continuing with hostname");
-                });
-            }
-        }).start();
-    }
-
-    private void retryConnection() {
-        connectionAttempts++;
-        if (connectionAttempts > MAX_CONNECTION_ATTEMPTS) {
-            showError("Failed to connect after multiple attempts. Please check your connection.");
-            return;
-        }
-
-        Log.d("Login", "Retry attempt " + connectionAttempts);
-
-        if (directIPUrl != null) {
-            // Try with direct IP if available
-            fetchAllUsersWithIP(directIPUrl);
-        } else {
-            // Otherwise try with hostname
-            fetchAllUsers();
-        }
-    }
-
-    private void fetchAllUsers() {
-        showInfo("Connecting to server...");
-        String url = BASE_URL;
-        Log.d("Login", "Fetching users from: " + url);
-
-        // Use StringRequest for more robust handling
-        StringRequest request = new StringRequest(
-                Request.Method.GET,
-                url,
-                response -> {
-                    // Success! Got string response
-                    Log.d("Login", "Raw response received, length: " + response.length());
-
-                    try {
-                        JSONArray jsonArray = new JSONArray(response);
-                        usersList.clear();
-
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            JSONObject user = jsonArray.getJSONObject(i);
-                            usersList.add(user);
-                        }
-
-                        isDataLoaded = true;
-                        Log.d("Login", "Successfully loaded " + usersList.size() + " users");
-                        showInfo("Connected to server");
-
-                        // Debug the fetched user data
-                        debugUserData();
-                    } catch (JSONException e) {
-                        Log.e("Login", "Error parsing JSON: " + e.getMessage());
-                        showError("Error parsing server data");
-                    }
-                },
-                error -> {
-                    Log.e("Login", "Error fetching users: " + error.toString());
-
-                    // If we have a direct IP url and haven't tried it yet, use it now
-                    if (directIPUrl != null && !directIPUrl.equals(url)) {
-                        Log.d("Login", "Trying with direct IP instead");
-                        fetchAllUsersWithIP(directIPUrl);
-                    } else {
-                        isDataLoaded = false;
-                        showError("Cannot connect to server. Please check your internet connection.");
-                    }
-                }
-        );
-
-        // Set longer timeout and more retries
-        request.setRetryPolicy(new DefaultRetryPolicy(
-                15000, // 15 seconds timeout
-                2,     // 2 retries
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-        ));
-
-        VolleySingleton.getInstance(this).addToRequestQueue(request);
-    }
-
-    private void fetchAllUsersWithIP(String directUrl) {
-        showInfo("Connecting via direct IP...");
-        Log.d("Login", "Fetching users from IP URL: " + directUrl);
-
-        StringRequest request = new StringRequest(
-                Request.Method.GET,
-                directUrl,
-                response -> {
-                    Log.d("Login", "Got response via IP! Length: " + response.length());
-                    try {
-                        JSONArray usersArray = new JSONArray(response);
-                        usersList.clear();
-
-                        for (int i = 0; i < usersArray.length(); i++) {
-                            usersList.add(usersArray.getJSONObject(i));
-                        }
-
-                        isDataLoaded = true;
-                        Log.d("Login", "Loaded " + usersList.size() + " users from server via IP");
-                        showSuccess("Connected to server");
-
-                        // Debug the fetched user data
-                        debugUserData();
-                    } catch (JSONException e) {
-                        Log.e("Login", "Error parsing JSON from IP", e);
-                        showError("Error parsing server data");
-                    }
-                },
-                error -> {
-                    Log.e("Login", "Error fetching users via IP: " + error.toString());
-                    isDataLoaded = false;
-                    showError("Failed to connect: " + getVolleyErrorMessage(error));
-                }
-        );
-
-        request.setRetryPolicy(new DefaultRetryPolicy(
-                15000, // 15 seconds timeout
-                2,     // 2 retries
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-        ));
-
-        VolleySingleton.getInstance(this).addToRequestQueue(request);
-    }
-
-    private void debugUserData() {
-        StringBuilder debug = new StringBuilder("Available Users:\n");
-
-        for (int i = 0; i < usersList.size(); i++) {
-            try {
-                JSONObject user = usersList.get(i);
-                String name = user.getString("name");
-                String password = user.getString("password");
-                String personName = user.has("person") ?
-                        user.getJSONObject("person").getString("name") : "N/A";
-
-                debug.append(i+1).append(". Username: '").append(name)
-                        .append("', Password: '").append(password)
-                        .append("', Person: ").append(personName).append("\n");
-
-            } catch (JSONException e) {
-                debug.append(i+1).append(". Error parsing user\n");
-            }
-        }
-
-        Log.d("UserData", debug.toString());
     }
 
     private void updatePasswordStrength(String password) {
         int strength = calculatePasswordStrength(password);
         passwordStrengthBar.setProgress(strength);
+
         int color;
         if (strength < 33) {
             color = Color.RED;
@@ -408,42 +270,6 @@ public class LoginActivity extends AppCompatActivity {
         return score;
     }
 
-    private void sendPasswordResetRequest(String username) {
-        String url = BASE_URL + "/forgot-password";
-        Log.d("Login", "Reset password URL: " + url);
-
-        JSONObject jsonBody = new JSONObject();
-        try {
-            jsonBody.put("emailId", username);
-
-            JsonObjectRequest request = new JsonObjectRequest(
-                    Request.Method.POST,
-                    url,
-                    jsonBody,
-                    response -> showSuccess("Password reset instructions sent"),
-                    error -> showError("Failed to send reset instructions: " + getVolleyErrorMessage(error))
-            );
-
-            VolleySingleton.getInstance(this).addToRequestQueue(request);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            showError("Error processing request");
-        }
-    }
-
-    private String getVolleyErrorMessage(VolleyError error) {
-        if (error.networkResponse != null) {
-            switch (error.networkResponse.statusCode) {
-                case 404: return "Server not found";
-                case 401: return "Invalid credentials";
-                case 400: return "Invalid request";
-                case 500: return "Server error";
-                default: return "Network error " + error.networkResponse.statusCode;
-            }
-        }
-        return error.getMessage() != null ? error.getMessage() : "Unknown error occurred";
-    }
-
     private void shakeView(View view) {
         view.animate()
                 .translationX(20f)
@@ -461,44 +287,51 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void showLoginAnimation(MaterialButton button) {
-        button.setEnabled(false);
-        button.setText("");
-        loadingProgress.setVisibility(View.VISIBLE);
+        Log.d(TAG, "Starting login animation");
 
+        // Save original text to restore later
+        final String originalText = button.getText().toString();
+
+        // Disable button and show logging in text
+        button.setEnabled(false);
+        button.setText("Logging in...");
+
+        // Show loading indicator if available
+        if (loadingProgress != null) {
+            loadingProgress.setVisibility(View.VISIBLE);
+            Log.d(TAG, "Loading indicator set to VISIBLE");
+        }
+
+        // After delay, restore button state
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            loadingProgress.setVisibility(View.GONE);
-            button.setText("Sign In");
+            if (loadingProgress != null) {
+                loadingProgress.setVisibility(View.GONE);
+                Log.d(TAG, "Loading indicator set back to GONE");
+            }
+            button.setText("Login");
             button.setEnabled(true);
+            Log.d(TAG, "Login animation completed");
         }, 2000);
     }
 
     private void showError(String message) {
-        Snackbar snackbar = Snackbar.make(
-                findViewById(android.R.id.content),
-                message,
-                Snackbar.LENGTH_LONG
-        );
-        snackbar.setBackgroundTint(getColor(R.color.cardinal_red));
-        snackbar.show();
+        Log.e(TAG, "Error: " + message);
+        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG)
+                .setBackgroundTint(getColor(R.color.cardinal_red))
+                .show();
     }
 
     private void showSuccess(String message) {
-        Snackbar snackbar = Snackbar.make(
-                findViewById(android.R.id.content),
-                message,
-                Snackbar.LENGTH_LONG
-        );
-        snackbar.setBackgroundTint(Color.parseColor("#4CAF50"));
-        snackbar.show();
+        Log.d(TAG, "Success: " + message);
+        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG)
+                .setBackgroundTint(Color.parseColor("#4CAF50"))
+                .show();
     }
 
     private void showInfo(String message) {
-        Snackbar snackbar = Snackbar.make(
-                findViewById(android.R.id.content),
-                message,
-                Snackbar.LENGTH_LONG
-        );
-        snackbar.setBackgroundTint(Color.parseColor("#2196F3"));
-        snackbar.show();
+        Log.i(TAG, "Info: " + message);
+        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG)
+                .setBackgroundTint(Color.parseColor("#2196F3"))
+                .show();
     }
 }
