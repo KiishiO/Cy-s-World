@@ -21,6 +21,7 @@ import onetoone.Persons.PersonRepository;
  */ 
 
 @RestController
+@RequestMapping("/signup")
 public class SignupController {
 
     @Autowired
