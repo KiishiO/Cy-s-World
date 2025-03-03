@@ -32,6 +32,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,6 +64,7 @@ public class LoginActivity extends AppCompatActivity {
         TextInputEditText etUsername = findViewById(R.id.etUsername);
         TextInputEditText etPassword = findViewById(R.id.etPassword);
         MaterialButton btnLogin = findViewById(R.id.btnSignIn);
+        MaterialButton btnDeleteAccount = findViewById(R.id.btnDeleteAccount);
         TextView tvForgotPassword = findViewById(R.id.tvForgotPassword);
         ImageView logo = findViewById(R.id.ivLogo);
 
@@ -132,6 +138,20 @@ public class LoginActivity extends AppCompatActivity {
                 } else {
                     fetchAllUsers(username, password);
                 }
+            }
+        });
+
+        // Delete Account button click listener
+        btnDeleteAccount.setOnClickListener(v -> {
+            String username = etUsername.getText().toString();
+            String password = etPassword.getText().toString();
+
+            if (username.isEmpty() || password.isEmpty()) {
+                showError("Please enter your credentials first");
+                shakeView(username.isEmpty() ? etUsername : etPassword);
+            } else {
+                // First authenticate the user
+                authenticateAndDeleteUser(username, password);
             }
         });
 
@@ -249,6 +269,120 @@ public class LoginActivity extends AppCompatActivity {
             Log.d(TAG, "Login failed - invalid credentials");
             showError("Invalid username or password. Please check your credentials.");
         }
+    }
+
+    private void authenticateAndDeleteUser(String username, String password) {
+        // First we need to find the user ID by authenticating
+        for (JSONObject user : usersList) {
+            try {
+                String storedNetId = user.getString("emailId").trim();
+                String storedName = user.getString("name").trim();
+                String storedPassword = user.getString("password");
+
+                boolean credentialsMatch =
+                        (storedNetId.equalsIgnoreCase(username.trim()) ||
+                                storedName.equalsIgnoreCase(username.trim())) &&
+                                storedPassword.equals(password);
+
+                if (credentialsMatch) {
+                    // Found the user, get the ID
+                    String userId = user.getString("id");
+
+                    // Show confirmation dialog
+                    new AlertDialog.Builder(this)
+                            .setTitle("Delete Account")
+                            .setMessage("Are you sure you want to delete your account? This action cannot be undone.")
+                            .setPositiveButton("Delete", (dialog, which) -> deleteCurrentUser(userId))
+                            .setNegativeButton("Cancel", null)
+                            .show();
+
+                    return;
+                }
+            } catch (JSONException e) {
+                Log.e(TAG, "Error checking user credentials", e);
+            }
+        }
+
+        // If we got here, authentication failed
+        showError("Invalid username or password");
+    }
+
+    private void deleteCurrentUser(String userId) {
+        // Show loading indicator
+        loadingProgress.setVisibility(View.VISIBLE);
+
+        new Thread(() -> {
+            HttpURLConnection urlConnection = null;
+            try {
+                String deleteUrl = BASE_URL + "/" + userId;
+                Log.d(TAG, "Attempting to delete user at: " + deleteUrl);
+
+                URL requestUrl = new URL(deleteUrl);
+                urlConnection = (HttpURLConnection) requestUrl.openConnection();
+                urlConnection.setRequestMethod("DELETE");
+
+                // Get the response code
+                int responseCode = urlConnection.getResponseCode();
+                Log.d(TAG, "Delete response code: " + responseCode);
+
+                // Read response
+                StringBuilder response = new StringBuilder();
+                try {
+                    InputStream is;
+                    if (responseCode >= 200 && responseCode < 400) {
+                        is = urlConnection.getInputStream();
+                    } else {
+                        is = urlConnection.getErrorStream();
+                    }
+
+                    if (is != null) {
+                        BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"));
+                        String responseLine;
+                        while ((responseLine = br.readLine()) != null) {
+                            response.append(responseLine.trim());
+                        }
+                        br.close();
+                    }
+                    Log.d(TAG, "Delete response: " + response.toString());
+                } catch (Exception e) {
+                    Log.e(TAG, "Error reading response", e);
+                }
+
+                // Update UI on main thread
+                final int finalResponseCode = responseCode;
+                final String finalResponse = response.toString();
+
+                runOnUiThread(() -> {
+                    loadingProgress.setVisibility(View.GONE);
+
+                    if (finalResponseCode >= 200 && finalResponseCode < 300) {
+                        showSuccess("Account deleted successfully");
+
+                        // Refresh the user list
+                        fetchAllUsers();
+                    } else {
+                        String errorMsg = "Failed to delete account: " + finalResponseCode;
+                        if (!finalResponse.isEmpty()) {
+                            errorMsg += " - " + finalResponse;
+                        }
+                        showError(errorMsg);
+                    }
+                });
+
+            } catch (Exception e) {
+                Log.e(TAG, "Error during account deletion", e);
+                final String errorMessage = e.getMessage();
+
+                runOnUiThread(() -> {
+                    loadingProgress.setVisibility(View.GONE);
+                    showError("Failed to delete account: " + errorMessage);
+                });
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+            }
+        }).start();
     }
 
     private void updatePasswordStrength(String password) {
