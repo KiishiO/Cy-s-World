@@ -3,6 +3,8 @@ package onetoone;
 import jakarta.transaction.Transactional;
 import onetoone.Login.Login;
 import onetoone.Login.LoginRepository;
+import onetoone.Signup.Signup;
+import onetoone.Signup.SignupRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -59,13 +61,14 @@ class Main {
      *
      * @param loginRepository Repository for storing login details.
      * @param personRepository Repository for storing personal details.
+     * @param signupRepository
      * @return CommandLineRunner to insert sample data.
      */
 
 
     @Bean
     @Transactional // Ensures entity relationships are properly persisted
-    CommandLineRunner initData(LoginRepository loginRepository, PersonRepository personRepository) {
+    CommandLineRunner initData(LoginRepository loginRepository, PersonRepository personRepository, SignupRepository signupRepository) {
         return args -> {
             // Creating Person entities
             Person person1 = new Person("Michael Johnson", "515-789-9852");
@@ -84,6 +87,13 @@ class Main {
             Login login1 = new Login("mjohnson", "mjohnson123@example.com", "MjOhNsOn", person1);
             Login login2 = new Login("sarah_a", "sarah123@example.com","A_HARAS", person2);
             Login login3 = new Login("dwilliams", "davidw@example.com","Davidw545", person3);
+
+            Person person4 = new Person("Sonia Patil", "john@somemail.com");
+            personRepository.save(person4); // Save the person first
+
+            Signup signup3 = new Signup("Sonia Patil", "SoniaP", "john@somemail.com", "123456789");
+            signup3.setPerson(person4); // Set the already saved person
+            signupRepository.save(signup3); // Now save signup
 
             // Saving Login details
             loginRepository.save(login1);

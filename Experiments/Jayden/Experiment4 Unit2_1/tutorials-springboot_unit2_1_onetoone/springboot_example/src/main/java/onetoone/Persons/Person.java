@@ -43,7 +43,7 @@ public class Person {
     @JsonBackReference
     private Login login; // Associating `Person` with `Login`
 
-
+//    @ManyToOne(fetch = FetchType.EAGER)
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "signup_id")
     private Signup signup;

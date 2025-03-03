@@ -2,6 +2,12 @@ package onetoone.Signup;
 
 import java.util.List;
 
+import onetoone.Persons.Person;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,12 +21,13 @@ import onetoone.Persons.Person;
 import onetoone.Persons.PersonRepository;
 
 /**
- * 
+ *
  * @author Vivek Bengre
- * 
- */ 
+ *
+ */
 
 @RestController
+@RequestMapping("/signup")
 public class SignupController {
 
     @Autowired
@@ -28,11 +35,11 @@ public class SignupController {
 
     @Autowired
     PersonRepository personRepository;
-    
+
     private String success = "{\"message\":\"success\"}";
     private String failure = "{\"message\":\"failure\"}";
 
-    @GetMapping(path = "/signup")
+    @GetMapping
     List<Signup> getAllSignups(){
         return signupRepository.findAll();
     }

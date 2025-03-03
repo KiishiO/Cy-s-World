@@ -1,10 +1,7 @@
 package onetoone.Signup;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -12,14 +9,14 @@ import onetoone.Persons.Person;
 import onetoone.Persons.PersonRepository;
 
 /**
- * 
+ *
  * @author Vivek Bengre
- */ 
+ */
 
 @Entity
 public class Signup {
-    
-    /* 
+
+    /*
      * The annotation @ID marks the field below as the primary key for the table created by springboot
      * The @GeneratedValue generates a value if not already present, The strategy in this case is to start from 1 and increment for each table
      */
@@ -35,8 +32,10 @@ public class Signup {
      * @OneToOne creates a relation between the current entity/table(Laptop) with the entity/table defined below it(Person)
      * @JsonIgnore is to assure that there is no infinite loop while returning either Person/laptop objects (laptop->Person->laptop->...)
      */
-    @OneToOne
-    @JsonIgnore
+    @ManyToOne(fetch = FetchType.EAGER) //Allows to GET dummy data
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "person_id", referencedColumnName = "id")
+    @JsonManagedReference
     private Person person;
 
     public Signup(String firstAndLastName, String username, String email, String password) {
