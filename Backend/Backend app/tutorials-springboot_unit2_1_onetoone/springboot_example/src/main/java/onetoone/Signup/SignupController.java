@@ -33,17 +33,17 @@ public class SignupController {
     private String success = "{\"message\":\"success\"}";
     private String failure = "{\"message\":\"failure\"}";
 
-    @GetMapping(path = "/signup")
+    //@GetMapping(path = "/signup")
     List<Signup> getAllSignups(){
         return signupRepository.findAll();
     }
 
-    @GetMapping(path = "/signup/{id}")
+    //@GetMapping(path = "/signup/{id}")
     Signup getSignupById(@PathVariable int id){
         return signupRepository.findById(id);
     }
 
-    @PostMapping(path = "/signup")
+    @PostMapping("/signup")
     String createSignup(@RequestBody Signup signup){
         if (signup == null || signup.getUsername() == null || signup.getEmail() == null)
             return failure;
@@ -57,7 +57,7 @@ public class SignupController {
         return success;
     }
 
-    @PutMapping(path = "/signup/{id}")
+    @PutMapping("/signup/{id}")
     Signup updateSignupInfo(@PathVariable int id, @RequestBody Signup request){
         Signup currentSignup = signupRepository.findById(id);
         if(currentSignup == null)
@@ -78,7 +78,7 @@ public class SignupController {
         return signupRepository.findById(id);
     }
 
-    @DeleteMapping(path = "/signup/{id}")
+    @DeleteMapping("/signup/{id}")
     String deleteSignupInfo(@PathVariable int id){
 
         // Check if there is an object depending on Person and then remove the dependency
