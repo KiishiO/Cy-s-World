@@ -8,28 +8,34 @@ import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -136,7 +142,7 @@ public class LoginActivity extends AppCompatActivity {
                 showError("Please enter your Net-ID first");
                 shakeView(etUsername);
             } else {
-                showSuccess("Password reset instructions sent");
+                showChangePasswordDialog(username);
             }
         });
     }
@@ -312,6 +318,204 @@ public class LoginActivity extends AppCompatActivity {
             button.setEnabled(true);
             Log.d(TAG, "Login animation completed");
         }, 2000);
+    }
+
+    private void showChangePasswordDialog(String username) {
+        // Inflate the dialog layout
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_change_password, null);
+        TextInputEditText etCurrentPassword = dialogView.findViewById(R.id.etCurrentPassword);
+        TextInputEditText etNewPassword = dialogView.findViewById(R.id.etNewPassword);
+        TextInputEditText etConfirmPassword = dialogView.findViewById(R.id.etConfirmPassword);
+        ProgressBar passwordStrengthDialogBar = dialogView.findViewById(R.id.passwordStrengthDialogBar);
+        passwordStrengthDialogBar.setVisibility(View.GONE);
+
+        // Add TextWatcher to new password field
+        etNewPassword.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String password = s.toString();
+                if (password.isEmpty()) {
+                    passwordStrengthDialogBar.setVisibility(View.GONE);
+                } else {
+                    passwordStrengthDialogBar.setVisibility(View.VISIBLE);
+                    int strength = calculatePasswordStrength(password);
+                    passwordStrengthDialogBar.setProgress(strength);
+
+                    int color;
+                    if (strength < 33) {
+                        color = Color.RED;
+                    } else if (strength < 66) {
+                        color = Color.YELLOW;
+                    } else {
+                        color = Color.GREEN;
+                    }
+                    passwordStrengthDialogBar.setProgressTintList(ColorStateList.valueOf(color));
+                }
+            }
+        });
+
+        // Create themed alert dialog that matches the app's dark theme
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog dialog = builder
+                .setTitle("Change Password")
+                .setView(dialogView)
+                .setPositiveButton("Update", null) // Set null to prevent auto-dismiss
+                .setNegativeButton("Cancel", (dialogInterface, i) -> dialogInterface.dismiss())
+                .create();
+
+        // Style dialog to match app theme
+        dialog.setOnShowListener(dialogInterface -> {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.cardinal_red));
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.white));
+        });
+
+        dialog.show();
+
+        // Override the positive button to handle password validation
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String currentPassword = etCurrentPassword.getText().toString();
+            String newPassword = etNewPassword.getText().toString();
+            String confirmPassword = etConfirmPassword.getText().toString();
+
+            if (currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
+                showError("Please fill in all password fields");
+                return;
+            }
+
+            if (!newPassword.equals(confirmPassword)) {
+                showError("New passwords don't match");
+                return;
+            }
+
+            // Validate current password
+            boolean isCurrentPasswordValid = validateCurrentPassword(username, currentPassword);
+            if (!isCurrentPasswordValid) {
+                showError("Current password is incorrect");
+                return;
+            }
+
+            // Password strength check
+            int strength = calculatePasswordStrength(newPassword);
+            if (strength < 60) {
+                showError("New password is too weak. Include uppercase, lowercase, numbers, and special characters.");
+                return;
+            }
+
+            // All validations passed, update the password
+            updatePassword(username, newPassword, dialog);
+        });
+    }
+
+    private boolean validateCurrentPassword(String username, String password) {
+        for (JSONObject user : usersList) {
+            try {
+                String storedNetId = user.getString("emailId").trim();
+                String storedName = user.getString("name").trim();
+                String storedPassword = user.getString("password");
+
+                // Check if username matches either email or name, and password matches
+                if ((storedNetId.equalsIgnoreCase(username.trim()) ||
+                        storedName.equalsIgnoreCase(username.trim())) &&
+                        storedPassword.equals(password)) {
+                    return true;
+                }
+            } catch (JSONException e) {
+                Log.e(TAG, "Error validating current password", e);
+            }
+        }
+        return false;
+    }
+
+    private void updatePassword(String username, String newPassword, AlertDialog dialog) {
+        // Find the user ID to update
+        String userId = null;
+        JSONObject userToUpdate = null;
+
+        for (JSONObject user : usersList) {
+            try {
+                String storedNetId = user.getString("emailId").trim();
+                String storedName = user.getString("name").trim();
+
+                if (storedNetId.equalsIgnoreCase(username.trim()) ||
+                        storedName.equalsIgnoreCase(username.trim())) {
+                    userId = user.getString("id");
+                    userToUpdate = user;
+                    break;
+                }
+            } catch (JSONException e) {
+                Log.e(TAG, "Error finding user ID", e);
+            }
+        }
+
+        if (userId == null || userToUpdate == null) {
+            showError("User not found. Please try again.");
+            return;
+        }
+
+        // Show loading indicator
+        loadingProgress.setVisibility(View.VISIBLE);
+
+        try {
+            // Create a copy of the user object with the updated password
+            JSONObject updatedUser = new JSONObject(userToUpdate.toString());
+            updatedUser.put("password", newPassword);
+
+            // Prepare the API endpoint URL for the specific user
+            String updateUrl = BASE_URL + "/" + userId;
+            Log.d(TAG, "Updating password at URL: " + updateUrl);
+
+            // Make the PUT request to update the password
+            JsonObjectRequest updateRequest = new JsonObjectRequest(
+                    Request.Method.PUT,
+                    updateUrl,
+                    updatedUser,
+                    response -> {
+                        loadingProgress.setVisibility(View.GONE);
+                        Log.d(TAG, "Password updated successfully: " + response.toString());
+                        showSuccess("Password updated successfully!");
+                        dialog.dismiss();
+
+                        // Refresh the user list to get updated data
+                        fetchAllUsers();
+                    },
+                    error -> {
+                        loadingProgress.setVisibility(View.GONE);
+                        Log.e(TAG, "Error updating password: " + error.toString());
+
+                        if (error.networkResponse != null) {
+                            Log.e(TAG, "Network error code: " + error.networkResponse.statusCode);
+                        }
+
+                        showError("Failed to update password. Please try again later.");
+                    }
+            ) {
+                @Override
+                public Map<String, String> getHeaders() {
+                    Map<String, String> headers = new HashMap<>();
+                    headers.put("Content-Type", "application/json");
+                    return headers;
+                }
+            };
+
+            updateRequest.setRetryPolicy(new DefaultRetryPolicy(
+                    10000, // 10 seconds timeout
+                    1,     // 1 retry
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+            ));
+
+            VolleySingleton.getInstance(this).addToRequestQueue(updateRequest);
+
+        } catch (JSONException e) {
+            loadingProgress.setVisibility(View.GONE);
+            Log.e(TAG, "Error preparing user data for update", e);
+            showError("An error occurred. Please try again.");
+        }
     }
 
     private void showError(String message) {
