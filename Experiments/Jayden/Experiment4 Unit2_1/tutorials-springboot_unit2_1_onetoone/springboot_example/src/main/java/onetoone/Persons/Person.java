@@ -44,7 +44,7 @@ public class Person {
     private Login login; // Associating `Person` with `Login`
 
 //    @ManyToOne(fetch = FetchType.EAGER)
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "signup_id")
     private Signup signup;
 

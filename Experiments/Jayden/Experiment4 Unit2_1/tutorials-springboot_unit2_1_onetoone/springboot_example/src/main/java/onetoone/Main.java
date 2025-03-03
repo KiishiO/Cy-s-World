@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 //import onetoone.Laptops.LaptopRepository;
 import onetoone.Persons.Person;
 import onetoone.Persons.PersonRepository;
+import onetoone.Signup.SignupRepository;
 
 /**
  * 
@@ -61,7 +62,6 @@ class Main {
      *
      * @param loginRepository Repository for storing login details.
      * @param personRepository Repository for storing personal details.
-     * @param signupRepository
      * @return CommandLineRunner to insert sample data.
      */
 

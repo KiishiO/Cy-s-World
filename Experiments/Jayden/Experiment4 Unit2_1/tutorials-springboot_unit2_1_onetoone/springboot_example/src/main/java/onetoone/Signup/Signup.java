@@ -33,7 +33,7 @@ public class Signup {
      * @JsonIgnore is to assure that there is no infinite loop while returning either Person/laptop objects (laptop->Person->laptop->...)
      */
     @ManyToOne(fetch = FetchType.EAGER) //Allows to GET dummy data
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "person_id", referencedColumnName = "id")
     @JsonManagedReference
     private Person person;

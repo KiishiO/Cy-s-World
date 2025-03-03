@@ -2,6 +2,7 @@ package onetoone.Signup;
 
 import java.util.List;
 
+import onetoone.Login.Login;
 import onetoone.Persons.Person;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,16 +41,20 @@ public class SignupController {
     private String failure = "{\"message\":\"failure\"}";
 
     @GetMapping
-    List<Signup> getAllSignups(){
-        return signupRepository.findAll();
+    public ResponseEntity<List<Signup>> getAllSignUp() {
+        List<Signup> signup = signupRepository.findAll();
+        if (signup.isEmpty()) {
+            return ResponseEntity.noContent().build(); // Returns 204 if no users exist
+        }
+        return ResponseEntity.ok(signup);
     }
 
-    @GetMapping(path = "/signup/{id}")
+    @GetMapping("/{id}")
     Signup getSignupById(@PathVariable int id){
         return signupRepository.findById(id);
     }
 
-    @PostMapping(path = "/signup")
+    @PostMapping("/Newsignup")
     String createSignup(@RequestBody Signup signup){
         if (signup == null || signup.getUsername() == null || signup.getEmail() == null)
             return failure;
@@ -63,7 +68,7 @@ public class SignupController {
         return success;
     }
 
-    @PutMapping(path = "/signup/{id}")
+    @PutMapping("/{id}")
     Signup updateSignupInfo(@PathVariable int id, @RequestBody Signup request){
         Signup currentSignup = signupRepository.findById(id);
         if(currentSignup == null)
@@ -84,7 +89,7 @@ public class SignupController {
         return signupRepository.findById(id);
     }
 
-    @DeleteMapping(path = "/signup/{id}")
+    @DeleteMapping("/{id}")
     String deleteSignupInfo(@PathVariable int id){
 
         // Check if there is an object depending on Person and then remove the dependency
