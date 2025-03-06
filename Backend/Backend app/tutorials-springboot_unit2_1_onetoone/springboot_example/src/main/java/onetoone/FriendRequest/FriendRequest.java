@@ -16,7 +16,22 @@ import onetoone.Persons.Person;
 public class FriendRequest {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
+    private Long senderId;
+
+    @Column(nullable = false)
+    private Long receiverId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status = Status.PENDING;
+
+    public enum Status {
+        PENDING, ACCEPTED, REJECTED
+    }
 
     public void setId(Long id) {
         this.id = id;
