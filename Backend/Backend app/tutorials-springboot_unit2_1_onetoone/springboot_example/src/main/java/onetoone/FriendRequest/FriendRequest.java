@@ -15,7 +15,6 @@ import onetoone.Persons.Person;
 @Table(name= "FriendRequest")
 public class FriendRequest {
 
-
     @Id
     private Long id;
 
