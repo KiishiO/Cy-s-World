@@ -21,12 +21,12 @@ import okhttp3.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ActivityProfileLanding extends AppCompatActivity {
+public class ProfilePick extends AppCompatActivity {
 
     private MaterialCardView studentCard;
     private MaterialCardView teacherCard;
     private OkHttpClient client;
-    private static final String API_URL = "https://your-api-endpoint.com/users/role"; // Replace with your actual API URL
+    private static final String API_URL = "http://coms-3090-017.class.las.iastate.edu:8080/role"; // Replace with actual API URL
 
     // Simple enum for user roles
     public enum UserRole {
@@ -96,7 +96,7 @@ public class ActivityProfileLanding extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(ActivityProfileLanding.this,
+                            Toast.makeText(ProfilePick.this,
                                     "Network error: " + e.getMessage(),
                                     Toast.LENGTH_SHORT).show();
                             setCardsEnabled(true);
@@ -117,13 +117,13 @@ public class ActivityProfileLanding extends AppCompatActivity {
                                     navigateToNextScreen(role);
                                 } else {
                                     // API returned an error
-                                    Toast.makeText(ActivityProfileLanding.this,
+                                    Toast.makeText(ProfilePick.this,
                                             "Server error: " + response.code() + " " + response.message(),
                                             Toast.LENGTH_SHORT).show();
                                     setCardsEnabled(true);
                                 }
                             } catch (Exception e) {
-                                Toast.makeText(ActivityProfileLanding.this,
+                                Toast.makeText(ProfilePick.this,
                                         "Error processing response: " + e.getMessage(),
                                         Toast.LENGTH_SHORT).show();
                                 setCardsEnabled(true);

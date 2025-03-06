@@ -10,7 +10,7 @@
         android:title="Classes" />
     <item
         android:id="@+id/nav_grading"
-        android:icon="@drawable/ic_grade"
+        android:icon="@drawable/icon_grade"
         android:title="Grading" />
     <item
         android:id="@+id/nav_profile"

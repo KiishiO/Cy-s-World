@@ -41,7 +41,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Navigate to Friend Request activity
-                Intent intent = new Intent(StudentDashboardActivity.this, FriendRequestActivity.class);
+                Intent intent = new Intent(StudentDashboardActivity.this, FriendRequestActivity.class); //will come from Jawad's code
                 startActivity(intent);
             }
         });
@@ -110,7 +110,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         // Ask if the user really wants to exit the app
-        // You can implement a dialog here if needed
+        // I may implement a dialog here if needed
         super.onBackPressed();
     }
 }

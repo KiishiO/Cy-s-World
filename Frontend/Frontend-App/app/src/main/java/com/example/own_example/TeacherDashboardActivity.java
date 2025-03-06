@@ -41,4 +41,7 @@ public class TeacherDashboardActivity extends AppCompatActivity {
         classesManagementCard = findViewById(R.id.classes_management_card);
         gradingCard = findViewById(R.id.grading_card);
         attendanceCard = findViewById(R.id.attendance_card);
-        officeHoursCard = findViewByI
+        officeHoursCard = findViewById(R.id.office_hours_card);
+
+        //More to come soon
+    }
