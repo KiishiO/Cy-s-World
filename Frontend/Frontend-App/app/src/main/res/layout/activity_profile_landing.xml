@@ -50,10 +50,10 @@
 
             <!-- Student Profile Card-->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/studentCard_02"
+                android:id="@+id/studentCard"
                 android:layout_width="150dp"
                 android:layout_height="150dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="30dp"
                 android:layout_marginLeft="30dp"
                 app:cardCornerRadius="24dp"
                 app:cardElevation="8dp"
@@ -74,10 +74,10 @@
 
             <!--Teacher Profile Card-->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/teacherCard_02"
+                android:id="@+id/teacherCard"
                 android:layout_width="150dp"
                 android:layout_height="150dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="30dp"
                 android:layout_marginRight="30dp"
                 app:cardCornerRadius="24dp"
                 app:cardElevation="8dp"
@@ -90,10 +90,10 @@
                     android:layout_height="130dp"
                     android:src="@drawable/teacher_icon"
                     android:layout_gravity="center"
-                    app:layout_constraintTop_toTopOf="@+id/teacherCard_02"
-                    app:layout_constraintLeft_toLeftOf="@+id/teacherCard_02"
-                    app:layout_constraintRight_toRightOf="@+id/teacherCard_02"
-                    app:layout_constraintBottom_toBottomOf="@+id/teacherCard_02">
+                    app:layout_constraintTop_toTopOf="@+id/teacherCard"
+                    app:layout_constraintLeft_toLeftOf="@+id/teacherCard"
+                    app:layout_constraintRight_toRightOf="@+id/teacherCard"
+                    app:layout_constraintBottom_toBottomOf="@+id/teacherCard">
                 </ImageView>
 
             </com.google.android.material.card.MaterialCardView>
@@ -104,7 +104,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/studentCard_02"
+                app:layout_constraintTop_toBottomOf="@+id/studentCard"
                 android:layout_marginTop="10dp"
                 android:layout_marginLeft="45dp"
                 android:text="Student"
@@ -120,7 +120,7 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintLeft_toRightOf="@id/studentText"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/teacherCard_02"
+                app:layout_constraintTop_toBottomOf="@+id/teacherCard"
                 android:layout_marginTop="10dp"
                 android:layout_marginLeft="45dp"
                 android:text="Teacher"
