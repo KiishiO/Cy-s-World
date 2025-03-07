@@ -67,7 +67,6 @@ class Main {
 
 
     @Bean
-    @Transactional // Ensures entity relationships are properly persisted
     CommandLineRunner initData(LoginRepository loginRepository, PersonRepository personRepository, SignupRepository signupRepository) {
         return args -> {
             // Creating Person entities
@@ -84,21 +83,29 @@ class Main {
 //            personRepository.flush();
 
             // Creating associated Login entities
-            Login login1 = new Login("mjohnson", "mjohnson123@example.com", "MjOhNsOn", person1);
-            Login login2 = new Login("sarah_a", "sarah123@example.com","A_HARAS", person2);
-            Login login3 = new Login("dwilliams", "davidw@example.com","Davidw545", person3);
+            Login login1 = new Login("mjohnson", "mjohnson123@example.com", "MjOhNsOn");
+            Login login2 = new Login("sarah_a", "sarah123@example.com","A_HARAS");
+            Login login3 = new Login("dwilliams", "davidw@example.com","Davidw545");
 
             Person person4 = new Person("Sonia Patil", "john@somemail.com");
             personRepository.save(person4); // Save the person first
 
             Signup signup3 = new Signup("Sonia Patil", "SoniaP", "john@somemail.com", "123456789");
             signup3.setPerson(person4); // Set the already saved person
+            person4.setSignupInfo(signup3);
             signupRepository.save(signup3); // Now save signup
+            personRepository.save(person4);
 
             // Saving Login details
-            loginRepository.save(login1);
-            loginRepository.save(login2);
-            loginRepository.save(login3);
+           login1.setPerson(person4);            person1.setLogin(login1);
+           login1.setSignup(signup3);
+           loginRepository.save(login1);
+            person4.setLogin(login1);
+            signup3.setLogin(login1);
+            personRepository.save(person4);
+            signupRepository.save(signup3); // Now save signup
+//            loginRepository.save(login2);
+//            loginRepository.save(login3);
 
             // Logging to console (optional, for verification)
             System.out.println("Sample login and person data inserted into the database.");

@@ -11,7 +11,6 @@ import onetoone.Persons.PersonRepository;
  *
  * @author Vivek Bengre
  */
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Entity
 public class Signup {
 
@@ -31,15 +30,15 @@ public class Signup {
      * @OneToOne creates a relation between the current entity/table(Laptop) with the entity/table defined below it(Person)
      * @JsonIgnore is to assure that there is no infinite loop while returning either Person/laptop objects (laptop->Person->laptop->...)
      */
-    @ManyToOne(fetch = FetchType.EAGER) //Allows to GET dummy data
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "person_id", referencedColumnName = "id")
-    @JsonManagedReference
+    @OneToOne(mappedBy = "signup")
+   // @JsonManagedReference
+    @JsonIgnore
     private Person person;
 
 
     @OneToOne(mappedBy = "signup")
-    @JsonManagedReference // Prevents infinite recursion in Signup
+    //@JsonManagedReference // Prevents infinite recursion in Signup
+    @JsonIgnore
     private Login login;
 
     public Signup(String firstAndLastName, String username, String email, String password) {
@@ -49,7 +48,6 @@ public class Signup {
         this.firstAndLastName = firstAndLastName;
         //this.person = person;
         //createNewPerson
-        this.person = new Person(firstAndLastName, email);
 
     }
 
@@ -105,5 +103,12 @@ public class Signup {
 
     public void setPerson(Person person) {
         this.person = person;
+    }
+
+    public Login getLogin() {
+        return login;
+    }
+    public void setLogin(Login login) {
+        this.login = login;
     }
 }

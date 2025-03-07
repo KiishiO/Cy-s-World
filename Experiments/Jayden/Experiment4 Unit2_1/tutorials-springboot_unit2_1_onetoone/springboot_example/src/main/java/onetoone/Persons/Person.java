@@ -2,6 +2,7 @@ package onetoone.Persons;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
@@ -14,7 +15,6 @@ import onetoone.Signup.Signup;
  * @author Vivek Bengre
  * 
  */
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Entity
 public class Person {
 
@@ -41,13 +41,12 @@ public class Person {
 
 //    @ManyToOne(fetch = FetchType.EAGER)
 //    @ManyToOne(cascade = CascadeType.ALL)
-    @OneToOne(cascade = CascadeType.ALL)
-    @JsonBackReference
+    @OneToOne(mappedBy = "person")
+    @JsonIgnore
     private Login login; // Associating `Person` with `Login`
 
-//    @ManyToOne(fetch = FetchType.EAGER)
     @OneToOne
-    @JoinColumn(name = "signup_id")
+    @JoinColumn
     private Signup signup;
 
     // =============================== Constructors ================================== //
