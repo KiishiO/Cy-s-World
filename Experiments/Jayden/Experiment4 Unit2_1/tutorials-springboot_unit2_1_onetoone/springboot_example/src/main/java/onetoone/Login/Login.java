@@ -40,6 +40,7 @@ public class Login {
 
     @OneToOne
     @JoinColumn
+    @JsonIgnore
     private Signup signup;
 
     // =============================== Constructors ================================== //

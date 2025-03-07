@@ -25,6 +25,7 @@ public class Signup {
     private String email;
     private String password;
     private String firstAndLastName;
+    private String roles;
 
     /*
      * @OneToOne creates a relation between the current entity/table(Laptop) with the entity/table defined below it(Person)
@@ -41,11 +42,12 @@ public class Signup {
     @JsonIgnore
     private Login login;
 
-    public Signup(String firstAndLastName, String username, String email, String password) {
+    public Signup(String firstAndLastName, String username, String email, String password, String roles) {
         this.username = username;
         this.email = email;
         this.password = password;
         this.firstAndLastName = firstAndLastName;
+        this.roles = roles;
         //this.person = person;
         //createNewPerson
 
@@ -110,5 +112,11 @@ public class Signup {
     }
     public void setLogin(Login login) {
         this.login = login;
+    }
+    public String getRoles(){
+        return roles;
+    }
+    public void setRoles(String roles){
+        this.roles = roles;
     }
 }

@@ -28,6 +28,7 @@ public class Person {
     private String name;
     private String phoneNumber;
     private boolean ifActive;
+    private String roles;
 
     /*
      * @OneToOne creates a relation between the current entity/table(Laptop) with the entity/table defined below it(Person)
@@ -55,10 +56,11 @@ public class Person {
         this.ifActive = true;
     }
 
-    public Person(String name, String phoneNumber) {
+    public Person(String name, String phoneNumber, String roles) {
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.ifActive = true;
+        this.roles = roles;
     }
 
 
@@ -117,6 +119,12 @@ public class Person {
 
     public void setSignupInfo(Signup signup){
         this.signup = signup;
+    }
+    public String getRoles(){
+        return roles;
+    }
+    public void setRoles(String roles){
+        this.roles = roles;
     }
     
 }

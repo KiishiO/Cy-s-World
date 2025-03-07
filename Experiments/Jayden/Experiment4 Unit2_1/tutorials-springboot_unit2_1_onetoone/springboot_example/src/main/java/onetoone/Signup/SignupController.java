@@ -56,14 +56,14 @@ public class SignupController {
 
     @PostMapping("/Newsignup")
     String createSignup(@RequestBody Signup signup){
-        if (signup == null || signup.getUsername() == null || signup.getEmail() == null)
+        if (signup == null || signup.getUsername() == null || signup.getEmail() == null || signup.getRoles() == null)
             return failure;
 
 
-        Person newPerson = new Person(signup.getFirstAndLastName(), signup.getEmail());
+        Person newPerson = new Person(signup.getFirstAndLastName(), signup.getEmail(), signup.getRoles());
+        signupRepository.save(signup);
         newPerson.setSignupInfo(signup);
         personRepository.save(newPerson);
-        signupRepository.save(signup);
 
         return success;
     }
