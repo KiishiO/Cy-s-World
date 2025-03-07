@@ -66,7 +66,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
                         return true;
                     case R.id.nav_friends:
                         // Navigate to Friends section
-                        Intent friendsIntent = new Intent(StudentDashboardActivity.this, FriendRequestActivity.class);
+                        Intent friendsIntent = new Intent(StudentDashboardActivity.this, FriendsActivity.class);
                         startActivity(friendsIntent);
                         return true;
                     case R.id.nav_classes:
@@ -74,11 +74,11 @@ public class StudentDashboardActivity extends AppCompatActivity {
                         Intent classesIntent = new Intent(StudentDashboardActivity.this, ClassesActivity.class);
                         startActivity(classesIntent);
                         return true;
-                    case R.id.nav_profile:
-                        // Navigate to Profile section
-                        Intent profileIntent = new Intent(StudentDashboardActivity.this, StudentProfileActivity.class);
-                        startActivity(profileIntent);
-                        return true;
+//                    case R.id.nav_profile:
+//                        // Navigate to Profile section
+//                        Intent profileIntent = new Intent(StudentDashboardActivity.this, StudentProfileActivity.class);
+//                        startActivity(profileIntent);
+//                        return true;
                 }
                 return false;
             }
