@@ -22,7 +22,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Login Card -->
+    <!-- SignUp Card -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/signUpCard"
         android:layout_width="match_parent"
