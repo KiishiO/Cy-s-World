@@ -186,52 +186,7 @@ public class FriendRequestController {
                     .body(createErrorResponse("Error responding to friend request: " + e.getMessage()));
         }
     }
-
-//    @PostMapping("/respond")
-//    public ResponseEntity<?> respondToRequest(@RequestBody Map<String, Object> requestData) {
-//        try {
-//            // Extract requestId and status from JSON
-//            Long requestId = Long.valueOf(requestData.get("requestId").toString());
-//            String status = requestData.get("status").toString();
-//
-//            Optional<FriendRequest> requestOptional = requestRepository.findById(requestId);
-//
-//            if (requestOptional.isEmpty()) {
-//                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                        .body(createErrorResponse("Friend request not found with ID: " + requestId));
-//            }
-//
-//            FriendRequest request = requestOptional.get();
-//
-//            if ("ACCEPTED".equalsIgnoreCase(status)) {
-//                request.setStatus(FriendRequest.Status.ACCEPTED);
-//                request.getSender().getFriends().add(request.getReceiver());
-//                request.getReceiver().getFriends().add(request.getSender());
-//                personRepository.save(request.getReceiver());
-//                personRepository.save(request.getSender());
-//            } else if ("REJECTED".equalsIgnoreCase(status)) {
-//                request.setStatus(FriendRequest.Status.REJECTED);
-//            } else {
-//                return ResponseEntity.badRequest()
-//                        .body(createErrorResponse("Invalid status. Must be 'ACCEPTED' or 'REJECTED'"));
-//            }
-//
-//            FriendRequest savedRequest = requestRepository.save(request);
-//            Map<String, Object> response = createFriendRequestResponse(savedRequest);
-//
-//            if (request.getStatus() == FriendRequest.Status.ACCEPTED) {
-//                response.put("message", "Friend request accepted. Users are now friends.");
-//            }
-//
-//            return ResponseEntity.ok(response);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(createErrorResponse("Error responding to friend request: " + e.getMessage()));
-//        }
-//    }
-
-
+    
     // Cancel a friend request
     @DeleteMapping("/cancel/{requestId}")
     public ResponseEntity<?> cancelFriendRequest(@PathVariable Long requestId) {
