@@ -25,7 +25,7 @@ import com.example.own_example.models.FriendRequest;
 
 public class FriendService {
     private static final String TAG = "FriendService";
-    private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu:8080";
+    private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu:8080/Persons";
 
     private RequestQueue requestQueue;
     private Context context;
@@ -119,7 +119,7 @@ public class FriendService {
 
     // Send a friend request
     public void sendFriendRequest(long senderId, long receiverId, ActionCallback callback) {
-        String url = BASE_URL + "/FriendRequests/send";
+        String url = BASE_URL;
 
         JSONObject requestBody = new JSONObject();
         try {
@@ -147,7 +147,7 @@ public class FriendService {
 
     // Accept a friend request
     public void respondToRequest(long requestId, boolean accept, ActionCallback callback) {
-        String url = BASE_URL + "/FriendRequests/respond";
+        String url = BASE_URL;
 
         JSONObject requestBody = new JSONObject();
         try {
@@ -176,7 +176,7 @@ public class FriendService {
 
     // Remove a friend (cancel a connection)
     public void removeFriend(long requestId, ActionCallback callback) {
-        String url = BASE_URL + "/FriendRequests/cancel/" + requestId;
+        String url = BASE_URL + requestId;
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.DELETE, url, null,
                 response -> {
