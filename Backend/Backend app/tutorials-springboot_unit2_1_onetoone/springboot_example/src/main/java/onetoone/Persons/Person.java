@@ -1,7 +1,6 @@
 package onetoone.Persons;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 
 import lombok.*;
@@ -11,6 +10,7 @@ import onetoone.Login.Login;
 import onetoone.Signup.Signup;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 
@@ -19,6 +19,10 @@ import java.util.List;
  */ 
 
 @Entity
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id"
+)
 public class Person {
 
      /* 
@@ -63,12 +67,12 @@ public class Person {
 
     //sent friend requests
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonManagedReference(value = "sender-reference")
     private List<FriendRequest> sentRequests;
 
     //received friend requests
     @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonManagedReference(value = "recieved-reference")
     private List<FriendRequest> receivedRequests;
 
     //Friends list (Accepted Requests)

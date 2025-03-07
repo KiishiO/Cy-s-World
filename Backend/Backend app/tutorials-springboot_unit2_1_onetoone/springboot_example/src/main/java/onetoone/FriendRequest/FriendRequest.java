@@ -1,5 +1,5 @@
 package onetoone.FriendRequest;
-
+import lombok.Builder;
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -27,12 +27,12 @@ public class FriendRequest {
 
     @JoinColumn(name = "sender_id", nullable = false)
     @ManyToOne
-    @JsonBackReference
+    @JsonBackReference(value = "sender-reference")
     private Person sender;
 
     @ManyToOne
     @JoinColumn(name = "receiver_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference(value = "receiver-reference")
     private Person receiver;
 
     @Enumerated(EnumType.STRING)
@@ -74,4 +74,5 @@ public class FriendRequest {
     public void setStatus(Status status) {
         this.status = status;
     }
+
 }

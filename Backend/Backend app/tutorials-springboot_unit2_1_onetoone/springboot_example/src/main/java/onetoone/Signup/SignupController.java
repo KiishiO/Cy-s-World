@@ -22,7 +22,7 @@ import onetoone.Persons.PersonRepository;
 
 /**
  * 
- * @author Vivek Bengre
+ * @author Sonia Patil
  * 
  */ 
 
@@ -53,7 +53,6 @@ public class SignupController {
     String createSignup(@RequestBody Signup signup){
         if (signup == null || signup.getUsername() == null || signup.getEmail() == null)
             return failure;
-
 
         Person newPerson = new Person(signup.getFirstAndLastName(), signup.getEmail());
         newPerson.setSignupInfo(signup);
