@@ -1,5 +1,9 @@
 package onetoone.Login;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -10,8 +14,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.*;
 import onetoone.Persons.Person;
+import onetoone.Signup.Signup;
 
-
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Entity
 @Table(name = "login")
 public class Login {
@@ -30,11 +35,17 @@ public class Login {
     @Column(nullable = false)
     private boolean ifActive;
 
-    @ManyToOne(fetch = FetchType.EAGER) //Allows to GET dummy data
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne //Allows to GET dummy data
+//    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "person_id", referencedColumnName = "id")
     @JsonManagedReference
     private Person person;  // Storing related person details
+
+//    @ManyToOne(fetch = FetchType.EAGER) //Allows to GET dummy data
+@ManyToOne
+@JoinColumn(name = "signup_id")
+@JsonBackReference // Prevents infinite recursion in Login
+private Signup signup;
 
     // =============================== Constructors ================================== //
 
@@ -48,6 +59,7 @@ public class Login {
         this.password = password;
         this.ifActive = true;
         this.person = person;
+
     }
 
     // =============================== Getters and Setters ================================== //

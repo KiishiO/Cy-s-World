@@ -85,7 +85,7 @@ public class LoginController {
     /**
      * Register a new login.
      */
-    @PostMapping("/new")
+    @PostMapping(path = "/new", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Login> registerLogin(@RequestBody Login login) {
         if (login == null || login.getEmailId() == null || login.getName() == null || login.getPassword() == null) {
             return ResponseEntity.badRequest().body(null); // 400 Bad Request if login is invalid

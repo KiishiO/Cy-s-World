@@ -1,10 +1,9 @@
 package onetoone.Signup;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import onetoone.Login.Login;
 import onetoone.Persons.Person;
 import onetoone.Persons.PersonRepository;
 
@@ -12,7 +11,7 @@ import onetoone.Persons.PersonRepository;
  *
  * @author Vivek Bengre
  */
-
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Entity
 public class Signup {
 
@@ -37,6 +36,11 @@ public class Signup {
     @JoinColumn(name = "person_id", referencedColumnName = "id")
     @JsonManagedReference
     private Person person;
+
+
+    @OneToOne(mappedBy = "signup")
+    @JsonManagedReference // Prevents infinite recursion in Signup
+    private Login login;
 
     public Signup(String firstAndLastName, String username, String email, String password) {
         this.username = username;

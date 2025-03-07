@@ -1,6 +1,8 @@
 package onetoone.Persons;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 import onetoone.Laptops.Laptop;
@@ -11,8 +13,8 @@ import onetoone.Signup.Signup;
  * 
  * @author Vivek Bengre
  * 
- */ 
-
+ */
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Entity
 public class Person {
 
@@ -37,14 +39,14 @@ public class Person {
     @JoinColumn(name = "laptop_id")
     private Laptop laptop;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+//    @ManyToOne(fetch = FetchType.EAGER)
 //    @ManyToOne(cascade = CascadeType.ALL)
     @OneToOne(cascade = CascadeType.ALL)
     @JsonBackReference
     private Login login; // Associating `Person` with `Login`
 
 //    @ManyToOne(fetch = FetchType.EAGER)
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne
     @JoinColumn(name = "signup_id")
     private Signup signup;
 
