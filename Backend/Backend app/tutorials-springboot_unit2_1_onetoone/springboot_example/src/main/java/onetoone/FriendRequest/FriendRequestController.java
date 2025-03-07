@@ -1,5 +1,6 @@
 package onetoone.FriendRequest;
 import onetoone.FriendRequest.FriendRequestRepository;
+import onetoone.FriendRequest.FriendRequest;
 import onetoone.Persons.Person;
 import onetoone.Persons.PersonRepository;
 import org.springframework.web.bind.annotation.*;
@@ -186,7 +187,7 @@ public class FriendRequestController {
                     .body(createErrorResponse("Error responding to friend request: " + e.getMessage()));
         }
     }
-    
+
     // Cancel a friend request
     @DeleteMapping("/cancel/{requestId}")
     public ResponseEntity<?> cancelFriendRequest(@PathVariable Long requestId) {
