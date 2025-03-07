@@ -21,6 +21,7 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.VolleyError;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
@@ -41,6 +42,8 @@ public class SignUpActivity extends AppCompatActivity {
     private ProgressBar passwordStrengthBar;
     private CircularProgressIndicator loadingProgress;
     private MaterialButton btnNext;
+    private MaterialButton btnRoleSelection;
+    private String selectedRole = "";
 
     // Let's try the Login endpoint as a last resort
     private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu:8080/Logins/new";
@@ -58,6 +61,7 @@ public class SignUpActivity extends AppCompatActivity {
         TextInputEditText etPassword = findViewById((R.id.signUp_etPassword));
         TextInputEditText etEmail = findViewById(R.id.signUp_etEmail);
         btnNext = findViewById(R.id.signUp_btnNext);
+        btnRoleSelection = findViewById(R.id.signUp_btnRoleSelection);
         TextView tvAlreadyHaveAccount = findViewById(R.id.signUp_tvAlreadyHaveAccount);
         ImageView logo = findViewById(R.id.signUp_ivLogo);
 
@@ -82,6 +86,9 @@ public class SignUpActivity extends AppCompatActivity {
                                 .setDuration(1000)
                                 .setInterpolator(new AccelerateDecelerateInterpolator())
                 );
+
+        // Setup role selection dialog
+        btnRoleSelection.setOnClickListener(v -> showRoleSelectionDialog());
 
         // Password strength watcher
         etConfirmPassword.addTextChangedListener(new TextWatcher() {
@@ -113,11 +120,14 @@ public class SignUpActivity extends AppCompatActivity {
             if (username.isEmpty() || password.isEmpty() || email.isEmpty() || passwordConfirmed.isEmpty()) {
                 showError("Please fill in all fields");
                 shakeView(username.isEmpty() ? etUsername : etPassword);
+            } else if (selectedRole.isEmpty()) {
+                showError("Please select a role");
+                shakeView(btnRoleSelection);
             } else if (!isPasswordMatch(password, passwordConfirmed)) {
                 showError("Passwords do not match");
             } else {
                 showSignUpAnimation();
-                performSignUp(username, password, email);
+                performSignUp(username, password, email, selectedRole);
             }
         });
 
@@ -127,6 +137,20 @@ public class SignUpActivity extends AppCompatActivity {
             Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
             startActivity(intent);
         });
+    }
+
+    private void showRoleSelectionDialog() {
+        final String[] roles = {"Teacher", "Student", "TA"};
+
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Select Your Role")
+                .setBackground(getDrawable(R.drawable.dialog_background))
+                .setItems(roles, (dialog, which) -> {
+                    selectedRole = roles[which];
+                    btnRoleSelection.setText(selectedRole);
+                    btnRoleSelection.setIcon(null);
+                })
+                .show();
     }
 
     private void updatePasswordStrength(String password) {
@@ -157,7 +181,7 @@ public class SignUpActivity extends AppCompatActivity {
         return password.equals(confirm);
     }
 
-    private void performSignUp(String username, String password, String email) {
+    private void performSignUp(String username, String password, String email, String role) {
         // Use a background thread for network operations
         new Thread(() -> {
             HttpURLConnection urlConnection = null;
@@ -167,6 +191,8 @@ public class SignUpActivity extends AppCompatActivity {
                 jsonBody.put("name", username);
                 jsonBody.put("password", password);
                 jsonBody.put("emailId", email);
+                // Add role field
+                jsonBody.put("role", role);
                 // Add ifActive field which may be required
                 jsonBody.put("ifActive", true);
 

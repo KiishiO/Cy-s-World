@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    tools:context=".FriendsActivity">
+
+    <com.example.own_example.ParticleView
+        android:id="@+id/particleView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:ignore="MissingClass" />
+
+    <!-- ISU Logo -->
+    <ImageView
+        android:id="@+id/ivLogo"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/iowa_state_logo"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Content Card -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/friendsCard"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="16dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        app:cardBackgroundColor="#1A1A1A"
+        app:layout_constraintTop_toBottomOf="@id/ivLogo"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/title_cyclone_connect"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cyclone Connect"
+                android:textColor="@color/cardinal_red"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <!-- Search Section -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/search_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="8dp"
+                android:textColorHint="@color/white"
+                app:boxStrokeColor="@color/cardinal_red"
+                app:hintTextColor="@color/cardinal_red"
+                app:layout_constraintTop_toBottomOf="@id/title_cyclone_connect"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/search_button">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/search_netid_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Search by Net-ID"
+                    android:inputType="text"
+                    android:textColor="@color/white" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/search_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Search"
+                android:backgroundTint="@color/cardinal_red"
+                app:layout_constraintTop_toTopOf="@id/search_layout"
+                app:layout_constraintBottom_toBottomOf="@id/search_layout"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Search Result -->
+            <LinearLayout
+                android:id="@+id/search_result_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginTop="16dp"
+                app:layout_constraintTop_toBottomOf="@id/search_layout">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Search Results"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="@color/white"
+                    android:layout_marginBottom="8dp" />
+            </LinearLayout>
+
+            <!-- Friend Requests Section -->
+            <TextView
+                android:id="@+id/requests_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Connection Requests"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="@color/cardinal_red"
+                android:layout_marginTop="24dp"
+                app:layout_constraintTop_toBottomOf="@id/search_result_layout"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
+                android:id="@+id/requests_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/count_badge_background"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:textColor="@android:color/white"
+                app:layout_constraintTop_toTopOf="@id/requests_title"
+                app:layout_constraintBottom_toBottomOf="@id/requests_title"
+                app:layout_constraintStart_toEndOf="@id/requests_title" />
+
+            <TextView
+                android:id="@+id/no_requests_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No connection requests at this time"
+                android:textAlignment="center"
+                android:textColor="@android:color/darker_gray"
+                android:layout_marginTop="8dp"
+                app:layout_constraintTop_toBottomOf="@id/requests_title" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/requests_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp"
+                app:layout_constraintTop_toBottomOf="@id/requests_title"
+                app:layout_constraintHeight_percent="0.25"
+                android:visibility="gone"
+                tools:listitem="@layout/item_request" />
+
+            <!-- Friends Section -->
+            <TextView
+                android:id="@+id/friends_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="My Cyclones"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="@color/cardinal_red"
+                android:layout_marginTop="24dp"
+                app:layout_constraintTop_toBottomOf="@id/requests_recycler_view"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
+                android:id="@+id/friends_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/count_badge_background"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:textColor="@android:color/white"
+                app:layout_constraintTop_toTopOf="@id/friends_title"
+                app:layout_constraintBottom_toBottomOf="@id/friends_title"
+                app:layout_constraintStart_toEndOf="@id/friends_title" />
+
+            <TextView
+                android:id="@+id/no_friends_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No Cyclones connected yet"
+                android:textAlignment="center"
+                android:textColor="@android:color/darker_gray"
+                android:layout_marginTop="8dp"
+                app:layout_constraintTop_toBottomOf="@id/friends_title" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/friends_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintTop_toBottomOf="@id/friends_title"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:visibility="gone"
+                tools:listitem="@layout/item_friend" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

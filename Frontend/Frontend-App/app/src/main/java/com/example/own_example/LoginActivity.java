@@ -1,5 +1,7 @@
 package com.example.own_example;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -230,6 +232,7 @@ public class LoginActivity extends AppCompatActivity {
         Log.d(TAG, "Validating login for username: " + username);
         boolean loginSuccess = false;
         String fullName = "";
+        String userId = "";
 
         for (JSONObject user : usersList) {
             try {
@@ -237,6 +240,7 @@ public class LoginActivity extends AppCompatActivity {
                 String storedNetId = user.getString("emailId").trim();
                 String storedPassword = user.getString("password");
                 String storedName = user.getString("name").trim();
+                String storedId = user.getString("id");
 
                 Log.d(TAG, "Comparing with user: " + storedName + ", email: " + storedNetId);
 
@@ -248,10 +252,13 @@ public class LoginActivity extends AppCompatActivity {
 
                 if (credentialsMatch) {
                     loginSuccess = true;
+                    userId = storedId;
                     Log.d(TAG, "Login match found for user: " + storedName);
                     if (user.has("person")) {
                         fullName = user.getJSONObject("person").getString("name");
                         Log.d(TAG, "Found person name: " + fullName);
+                    } else {
+                        fullName = storedName;
                     }
                     break;
                 }
@@ -262,9 +269,40 @@ public class LoginActivity extends AppCompatActivity {
 
         if (loginSuccess) {
             final String welcomeName = fullName.isEmpty() ? username : fullName;
-            Log.d(TAG, "Login successful for user: " + welcomeName);
+            final String finalUserId = userId;
+            Log.d(TAG, "Login successful for user: " + welcomeName + " with ID: " + finalUserId);
             showSuccess("Login successful! Welcome, " + welcomeName);
-            // TODO: Navigate to main activity
+
+            // Save user data to both SharedPreferences
+            // Save to user_prefs for StudentDashboardActivity
+            SharedPreferences userPrefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+            SharedPreferences.Editor userEditor = userPrefs.edit();
+            userEditor.putString("username", welcomeName);
+            userEditor.putLong("user_id", Long.parseLong(finalUserId));
+            userEditor.putBoolean("is_logged_in", true);
+            userEditor.apply();
+
+            // Save to LoginPrefs for other activities
+            SharedPreferences loginPrefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+            SharedPreferences.Editor loginEditor = loginPrefs.edit();
+            loginEditor.putString("username", welcomeName);
+            loginEditor.putLong("user_id", Long.parseLong(finalUserId));
+            loginEditor.putBoolean("is_logged_in", true);
+
+            // Save the remember me preference if checkbox is checked
+            if (rememberMeCheckbox != null && rememberMeCheckbox.isChecked()) {
+                loginEditor.putBoolean("remember_me", true);
+            }
+
+            loginEditor.apply();
+
+            // Navigate to StudentDashboardActivity with clear task and new task flags
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                Intent intent = new Intent(LoginActivity.this, StudentDashboardActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish(); // Close login activity
+            }, 1000); // Short delay for success message to be visible
         } else {
             Log.d(TAG, "Login failed - invalid credentials");
             showError("Invalid username or password. Please check your credentials.");
