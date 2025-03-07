@@ -1,9 +1,6 @@
 package onetoone.FriendRequest;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -28,11 +25,15 @@ public class FriendRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long senderId;
+    @JoinColumn(name = "sender_id", nullable = false)
+    @ManyToOne
+    @JsonBackReference
+    private Person sender;
 
-    @Column(nullable = false)
-    private Long receiverId;
+    @ManyToOne
+    @JoinColumn(name = "receiver_id", nullable = false)
+    @JsonBackReference
+    private Person receiver;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -40,5 +41,37 @@ public class FriendRequest {
 
     public enum Status {
         PENDING, ACCEPTED, REJECTED
+    }
+
+    public Person getSender() {
+        return sender;
+    }
+
+    public void setSender(Person sender) {
+        this.sender = sender;
+    }
+
+    public Person getReceiver() {
+        return receiver;
+    }
+
+    public void setReceiver(Person receiver) {
+        this.receiver = receiver;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 }
