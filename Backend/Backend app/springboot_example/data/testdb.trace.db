@@ -1,9 +1,0 @@
-2025-02-22 15:40:12 jdbc[3]: exception
-org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "LOGIN" not found (this database is empty); SQL statement:
-select count(*) from login l1_0 [42104-214]
-2025-02-22 15:44:41 jdbc[3]: exception
-org.h2.jdbc.JdbcSQLNonTransientException: The object is already closed [90007-214]
-2025-02-22 15:44:41 jdbc[3]: exception
-org.h2.jdbc.JdbcSQLNonTransientException: The object is already closed [90007-214]
-2025-02-22 15:44:41 jdbc[3]: exception
-org.h2.jdbc.JdbcSQLNonTransientException: The object is already closed [90007-214]

@@ -8,16 +8,19 @@ import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
@@ -25,27 +28,43 @@ import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class LoginActivity extends AppCompatActivity {
 
+    private static final String TAG = "LoginActivity";
     private ProgressBar passwordStrengthBar;
     private CircularProgressIndicator loadingProgress;
     private MaterialCheckBox rememberMeCheckbox;
     private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu:8080/Logins";
-//coms-3090-017.class.las@iastate.edu:8080/
+
+    private List<JSONObject> usersList = new ArrayList<>();
+    private boolean isDataLoaded = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        Log.d("MainActivity", "Starting app...");
+        Log.d(TAG, "Starting login activity...");
 
         // Initialize views
         MaterialCardView loginCard = findViewById(R.id.loginCard);
         TextInputEditText etUsername = findViewById(R.id.etUsername);
         TextInputEditText etPassword = findViewById(R.id.etPassword);
-        MaterialButton btnSignIn = findViewById(R.id.btnSignIn);
+        MaterialButton btnLogin = findViewById(R.id.btnSignIn);
+        MaterialButton btnDeleteAccount = findViewById(R.id.btnDeleteAccount);
         TextView tvForgotPassword = findViewById(R.id.tvForgotPassword);
         ImageView logo = findViewById(R.id.ivLogo);
 
@@ -53,17 +72,18 @@ public class LoginActivity extends AppCompatActivity {
         loadingProgress = findViewById(R.id.loadingProgress);
         rememberMeCheckbox = findViewById(R.id.rememberMeCheckbox);
 
-        // Set initial states and animations
-        setupInitialAnimations(loginCard, logo);
+        // Make sure loading indicator is properly initialized
+        if (loadingProgress != null) {
+            loadingProgress.setVisibility(View.GONE);
+            Log.d(TAG, "Loading indicator initialized and set to GONE");
+        } else {
+            Log.e(TAG, "Loading indicator is null! Check your layout XML");
+        }
 
-        // Password strength watcher
-        setupPasswordStrengthWatcher(etPassword);
+        // Change button text
+        btnLogin.setText("Login");
 
-        // Button click listeners
-        setupClickListeners(btnSignIn, tvForgotPassword, etUsername, etPassword);
-    }
-
-    private void setupInitialAnimations(MaterialCardView loginCard, ImageView logo) {
+        // Set initial animations
         loginCard.setTranslationY(1000f);
         logo.setScaleX(0f);
         logo.setScaleY(0f);
@@ -79,9 +99,8 @@ public class LoginActivity extends AppCompatActivity {
                                 .setDuration(1000)
                                 .setInterpolator(new AccelerateDecelerateInterpolator())
                 );
-    }
 
-    private void setupPasswordStrengthWatcher(TextInputEditText etPassword) {
+        // Password strength watcher
         etPassword.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -100,11 +119,12 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         });
-    }
 
-    private void setupClickListeners(MaterialButton btnSignIn, TextView tvForgotPassword,
-                                     TextInputEditText etUsername, TextInputEditText etPassword) {
-        btnSignIn.setOnClickListener(v -> {
+        // Fetch users data on startup
+        fetchAllUsers();
+
+        // Login button click listener
+        btnLogin.setOnClickListener(v -> {
             String username = etUsername.getText().toString();
             String password = etPassword.getText().toString();
 
@@ -112,75 +132,263 @@ public class LoginActivity extends AppCompatActivity {
                 showError("Please fill in all fields");
                 shakeView(username.isEmpty() ? etUsername : etPassword);
             } else {
-                showLoginAnimation(btnSignIn);
-                performLogin(username, password);
+                showLoginAnimation(btnLogin);
+                if (isDataLoaded) {
+                    validateLogin(username, password);
+                } else {
+                    fetchAllUsers(username, password);
+                }
             }
         });
 
+        // Delete Account button click listener
+        btnDeleteAccount.setOnClickListener(v -> {
+            String username = etUsername.getText().toString();
+            String password = etPassword.getText().toString();
+
+            if (username.isEmpty() || password.isEmpty()) {
+                showError("Please enter your credentials first");
+                shakeView(username.isEmpty() ? etUsername : etPassword);
+            } else {
+                // First authenticate the user
+                authenticateAndDeleteUser(username, password);
+            }
+        });
+
+        // Forgot password click listener
         tvForgotPassword.setOnClickListener(v -> {
             String username = etUsername.getText().toString();
             if (username.isEmpty()) {
                 showError("Please enter your Net-ID first");
                 shakeView(etUsername);
             } else {
-                sendPasswordResetRequest(username);
+                showChangePasswordDialog(username);
             }
         });
     }
 
-    private void performLogin(String username, String password) {
-        String url = BASE_URL;
-        Log.d("Login", "Full URL: " + url);
-        Log.d("Login", "Username: " + username);
+    private void fetchAllUsers() {
+        fetchAllUsers(null, null);
+    }
 
-        JSONObject jsonBody = new JSONObject();
-        try {
-            jsonBody.put("name", "password");     // Using static values that work with mock
-            jsonBody.put("emailId", "netid");     // Using static values that work with mock
-            jsonBody.put("ifActive", true);
+    private void fetchAllUsers(String username, String password) {
+        showInfo("Connecting to server...");
+        Log.d(TAG, "Fetching users from: " + BASE_URL);
 
-            Log.d("Login", "Sending data: " + jsonBody.toString());
-
-            JsonObjectRequest request = new JsonObjectRequest(
-                    Request.Method.POST,
-                    url,
-                    jsonBody,
-                    response -> {
-                        Log.d("Login", "Success response: " + response.toString());
+        JsonArrayRequest request = new JsonArrayRequest(
+                Request.Method.GET,
+                BASE_URL,
+                null,
+                response -> {
+                    Log.d(TAG, "Users response received, length: " + response.length());
+                    usersList.clear();
+                    for (int i = 0; i < response.length(); i++) {
                         try {
-                            String message = response.getString("message");
-                            showSuccess("Login successful");
+                            JSONObject user = response.getJSONObject(i);
+                            usersList.add(user);
+
+                            // Log user data to Logcat
+                            String name = user.optString("name", "N/A");
+                            String email = user.optString("emailId", "N/A");
+                            String pass = user.optString("password", "N/A");
+                            Log.d(TAG, "User " + (i+1) + ": Name=" + name + ", Email=" + email + ", Pass=" + pass);
                         } catch (JSONException e) {
-                            showError("Error parsing response");
+                            Log.e(TAG, "Error parsing user at index " + i, e);
                         }
-                    },
-                    error -> {
-                        Log.e("Login", "Error: " + error.toString());
-                        NetworkResponse networkResponse = error.networkResponse;
-                        if (networkResponse != null && networkResponse.data != null) {
-                            String errorResponse = new String(networkResponse.data);
-                            Log.e("Login", "Error response: " + errorResponse);
-                        }
-                        showError("Login failed: " + getVolleyErrorMessage(error));
                     }
-            );
 
-            request.setRetryPolicy(new DefaultRetryPolicy(
-                    10000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-            ));
+                    isDataLoaded = true;
+                    Log.d(TAG, "Successfully loaded " + usersList.size() + " users");
+                    showInfo("Connected to server");
 
-            VolleySingleton.getInstance(this).addToRequestQueue(request);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            showError("Error creating request");
+                    if (username != null && password != null) {
+                        validateLogin(username, password);
+                    }
+                },
+                error -> {
+                    isDataLoaded = false;
+                    Log.e(TAG, "Error fetching users: " + error.toString());
+
+                    if (error.networkResponse != null) {
+                        Log.e(TAG, "Network error code: " + error.networkResponse.statusCode);
+                    }
+
+                    showError("Cannot connect to server. Please check your internet connection.");
+                }
+        );
+
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                10000, // 10 seconds timeout
+                1,     // 1 retry
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        ));
+
+        VolleySingleton.getInstance(this).addToRequestQueue(request);
+    }
+
+    private void validateLogin(String username, String password) {
+        Log.d(TAG, "Validating login for username: " + username);
+        boolean loginSuccess = false;
+        String fullName = "";
+
+        for (JSONObject user : usersList) {
+            try {
+                // Check for matching emailId and password
+                String storedNetId = user.getString("emailId").trim();
+                String storedPassword = user.getString("password");
+                String storedName = user.getString("name").trim();
+
+                Log.d(TAG, "Comparing with user: " + storedName + ", email: " + storedNetId);
+
+                // Try matching by email or name
+                boolean credentialsMatch =
+                        (storedNetId.equalsIgnoreCase(username.trim()) ||
+                                storedName.equalsIgnoreCase(username.trim())) &&
+                                storedPassword.equals(password);
+
+                if (credentialsMatch) {
+                    loginSuccess = true;
+                    Log.d(TAG, "Login match found for user: " + storedName);
+                    if (user.has("person")) {
+                        fullName = user.getJSONObject("person").getString("name");
+                        Log.d(TAG, "Found person name: " + fullName);
+                    }
+                    break;
+                }
+            } catch (JSONException e) {
+                Log.e(TAG, "Error checking user credentials", e);
+            }
         }
+
+        if (loginSuccess) {
+            final String welcomeName = fullName.isEmpty() ? username : fullName;
+            Log.d(TAG, "Login successful for user: " + welcomeName);
+            showSuccess("Login successful! Welcome, " + welcomeName);
+            // TODO: Navigate to main activity
+        } else {
+            Log.d(TAG, "Login failed - invalid credentials");
+            showError("Invalid username or password. Please check your credentials.");
+        }
+    }
+
+    private void authenticateAndDeleteUser(String username, String password) {
+        // First we need to find the user ID by authenticating
+        for (JSONObject user : usersList) {
+            try {
+                String storedNetId = user.getString("emailId").trim();
+                String storedName = user.getString("name").trim();
+                String storedPassword = user.getString("password");
+
+                boolean credentialsMatch =
+                        (storedNetId.equalsIgnoreCase(username.trim()) ||
+                                storedName.equalsIgnoreCase(username.trim())) &&
+                                storedPassword.equals(password);
+
+                if (credentialsMatch) {
+                    // Found the user, get the ID
+                    String userId = user.getString("id");
+
+                    // Show confirmation dialog
+                    new AlertDialog.Builder(this)
+                            .setTitle("Delete Account")
+                            .setMessage("Are you sure you want to delete your account? This action cannot be undone.")
+                            .setPositiveButton("Delete", (dialog, which) -> deleteCurrentUser(userId))
+                            .setNegativeButton("Cancel", null)
+                            .show();
+
+                    return;
+                }
+            } catch (JSONException e) {
+                Log.e(TAG, "Error checking user credentials", e);
+            }
+        }
+
+        // If we got here, authentication failed
+        showError("Invalid username or password");
+    }
+
+    private void deleteCurrentUser(String userId) {
+        // Show loading indicator
+        loadingProgress.setVisibility(View.VISIBLE);
+
+        new Thread(() -> {
+            HttpURLConnection urlConnection = null;
+            try {
+                String deleteUrl = BASE_URL + "/" + userId;
+                Log.d(TAG, "Attempting to delete user at: " + deleteUrl);
+
+                URL requestUrl = new URL(deleteUrl);
+                urlConnection = (HttpURLConnection) requestUrl.openConnection();
+                urlConnection.setRequestMethod("DELETE");
+
+                // Get the response code
+                int responseCode = urlConnection.getResponseCode();
+                Log.d(TAG, "Delete response code: " + responseCode);
+
+                // Read response
+                StringBuilder response = new StringBuilder();
+                try {
+                    InputStream is;
+                    if (responseCode >= 200 && responseCode < 400) {
+                        is = urlConnection.getInputStream();
+                    } else {
+                        is = urlConnection.getErrorStream();
+                    }
+
+                    if (is != null) {
+                        BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"));
+                        String responseLine;
+                        while ((responseLine = br.readLine()) != null) {
+                            response.append(responseLine.trim());
+                        }
+                        br.close();
+                    }
+                    Log.d(TAG, "Delete response: " + response.toString());
+                } catch (Exception e) {
+                    Log.e(TAG, "Error reading response", e);
+                }
+
+                // Update UI on main thread
+                final int finalResponseCode = responseCode;
+                final String finalResponse = response.toString();
+
+                runOnUiThread(() -> {
+                    loadingProgress.setVisibility(View.GONE);
+
+                    if (finalResponseCode >= 200 && finalResponseCode < 300) {
+                        showSuccess("Account deleted successfully");
+
+                        // Refresh the user list
+                        fetchAllUsers();
+                    } else {
+                        String errorMsg = "Failed to delete account: " + finalResponseCode;
+                        if (!finalResponse.isEmpty()) {
+                            errorMsg += " - " + finalResponse;
+                        }
+                        showError(errorMsg);
+                    }
+                });
+
+            } catch (Exception e) {
+                Log.e(TAG, "Error during account deletion", e);
+                final String errorMessage = e.getMessage();
+
+                runOnUiThread(() -> {
+                    loadingProgress.setVisibility(View.GONE);
+                    showError("Failed to delete account: " + errorMessage);
+                });
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+            }
+        }).start();
     }
 
     private void updatePasswordStrength(String password) {
         int strength = calculatePasswordStrength(password);
         passwordStrengthBar.setProgress(strength);
+
         int color;
         if (strength < 33) {
             color = Color.RED;
@@ -202,42 +410,6 @@ public class LoginActivity extends AppCompatActivity {
         return score;
     }
 
-    private void sendPasswordResetRequest(String username) {
-        String url = BASE_URL + "/forgot-password";  // Updated to match mock server
-        Log.d("Login", "Reset password URL: " + url);
-
-        JSONObject jsonBody = new JSONObject();
-        try {
-            jsonBody.put("emailId", username);
-
-            JsonObjectRequest request = new JsonObjectRequest(
-                    Request.Method.POST,
-                    url,
-                    jsonBody,
-                    response -> showSuccess("Password reset instructions sent"),
-                    error -> showError("Failed to send reset instructions: " + getVolleyErrorMessage(error))
-            );
-
-            VolleySingleton.getInstance(this).addToRequestQueue(request);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            showError("Error processing request");
-        }
-    }
-
-    private String getVolleyErrorMessage(VolleyError error) {
-        if (error.networkResponse != null) {
-            switch (error.networkResponse.statusCode) {
-                case 404: return "Server not found";
-                case 401: return "Invalid credentials";
-                case 400: return "Invalid request";
-                case 500: return "Server error";
-                default: return "Network error " + error.networkResponse.statusCode;
-            }
-        }
-        return error.getMessage() != null ? error.getMessage() : "Unknown error occurred";
-    }
-
     private void shakeView(View view) {
         view.animate()
                 .translationX(20f)
@@ -255,44 +427,249 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void showLoginAnimation(MaterialButton button) {
-        button.setEnabled(false);
-        button.setText("");
-        loadingProgress.setVisibility(View.VISIBLE);
+        Log.d(TAG, "Starting login animation");
 
+        // Save original text to restore later
+        final String originalText = button.getText().toString();
+
+        // Disable button and show logging in text
+        button.setEnabled(false);
+        button.setText("Logging in...");
+
+        // Show loading indicator if available
+        if (loadingProgress != null) {
+            loadingProgress.setVisibility(View.VISIBLE);
+            Log.d(TAG, "Loading indicator set to VISIBLE");
+        }
+
+        // After delay, restore button state
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            loadingProgress.setVisibility(View.GONE);
-            button.setText("Sign In");
+            if (loadingProgress != null) {
+                loadingProgress.setVisibility(View.GONE);
+                Log.d(TAG, "Loading indicator set back to GONE");
+            }
+            button.setText("Login");
             button.setEnabled(true);
+            Log.d(TAG, "Login animation completed");
         }, 2000);
     }
 
+    private void showChangePasswordDialog(String username) {
+        // Inflate the dialog layout
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_change_password, null);
+        TextInputEditText etCurrentPassword = dialogView.findViewById(R.id.etCurrentPassword);
+        TextInputEditText etNewPassword = dialogView.findViewById(R.id.etNewPassword);
+        TextInputEditText etConfirmPassword = dialogView.findViewById(R.id.etConfirmPassword);
+        ProgressBar passwordStrengthDialogBar = dialogView.findViewById(R.id.passwordStrengthDialogBar);
+        passwordStrengthDialogBar.setVisibility(View.GONE);
+
+        // Add TextWatcher to new password field
+        etNewPassword.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String password = s.toString();
+                if (password.isEmpty()) {
+                    passwordStrengthDialogBar.setVisibility(View.GONE);
+                } else {
+                    passwordStrengthDialogBar.setVisibility(View.VISIBLE);
+                    int strength = calculatePasswordStrength(password);
+                    passwordStrengthDialogBar.setProgress(strength);
+
+                    int color;
+                    if (strength < 33) {
+                        color = Color.RED;
+                    } else if (strength < 66) {
+                        color = Color.YELLOW;
+                    } else {
+                        color = Color.GREEN;
+                    }
+                    passwordStrengthDialogBar.setProgressTintList(ColorStateList.valueOf(color));
+                }
+            }
+        });
+
+        // Create themed alert dialog that matches the app's dark theme
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog dialog = builder
+                .setTitle("Change Password")
+                .setView(dialogView)
+                .setPositiveButton("Update", null) // Set null to prevent auto-dismiss
+                .setNegativeButton("Cancel", (dialogInterface, i) -> dialogInterface.dismiss())
+                .create();
+
+        // Style dialog to match app theme
+        dialog.setOnShowListener(dialogInterface -> {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.cardinal_red));
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.white));
+        });
+
+        dialog.show();
+
+        // Override the positive button to handle password validation
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String currentPassword = etCurrentPassword.getText().toString();
+            String newPassword = etNewPassword.getText().toString();
+            String confirmPassword = etConfirmPassword.getText().toString();
+
+            if (currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
+                showError("Please fill in all password fields");
+                return;
+            }
+
+            if (!newPassword.equals(confirmPassword)) {
+                showError("New passwords don't match");
+                return;
+            }
+
+            // Validate current password
+            boolean isCurrentPasswordValid = validateCurrentPassword(username, currentPassword);
+            if (!isCurrentPasswordValid) {
+                showError("Current password is incorrect");
+                return;
+            }
+
+            // Password strength check
+            int strength = calculatePasswordStrength(newPassword);
+            if (strength < 60) {
+                showError("New password is too weak. Include uppercase, lowercase, numbers, and special characters.");
+                return;
+            }
+
+            // All validations passed, update the password
+            updatePassword(username, newPassword, dialog);
+        });
+    }
+
+    private boolean validateCurrentPassword(String username, String password) {
+        for (JSONObject user : usersList) {
+            try {
+                String storedNetId = user.getString("emailId").trim();
+                String storedName = user.getString("name").trim();
+                String storedPassword = user.getString("password");
+
+                // Check if username matches either email or name, and password matches
+                if ((storedNetId.equalsIgnoreCase(username.trim()) ||
+                        storedName.equalsIgnoreCase(username.trim())) &&
+                        storedPassword.equals(password)) {
+                    return true;
+                }
+            } catch (JSONException e) {
+                Log.e(TAG, "Error validating current password", e);
+            }
+        }
+        return false;
+    }
+
+    private void updatePassword(String username, String newPassword, AlertDialog dialog) {
+        // Find the user ID to update
+        String userId = null;
+        JSONObject userToUpdate = null;
+
+        for (JSONObject user : usersList) {
+            try {
+                String storedNetId = user.getString("emailId").trim();
+                String storedName = user.getString("name").trim();
+
+                if (storedNetId.equalsIgnoreCase(username.trim()) ||
+                        storedName.equalsIgnoreCase(username.trim())) {
+                    userId = user.getString("id");
+                    userToUpdate = user;
+                    break;
+                }
+            } catch (JSONException e) {
+                Log.e(TAG, "Error finding user ID", e);
+            }
+        }
+
+        if (userId == null || userToUpdate == null) {
+            showError("User not found. Please try again.");
+            return;
+        }
+
+        // Show loading indicator
+        loadingProgress.setVisibility(View.VISIBLE);
+
+        try {
+            // Create a copy of the user object with the updated password
+            JSONObject updatedUser = new JSONObject(userToUpdate.toString());
+            updatedUser.put("password", newPassword);
+
+            // Prepare the API endpoint URL for the specific user
+            String updateUrl = BASE_URL + "/" + userId;
+            Log.d(TAG, "Updating password at URL: " + updateUrl);
+
+            // Make the PUT request to update the password
+            JsonObjectRequest updateRequest = new JsonObjectRequest(
+                    Request.Method.PUT,
+                    updateUrl,
+                    updatedUser,
+                    response -> {
+                        loadingProgress.setVisibility(View.GONE);
+                        Log.d(TAG, "Password updated successfully: " + response.toString());
+                        showSuccess("Password updated successfully!");
+                        dialog.dismiss();
+
+                        // Refresh the user list to get updated data
+                        fetchAllUsers();
+                    },
+                    error -> {
+                        loadingProgress.setVisibility(View.GONE);
+                        Log.e(TAG, "Error updating password: " + error.toString());
+
+                        if (error.networkResponse != null) {
+                            Log.e(TAG, "Network error code: " + error.networkResponse.statusCode);
+                        }
+
+                        showError("Failed to update password. Please try again later.");
+                    }
+            ) {
+                @Override
+                public Map<String, String> getHeaders() {
+                    Map<String, String> headers = new HashMap<>();
+                    headers.put("Content-Type", "application/json");
+                    return headers;
+                }
+            };
+
+            updateRequest.setRetryPolicy(new DefaultRetryPolicy(
+                    10000, // 10 seconds timeout
+                    1,     // 1 retry
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+            ));
+
+            VolleySingleton.getInstance(this).addToRequestQueue(updateRequest);
+
+        } catch (JSONException e) {
+            loadingProgress.setVisibility(View.GONE);
+            Log.e(TAG, "Error preparing user data for update", e);
+            showError("An error occurred. Please try again.");
+        }
+    }
+
     private void showError(String message) {
-        Snackbar snackbar = Snackbar.make(
-                findViewById(android.R.id.content),
-                message,
-                Snackbar.LENGTH_LONG
-        );
-        snackbar.setBackgroundTint(getColor(R.color.cardinal_red));
-        snackbar.show();
+        Log.e(TAG, "Error: " + message);
+        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG)
+                .setBackgroundTint(getColor(R.color.cardinal_red))
+                .show();
     }
 
     private void showSuccess(String message) {
-        Snackbar snackbar = Snackbar.make(
-                findViewById(android.R.id.content),
-                message,
-                Snackbar.LENGTH_LONG
-        );
-        snackbar.setBackgroundTint(Color.parseColor("#4CAF50"));
-        snackbar.show();
+        Log.d(TAG, "Success: " + message);
+        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG)
+                .setBackgroundTint(Color.parseColor("#4CAF50"))
+                .show();
     }
 
     private void showInfo(String message) {
-        Snackbar snackbar = Snackbar.make(
-                findViewById(android.R.id.content),
-                message,
-                Snackbar.LENGTH_LONG
-        );
-        snackbar.setBackgroundTint(Color.parseColor("#2196F3"));
-        snackbar.show();
+        Log.i(TAG, "Info: " + message);
+        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG)
+                .setBackgroundTint(Color.parseColor("#2196F3"))
+                .show();
     }
 }
