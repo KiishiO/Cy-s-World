@@ -1,15 +1,17 @@
 package com.example.own_example.services;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.own_example.models.Friend;
+import com.example.own_example.models.FriendRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,20 +21,27 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.example.own_example.models.Friend;
-import com.example.own_example.models.FriendRequest;
+import java.util.Random;
 
 public class FriendService {
     private static final String TAG = "FriendService";
-    private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu:8080/Persons";
+    private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu:8080/Logins";
 
     private RequestQueue requestQueue;
     private Context context;
+    private List<JSONObject> allUsers = new ArrayList<>();
+    private long currentUserId;
 
     public FriendService(Context context) {
         this.context = context;
         this.requestQueue = Volley.newRequestQueue(context);
+
+        // Get current user ID from preferences
+        SharedPreferences prefs = context.getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
+        currentUserId = prefs.getLong("user_id", 0);
+
+        // Load all users on initialization
+        loadAllUsers();
     }
 
     public interface FriendsCallback {
@@ -50,156 +59,168 @@ public class FriendService {
         void onError(String error);
     }
 
-    // Get user's friends
+    private void loadAllUsers() {
+        JsonArrayRequest request = new JsonArrayRequest(
+                Request.Method.GET,
+                BASE_URL,
+                null,
+                response -> {
+                    Log.d(TAG, "Loaded " + response.length() + " users");
+                    for (int i = 0; i < response.length(); i++) {
+                        try {
+                            JSONObject user = response.getJSONObject(i);
+                            allUsers.add(user);
+                        } catch (JSONException e) {
+                            Log.e(TAG, "Error parsing user: " + e.getMessage());
+                        }
+                    }
+                },
+                error -> {
+                    Log.e(TAG, "Error loading users: " + error.toString());
+                }
+        );
+
+        requestQueue.add(request);
+    }
+
+    // Get user's friends (simulated with other users from the system)
     public void getFriends(long userId, FriendsCallback callback) {
-        String url = BASE_URL + "/FriendRequests/friends/" + userId;
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-                response -> {
-                    try {
-                        List<Friend> friendsList = new ArrayList<>();
-                        JSONArray friendsArray = response.getJSONArray("friends");
-
-                        for (int i = 0; i < friendsArray.length(); i++) {
-                            JSONObject friendObj = friendsArray.getJSONObject(i);
-                            int id = friendObj.getInt("id");
-                            String name = friendObj.getString("name");
-                            // Default status as we don't have actual status from API
-                            Friend friend = new Friend(id, name, "Online");
-                            friendsList.add(friend);
-                        }
-
-                        callback.onSuccess(friendsList);
-                    } catch (JSONException e) {
-                        Log.e(TAG, "Error parsing friends: " + e.getMessage());
-                        callback.onError("Error parsing friend data");
-                    }
-                },
-                error -> {
-                    Log.e(TAG, "Error fetching friends: " + error.toString());
-                    callback.onError("Error fetching friends: " + getVolleyErrorMessage(error));
-                });
-
-        requestQueue.add(request);
+        // Ensure users are loaded
+        if (allUsers.isEmpty()) {
+            loadAllUsers();
+            // Return a small delay to allow users to load
+            new android.os.Handler().postDelayed(() -> {
+                generateFriends(userId, callback);
+            }, 1000);
+        } else {
+            generateFriends(userId, callback);
+        }
     }
 
-    // Get pending friend requests
+    private void generateFriends(long userId, FriendsCallback callback) {
+        List<Friend> friendsList = new ArrayList<>();
+
+        // For demo purposes, simulate 2-3 friends
+        int friendCount = Math.min(allUsers.size() - 1, new Random().nextInt(2) + 2);
+
+        for (int i = 0; i < friendCount; i++) {
+            try {
+                JSONObject user = allUsers.get(i);
+                if (user.getLong("id") == userId) {
+                    continue; // Skip the current user
+                }
+
+                int id = user.getInt("id");
+                String name = user.getString("name");
+
+                // Random status for demo
+                String[] statuses = {"Online", "Away", "Offline"};
+                String status = statuses[new Random().nextInt(statuses.length)];
+
+                Friend friend = new Friend(id, name, status);
+                friendsList.add(friend);
+            } catch (JSONException e) {
+                Log.e(TAG, "Error generating friend: " + e.getMessage());
+            }
+        }
+
+        callback.onSuccess(friendsList);
+    }
+
+    // Get pending friend requests (simulated)
     public void getFriendRequests(long userId, RequestsCallback callback) {
-        String url = BASE_URL + "/FriendRequests/received/" + userId;
-
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
-                response -> {
-                    try {
-                        List<FriendRequest> requestsList = new ArrayList<>();
-
-                        for (int i = 0; i < response.length(); i++) {
-                            JSONObject requestObj = response.getJSONObject(i);
-                            JSONObject senderObj = requestObj.getJSONObject("sender");
-
-                            int id = requestObj.getInt("requestId");
-                            String name = senderObj.getString("name");
-                            // We don't have a timestamp in the API response, so using a placeholder
-                            FriendRequest friendRequest = new FriendRequest(id, name, "Just now");
-                            requestsList.add(friendRequest);
-                        }
-
-                        callback.onSuccess(requestsList);
-                    } catch (JSONException e) {
-                        Log.e(TAG, "Error parsing requests: " + e.getMessage());
-                        callback.onError("Error parsing request data");
-                    }
-                },
-                error -> {
-                    Log.e(TAG, "Error fetching requests: " + error.toString());
-                    callback.onError("Error fetching requests: " + getVolleyErrorMessage(error));
-                });
-
-        requestQueue.add(request);
+        // Ensure users are loaded
+        if (allUsers.isEmpty()) {
+            loadAllUsers();
+            // Return a small delay to allow users to load
+            new android.os.Handler().postDelayed(() -> {
+                generateRequests(userId, callback);
+            }, 1000);
+        } else {
+            generateRequests(userId, callback);
+        }
     }
 
-    // Send a friend request
+    private void generateRequests(long userId, RequestsCallback callback) {
+        List<FriendRequest> requestsList = new ArrayList<>();
+
+        // For demo purposes, simulate 1-2 requests
+        int requestCount = Math.min(allUsers.size() - 1, new Random().nextInt(2) + 1);
+
+        for (int i = 0; i < requestCount; i++) {
+            try {
+                // Skip current user and users already used as friends
+                int index = allUsers.size() - 1 - i;
+                JSONObject user = allUsers.get(index);
+                if (user.getLong("id") == userId) {
+                    continue; // Skip the current user
+                }
+
+                int id = user.getInt("id");
+                String name = user.getString("name");
+
+                // Random timestamp for demo
+                String[] times = {"Just now", "5 minutes ago", "1 hour ago"};
+                String time = times[new Random().nextInt(times.length)];
+
+                FriendRequest request = new FriendRequest(id, name, time);
+                requestsList.add(request);
+            } catch (JSONException e) {
+                Log.e(TAG, "Error generating request: " + e.getMessage());
+            }
+        }
+
+        callback.onSuccess(requestsList);
+    }
+
+    // Send a friend request (simulated)
     public void sendFriendRequest(long senderId, long receiverId, ActionCallback callback) {
-        String url = BASE_URL;
-
-        JSONObject requestBody = new JSONObject();
-        try {
-            requestBody.put("senderId", senderId);
-            requestBody.put("receiverId", receiverId);
-        } catch (JSONException e) {
-            callback.onError("Error creating request: " + e.getMessage());
-            return;
-        }
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, requestBody,
-                response -> {
-                    try {
-                        callback.onSuccess("Friend request sent successfully");
-                    } catch (Exception e) {
-                        callback.onError("Error processing response: " + e.getMessage());
-                    }
-                },
-                error -> {
-                    callback.onError("Error sending request: " + getVolleyErrorMessage(error));
-                });
-
-        requestQueue.add(request);
+        // Simulated success
+        new android.os.Handler().postDelayed(() -> {
+            callback.onSuccess("Friend request sent successfully");
+        }, 800);
     }
 
-    // Accept a friend request
+    // Accept a friend request (simulated)
     public void respondToRequest(long requestId, boolean accept, ActionCallback callback) {
-        String url = BASE_URL;
-
-        JSONObject requestBody = new JSONObject();
-        try {
-            requestBody.put("requestId", requestId);
-            requestBody.put("status", accept ? "ACCEPTED" : "REJECTED");
-        } catch (JSONException e) {
-            callback.onError("Error creating response: " + e.getMessage());
-            return;
-        }
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, requestBody,
-                response -> {
-                    try {
-                        String message = accept ? "Friend request accepted" : "Friend request rejected";
-                        callback.onSuccess(message);
-                    } catch (Exception e) {
-                        callback.onError("Error processing response: " + e.getMessage());
-                    }
-                },
-                error -> {
-                    callback.onError("Error responding to request: " + getVolleyErrorMessage(error));
-                });
-
-        requestQueue.add(request);
+        // Simulated success
+        new android.os.Handler().postDelayed(() -> {
+            String message = accept ? "Friend request accepted" : "Friend request rejected";
+            callback.onSuccess(message);
+        }, 800);
     }
 
-    // Remove a friend (cancel a connection)
-    public void removeFriend(long requestId, ActionCallback callback) {
-        String url = BASE_URL + requestId;
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.DELETE, url, null,
-                response -> {
-                    try {
-                        callback.onSuccess("Connection removed successfully");
-                    } catch (Exception e) {
-                        callback.onError("Error processing response: " + e.getMessage());
-                    }
-                },
-                error -> {
-                    callback.onError("Error removing connection: " + getVolleyErrorMessage(error));
-                });
-
-        requestQueue.add(request);
+    // Remove a friend (simulated)
+    public void removeFriend(long friendId, ActionCallback callback) {
+        // Simulated success
+        new android.os.Handler().postDelayed(() -> {
+            callback.onSuccess("Connection removed successfully");
+        }, 800);
     }
 
     // Search for a user by Net-ID
     public void searchNetId(String netId, ActionCallback callback) {
-        // This is a placeholder method as the specific endpoint for searching users wasn't provided
-        // Normally you would have an API endpoint like /users/search?netId=...
+        // Find matching users in our already loaded list
+        boolean found = false;
 
-        // For now, just simulate a successful search
-        callback.onSuccess("User found: " + netId);
+        for (JSONObject user : allUsers) {
+            try {
+                String email = user.getString("emailId").toLowerCase();
+                String name = user.getString("name").toLowerCase();
+
+                if (email.contains(netId.toLowerCase()) || name.contains(netId.toLowerCase())) {
+                    found = true;
+                    callback.onSuccess("User found: " + user.getString("name"));
+                    break;
+                }
+            } catch (JSONException e) {
+                Log.e(TAG, "Error searching for user: " + e.getMessage());
+            }
+        }
+
+        if (!found) {
+            callback.onSuccess("No user found with Net-ID: " + netId);
+        }
     }
 
     // Helper method to get a more useful error message from Volley

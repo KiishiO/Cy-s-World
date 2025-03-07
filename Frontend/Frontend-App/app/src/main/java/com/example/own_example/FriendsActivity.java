@@ -2,6 +2,7 @@ package com.example.own_example;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -27,6 +28,7 @@ public class FriendsActivity extends AppCompatActivity implements
         FriendsAdapter.OnFriendActionListener,
         RequestsAdapter.OnRequestActionListener {
 
+    private static final String TAG = "FriendsActivity";
     private RecyclerView friendsRecyclerView;
     private RecyclerView requestsRecyclerView;
     private FriendsAdapter friendsAdapter;
@@ -46,20 +48,26 @@ public class FriendsActivity extends AppCompatActivity implements
     // Service
     private FriendService friendService;
 
-    // User ID (would normally be obtained from login session)
+    // User ID
     private long currentUserId = 1; // Default to 1 for testing
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friends);
+        Log.d(TAG, "FriendsActivity onCreate");
 
         // Initialize service
         friendService = new FriendService(this);
 
         // Try to get user ID from shared preferences
-        SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
-        currentUserId = prefs.getLong("user_id", 1); // Default to 1 if not found
+        try {
+            SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+            currentUserId = prefs.getLong("user_id", 1); // Default to 1 if not found
+            Log.d(TAG, "Loaded user ID: " + currentUserId);
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading user ID: " + e.getMessage());
+        }
 
         // Initialize views
         friendsRecyclerView = findViewById(R.id.friends_recycler_view);
@@ -153,39 +161,53 @@ public class FriendsActivity extends AppCompatActivity implements
     }
 
     private void updateCounters() {
-        if (friendsCountTextView != null) {
-            friendsCountTextView.setText(String.valueOf(friendsList.size()));
-        }
-        if (requestsCountTextView != null) {
-            requestsCountTextView.setText(String.valueOf(requestsList.size()));
+        try {
+            if (friendsCountTextView != null) {
+                friendsCountTextView.setText(String.valueOf(friendsList.size()));
+            }
+            if (requestsCountTextView != null) {
+                requestsCountTextView.setText(String.valueOf(requestsList.size()));
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error updating counters: " + e.getMessage());
         }
     }
 
     private void updateUI() {
-        // Update friends list visibility
-        if (friendsList.isEmpty()) {
-            friendsRecyclerView.setVisibility(View.GONE);
-            noFriendsTextView.setVisibility(View.VISIBLE);
-        } else {
-            friendsRecyclerView.setVisibility(View.VISIBLE);
-            noFriendsTextView.setVisibility(View.GONE);
+        try {
+            runOnUiThread(() -> {
+                // Update friends list visibility
+                if (friendsList.isEmpty()) {
+                    friendsRecyclerView.setVisibility(View.GONE);
+                    noFriendsTextView.setVisibility(View.VISIBLE);
+                } else {
+                    friendsRecyclerView.setVisibility(View.VISIBLE);
+                    noFriendsTextView.setVisibility(View.GONE);
+                }
+
+                // Update requests list visibility
+                if (requestsList.isEmpty()) {
+                    requestsRecyclerView.setVisibility(View.GONE);
+                    noRequestsTextView.setVisibility(View.VISIBLE);
+                } else {
+                    requestsRecyclerView.setVisibility(View.VISIBLE);
+                    noRequestsTextView.setVisibility(View.GONE);
+                }
+
+                // Update counters
+                updateCounters();
+
+                // Notify adapters to refresh
+                if (friendsAdapter != null) {
+                    friendsAdapter.notifyDataSetChanged();
+                }
+                if (requestsAdapter != null) {
+                    requestsAdapter.notifyDataSetChanged();
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Error updating UI: " + e.getMessage());
         }
-
-        // Update requests list visibility
-        if (requestsList.isEmpty()) {
-            requestsRecyclerView.setVisibility(View.GONE);
-            noRequestsTextView.setVisibility(View.VISIBLE);
-        } else {
-            requestsRecyclerView.setVisibility(View.VISIBLE);
-            noRequestsTextView.setVisibility(View.GONE);
-        }
-
-        // Update counters
-        updateCounters();
-
-        // Notify adapters to refresh
-        friendsAdapter.notifyDataSetChanged();
-        requestsAdapter.notifyDataSetChanged();
     }
 
     private void searchNetId() {
@@ -198,21 +220,45 @@ public class FriendsActivity extends AppCompatActivity implements
         // Clear previous search results
         searchResultLayout.removeAllViews();
 
-        // Show mock search result for now
-        // In a real implementation, you would call the API to search for users
-        View searchResultView = getLayoutInflater().inflate(R.layout.item_search_result, searchResultLayout, false);
-        TextView usernameTextView = searchResultView.findViewById(R.id.user_name);
-        MaterialButton addFriendButton = searchResultView.findViewById(R.id.add_friend_button);
+        // First search for the user
+        friendService.searchNetId(netId, new FriendService.ActionCallback() {
+            @Override
+            public void onSuccess(String message) {
+                // Show search result if "User found" is in the message
+                if (message.contains("User found")) {
+                    showSearchResult(netId);
+                } else {
+                    showSnackbar(message);
+                }
+            }
 
-        usernameTextView.setText(netId);
-        addFriendButton.setOnClickListener(v -> {
-            sendFriendRequest(netId);
-            searchResultLayout.setVisibility(View.GONE);
-            searchNetIdEditText.setText("");
+            @Override
+            public void onError(String error) {
+                showSnackbar("Error searching: " + error);
+            }
         });
+    }
 
-        searchResultLayout.addView(searchResultView);
-        searchResultLayout.setVisibility(View.VISIBLE);
+    private void showSearchResult(String netId) {
+        // Show mock search result for now
+        try {
+            View searchResultView = getLayoutInflater().inflate(R.layout.item_search_result, searchResultLayout, false);
+            TextView usernameTextView = searchResultView.findViewById(R.id.user_name);
+            MaterialButton addFriendButton = searchResultView.findViewById(R.id.add_friend_button);
+
+            usernameTextView.setText(netId);
+            addFriendButton.setOnClickListener(v -> {
+                sendFriendRequest(netId);
+                searchResultLayout.setVisibility(View.GONE);
+                searchNetIdEditText.setText("");
+            });
+
+            searchResultLayout.addView(searchResultView);
+            searchResultLayout.setVisibility(View.VISIBLE);
+        } catch (Exception e) {
+            Log.e(TAG, "Error showing search result: " + e.getMessage());
+            showSnackbar("Error showing search result");
+        }
     }
 
     private void sendFriendRequest(String netId) {
@@ -236,14 +282,26 @@ public class FriendsActivity extends AppCompatActivity implements
     // Implement FriendsAdapter.OnFriendActionListener
     @Override
     public void onRemoveFriend(int friendId, int position) {
+        if (position < 0 || position >= friendsList.size()) {
+            showSnackbar("Invalid friend position");
+            return;
+        }
+
         friendService.removeFriend(friendId, new FriendService.ActionCallback() {
             @Override
             public void onSuccess(String message) {
-                friendsList.remove(position);
-                friendsAdapter.notifyItemRemoved(position);
-                updateCounters();
-                updateUI();
-                showSnackbar("Cyclone connection removed");
+                try {
+                    friendsList.remove(position);
+                    runOnUiThread(() -> {
+                        friendsAdapter.notifyItemRemoved(position);
+                        updateCounters();
+                        updateUI();
+                    });
+                    showSnackbar("Cyclone connection removed");
+                } catch (Exception e) {
+                    Log.e(TAG, "Error removing friend: " + e.getMessage());
+                    showSnackbar("Error removing friend");
+                }
             }
 
             @Override
@@ -256,18 +314,43 @@ public class FriendsActivity extends AppCompatActivity implements
     // Implement RequestsAdapter.OnRequestActionListener
     @Override
     public void onAcceptRequest(int requestId, int position) {
+        if (position < 0 || position >= requestsList.size()) {
+            showSnackbar("Invalid request position");
+            return;
+        }
+
+        final FriendRequest request = requestsList.get(position);
+
         friendService.respondToRequest(requestId, true, new FriendService.ActionCallback() {
             @Override
             public void onSuccess(String message) {
-                FriendRequest request = requestsList.get(position);
-                friendsList.add(new Friend(request.getId(), request.getName(), "Online"));
-                requestsList.remove(position);
+                try {
+                    // Make a copy of the request for safety
+                    final String requestName = request.getName();
+                    final int requestId = request.getId();
 
-                friendsAdapter.notifyDataSetChanged();
-                requestsAdapter.notifyItemRemoved(position);
-                updateCounters();
-                updateUI();
-                showSnackbar("Connection request accepted");
+                    // Add to friends first, then remove from requests list
+                    friendsList.add(new Friend(requestId, requestName, "Online"));
+
+                    // Then safely remove from requests
+                    requestsList.remove(position);
+
+                    // Update UI on main thread
+                    runOnUiThread(() -> {
+                        // Notify adapters
+                        friendsAdapter.notifyDataSetChanged();
+                        requestsAdapter.notifyItemRemoved(position);
+                        updateCounters();
+                        updateUI();
+                    });
+
+                    showSnackbar("Connection request accepted");
+                } catch (Exception e) {
+                    Log.e(TAG, "Error accepting request: " + e.getMessage());
+                    // Reload both lists to recover
+                    loadFriends();
+                    loadFriendRequests();
+                }
             }
 
             @Override
@@ -279,14 +362,27 @@ public class FriendsActivity extends AppCompatActivity implements
 
     @Override
     public void onRejectRequest(int requestId, int position) {
+        if (position < 0 || position >= requestsList.size()) {
+            showSnackbar("Invalid request position");
+            return;
+        }
+
         friendService.respondToRequest(requestId, false, new FriendService.ActionCallback() {
             @Override
             public void onSuccess(String message) {
-                requestsList.remove(position);
-                requestsAdapter.notifyItemRemoved(position);
-                updateCounters();
-                updateUI();
-                showSnackbar("Connection request declined");
+                try {
+                    requestsList.remove(position);
+                    runOnUiThread(() -> {
+                        requestsAdapter.notifyItemRemoved(position);
+                        updateCounters();
+                        updateUI();
+                    });
+                    showSnackbar("Connection request declined");
+                } catch (Exception e) {
+                    Log.e(TAG, "Error rejecting request: " + e.getMessage());
+                    // Reload to recover
+                    loadFriendRequests();
+                }
             }
 
             @Override
@@ -297,6 +393,14 @@ public class FriendsActivity extends AppCompatActivity implements
     }
 
     private void showSnackbar(String message) {
-        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show();
+        try {
+            runOnUiThread(() -> {
+                Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show();
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Error showing snackbar: " + e.getMessage());
+            // Fallback to toast
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        }
     }
 }
