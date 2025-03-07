@@ -1,5 +1,6 @@
 package com.example.own_example;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -14,7 +15,9 @@ import com.example.own_example.adapters.FriendsAdapter;
 import com.example.own_example.adapters.RequestsAdapter;
 import com.example.own_example.models.Friend;
 import com.example.own_example.models.FriendRequest;
+import com.example.own_example.services.FriendService;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
@@ -40,10 +43,23 @@ public class FriendsActivity extends AppCompatActivity implements
     private List<Friend> friendsList = new ArrayList<>();
     private List<FriendRequest> requestsList = new ArrayList<>();
 
+    // Service
+    private FriendService friendService;
+
+    // User ID (would normally be obtained from login session)
+    private long currentUserId = 1; // Default to 1 for testing
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friends);
+
+        // Initialize service
+        friendService = new FriendService(this);
+
+        // Try to get user ID from shared preferences
+        SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+        currentUserId = prefs.getLong("user_id", 1); // Default to 1 if not found
 
         // Initialize views
         friendsRecyclerView = findViewById(R.id.friends_recycler_view);
@@ -70,24 +86,70 @@ public class FriendsActivity extends AppCompatActivity implements
         // Set up search button
         searchButton.setOnClickListener(v -> searchNetId());
 
-        // Load example data for testing purposes
-        loadTestData();
-
-        updateUI();
+        // Load actual data from the server
+        loadFriends();
+        loadFriendRequests();
     }
 
-    private void loadTestData() {
-        // Mock friends data - replace with actual API calls later
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refresh data when returning to the activity
+        loadFriends();
+        loadFriendRequests();
+    }
+
+    private void loadFriends() {
+        friendService.getFriends(currentUserId, new FriendService.FriendsCallback() {
+            @Override
+            public void onSuccess(List<Friend> friends) {
+                friendsList.clear();
+                friendsList.addAll(friends);
+                updateUI();
+            }
+
+            @Override
+            public void onError(String error) {
+                showSnackbar("Error loading Cyclones: " + error);
+                // For demo purposes, load test data if the API fails
+                loadTestFriends();
+            }
+        });
+    }
+
+    private void loadFriendRequests() {
+        friendService.getFriendRequests(currentUserId, new FriendService.RequestsCallback() {
+            @Override
+            public void onSuccess(List<FriendRequest> requests) {
+                requestsList.clear();
+                requestsList.addAll(requests);
+                updateUI();
+            }
+
+            @Override
+            public void onError(String error) {
+                showSnackbar("Error loading connection requests: " + error);
+                // For demo purposes, load test data if the API fails
+                loadTestRequests();
+            }
+        });
+    }
+
+    private void loadTestFriends() {
+        // Mock friends data for testing
+        friendsList.clear();
         friendsList.add(new Friend(1, "jsmith", "Online"));
         friendsList.add(new Friend(2, "rbriggs", "Away"));
         friendsList.add(new Friend(3, "jdoe", "Offline"));
+        updateUI();
+    }
 
-        // Mock friend requests
+    private void loadTestRequests() {
+        // Mock friend requests for testing
+        requestsList.clear();
         requestsList.add(new FriendRequest(4, "ewilson", "Just now"));
         requestsList.add(new FriendRequest(5, "dbrown", "5 minutes ago"));
-
-        // Update counters
-        updateCounters();
+        updateUI();
     }
 
     private void updateCounters() {
@@ -118,6 +180,9 @@ public class FriendsActivity extends AppCompatActivity implements
             noRequestsTextView.setVisibility(View.GONE);
         }
 
+        // Update counters
+        updateCounters();
+
         // Notify adapters to refresh
         friendsAdapter.notifyDataSetChanged();
         requestsAdapter.notifyDataSetChanged();
@@ -126,14 +191,15 @@ public class FriendsActivity extends AppCompatActivity implements
     private void searchNetId() {
         String netId = searchNetIdEditText.getText().toString().trim();
         if (netId.isEmpty()) {
-            Toast.makeText(this, "Please enter a Net-ID", Toast.LENGTH_SHORT).show();
+            showSnackbar("Please enter a Net-ID");
             return;
         }
 
-        // Show a mock search result
+        // Clear previous search results
         searchResultLayout.removeAllViews();
-        searchResultLayout.setVisibility(View.VISIBLE);
 
+        // Show mock search result for now
+        // In a real implementation, you would call the API to search for users
         View searchResultView = getLayoutInflater().inflate(R.layout.item_search_result, searchResultLayout, false);
         TextView usernameTextView = searchResultView.findViewById(R.id.user_name);
         MaterialButton addFriendButton = searchResultView.findViewById(R.id.add_friend_button);
@@ -146,49 +212,91 @@ public class FriendsActivity extends AppCompatActivity implements
         });
 
         searchResultLayout.addView(searchResultView);
+        searchResultLayout.setVisibility(View.VISIBLE);
     }
 
     private void sendFriendRequest(String netId) {
-        // For now, just show a toast
-        Toast.makeText(this, "Connection request sent to " + netId, Toast.LENGTH_SHORT).show();
+        // For a real implementation, you would need to get the user ID for the netId
+        // For now, use a dummy receiver ID of 2
+        long receiverId = 2;
+
+        friendService.sendFriendRequest(currentUserId, receiverId, new FriendService.ActionCallback() {
+            @Override
+            public void onSuccess(String message) {
+                showSnackbar("Connection request sent to " + netId);
+            }
+
+            @Override
+            public void onError(String error) {
+                showSnackbar("Error sending request: " + error);
+            }
+        });
     }
 
     // Implement FriendsAdapter.OnFriendActionListener
     @Override
     public void onRemoveFriend(int friendId, int position) {
-        // For now, just update the UI
-        friendsList.remove(position);
-        friendsAdapter.notifyItemRemoved(position);
-        updateCounters();
-        updateUI();
+        friendService.removeFriend(friendId, new FriendService.ActionCallback() {
+            @Override
+            public void onSuccess(String message) {
+                friendsList.remove(position);
+                friendsAdapter.notifyItemRemoved(position);
+                updateCounters();
+                updateUI();
+                showSnackbar("Cyclone connection removed");
+            }
 
-        Toast.makeText(this, "Friend removed", Toast.LENGTH_SHORT).show();
+            @Override
+            public void onError(String error) {
+                showSnackbar("Error removing connection: " + error);
+            }
+        });
     }
 
     // Implement RequestsAdapter.OnRequestActionListener
     @Override
     public void onAcceptRequest(int requestId, int position) {
-        // For now, just update the UI
-        FriendRequest request = requestsList.get(position);
-        friendsList.add(new Friend(request.getId(), request.getName(), "Online"));
-        requestsList.remove(position);
+        friendService.respondToRequest(requestId, true, new FriendService.ActionCallback() {
+            @Override
+            public void onSuccess(String message) {
+                FriendRequest request = requestsList.get(position);
+                friendsList.add(new Friend(request.getId(), request.getName(), "Online"));
+                requestsList.remove(position);
 
-        friendsAdapter.notifyDataSetChanged();
-        requestsAdapter.notifyItemRemoved(position);
-        updateCounters();
-        updateUI();
+                friendsAdapter.notifyDataSetChanged();
+                requestsAdapter.notifyItemRemoved(position);
+                updateCounters();
+                updateUI();
+                showSnackbar("Connection request accepted");
+            }
 
-        Toast.makeText(this, "Connection request accepted", Toast.LENGTH_SHORT).show();
+            @Override
+            public void onError(String error) {
+                showSnackbar("Error accepting request: " + error);
+            }
+        });
     }
 
     @Override
     public void onRejectRequest(int requestId, int position) {
-        // For now, just update the UI
-        requestsList.remove(position);
-        requestsAdapter.notifyItemRemoved(position);
-        updateCounters();
-        updateUI();
+        friendService.respondToRequest(requestId, false, new FriendService.ActionCallback() {
+            @Override
+            public void onSuccess(String message) {
+                requestsList.remove(position);
+                requestsAdapter.notifyItemRemoved(position);
+                updateCounters();
+                updateUI();
+                showSnackbar("Connection request declined");
+            }
 
-        Toast.makeText(this, "Connection request declined", Toast.LENGTH_SHORT).show();
+            @Override
+            public void onError(String error) {
+                showSnackbar("Error declining request: " + error);
+            }
+        });
+    }
+
+    private void showSnackbar(String message) {
+        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show();
     }
 }

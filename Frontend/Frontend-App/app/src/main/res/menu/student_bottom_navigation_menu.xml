@@ -12,8 +12,8 @@
         android:id="@+id/nav_classes"
         android:icon="@drawable/icon_school"
         android:title="Classes" />
-<!--    <item-->
-<!--        android:id="@+id/nav_profile"-->
-<!--        android:icon="@drawable/ic_person"-->
-<!--        android:title="Profile" />-->
+    <!--    <item-->
+    <!--        android:id="@+id/nav_profile"-->
+    <!--        android:icon="@drawable/ic_person"-->
+    <!--        android:title="Profile" />-->
 </menu>
