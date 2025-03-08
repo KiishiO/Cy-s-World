@@ -1,6 +1,9 @@
 package onetoone.Persons;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 import onetoone.Laptops.Laptop;
@@ -11,8 +14,7 @@ import onetoone.Signup.Signup;
  * 
  * @author Vivek Bengre
  * 
- */ 
-
+ */
 @Entity
 public class Person {
 
@@ -26,6 +28,7 @@ public class Person {
     private String name;
     private String phoneNumber;
     private boolean ifActive;
+    private String roles;
 
     /*
      * @OneToOne creates a relation between the current entity/table(Laptop) with the entity/table defined below it(Person)
@@ -37,15 +40,14 @@ public class Person {
     @JoinColumn(name = "laptop_id")
     private Laptop laptop;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+//    @ManyToOne(fetch = FetchType.EAGER)
 //    @ManyToOne(cascade = CascadeType.ALL)
-    @OneToOne(cascade = CascadeType.ALL)
-    @JsonBackReference
+    @OneToOne(mappedBy = "person")
+    @JsonIgnore
     private Login login; // Associating `Person` with `Login`
 
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "signup_id")
+    @OneToOne
+    @JoinColumn
     private Signup signup;
 
     // =============================== Constructors ================================== //
@@ -54,10 +56,11 @@ public class Person {
         this.ifActive = true;
     }
 
-    public Person(String name, String phoneNumber) {
+    public Person(String name, String phoneNumber, String roles) {
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.ifActive = true;
+        this.roles = roles;
     }
 
 
@@ -116,6 +119,12 @@ public class Person {
 
     public void setSignupInfo(Signup signup){
         this.signup = signup;
+    }
+    public String getRoles(){
+        return roles;
+    }
+    public void setRoles(String roles){
+        this.roles = roles;
     }
     
 }

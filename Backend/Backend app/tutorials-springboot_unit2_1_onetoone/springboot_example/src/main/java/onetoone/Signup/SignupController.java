@@ -2,6 +2,13 @@ package onetoone.Signup;
 
 import java.util.List;
 
+import onetoone.Login.Login;
+import onetoone.Persons.Person;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,12 +22,13 @@ import onetoone.Persons.Person;
 import onetoone.Persons.PersonRepository;
 
 /**
- * 
+ *
  * @author Vivek Bengre
- * 
- */ 
+ *
+ */
 
 @RestController
+@RequestMapping("/signup")
 public class SignupController {
 
     @Autowired
@@ -28,35 +36,39 @@ public class SignupController {
 
     @Autowired
     PersonRepository personRepository;
-    
+
     private String success = "{\"message\":\"success\"}";
     private String failure = "{\"message\":\"failure\"}";
 
-    @GetMapping(path = "/signup")
-    List<Signup> getAllSignups(){
-        return signupRepository.findAll();
+    @GetMapping
+    public ResponseEntity<List<Signup>> getAllSignUp() {
+        List<Signup> signup = signupRepository.findAll();
+        if (signup.isEmpty()) {
+            return ResponseEntity.noContent().build(); // Returns 204 if no users exist
+        }
+        return ResponseEntity.ok(signup);
     }
 
-    @GetMapping(path = "/signup/{id}")
+    @GetMapping("/{id}")
     Signup getSignupById(@PathVariable int id){
         return signupRepository.findById(id);
     }
 
-    @PostMapping(path = "/signup")
+    @PostMapping("/Newsignup")
     String createSignup(@RequestBody Signup signup){
-        if (signup == null || signup.getUsername() == null || signup.getEmail() == null)
+        if (signup == null || signup.getUsername() == null || signup.getEmail() == null || signup.getRoles() == null)
             return failure;
 
 
-        Person newPerson = new Person(signup.getFirstAndLastName(), signup.getEmail());
+        Person newPerson = new Person(signup.getFirstAndLastName(), signup.getEmail(), signup.getRoles());
+        signupRepository.save(signup);
         newPerson.setSignupInfo(signup);
         personRepository.save(newPerson);
-        signupRepository.save(signup);
 
         return success;
     }
 
-    @PutMapping(path = "/signup/{id}")
+    @PutMapping("/{id}")
     Signup updateSignupInfo(@PathVariable int id, @RequestBody Signup request){
         Signup currentSignup = signupRepository.findById(id);
         if(currentSignup == null)
@@ -77,7 +89,7 @@ public class SignupController {
         return signupRepository.findById(id);
     }
 
-    @DeleteMapping(path = "/signup/{id}")
+    @DeleteMapping("/{id}")
     String deleteSignupInfo(@PathVariable int id){
 
         // Check if there is an object depending on Person and then remove the dependency
