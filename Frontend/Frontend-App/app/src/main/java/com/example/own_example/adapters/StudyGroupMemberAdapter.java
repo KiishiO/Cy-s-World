@@ -1,4 +1,4 @@
-package com.example.own_example;
+package com.example.own_example.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.own_example.R;
-import com.example.own_example.StudyGroupMember;
+import com.example.own_example.models.StudyGroupMember;
 
 import java.util.List;
 

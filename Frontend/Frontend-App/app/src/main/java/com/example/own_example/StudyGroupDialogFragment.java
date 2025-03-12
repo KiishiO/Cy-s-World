@@ -15,11 +15,10 @@ import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.own_example.R;
-import com.example.own_example.StudyGroupMemberAdapter;
-import com.example.own_example.ApiService;
-import com.example.own_example.StudyGroup;
-import com.example.own_example.StudyGroupMember;
+import com.example.own_example.adapters.StudyGroupMemberAdapter;
+import com.example.own_example.models.StudyGroup;
+import com.example.own_example.models.StudyGroupMember;
+import com.example.own_example.services.StudyGroupService;
 import com.example.own_example.utils.UserSession;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -47,7 +46,7 @@ public class StudyGroupDialogFragment extends DialogFragment implements StudyGro
     private MaterialButton cancelButton;
     private MaterialButton saveButton;
 
-    private ApiService apiService;
+    private StudyGroupService studyGroupService;
     private UserSession userSession;
     private StudyGroupMemberAdapter memberAdapter;
     private StudyGroupDialogListener listener;
@@ -87,7 +86,7 @@ public class StudyGroupDialogFragment extends DialogFragment implements StudyGro
             studyGroup = new StudyGroup();
         }
 
-        apiService = ApiService.getInstance(requireContext());
+        studyGroupService = StudyGroupService.getInstance(requireContext());
         userSession = UserSession.getInstance(requireContext());
     }
 
@@ -102,7 +101,7 @@ public class StudyGroupDialogFragment extends DialogFragment implements StudyGro
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.dialog_study_group, container, false);
+        View view = inflater.inflate(R.layout.manage_study_group, container, false);
         initViews(view);
         setupRecyclerView();
         setupListeners();
@@ -120,16 +119,16 @@ public class StudyGroupDialogFragment extends DialogFragment implements StudyGro
     }
 
     private void initViews(View view) {
-        groupNameLayout = view.findViewById(R.id.group_name_layout);
-        groupNameInput = view.findViewById(R.id.group_name_input);
-        memberEmailLayout = view.findViewById(R.id.member_email_layout);
-        memberEmailInput = view.findViewById(R.id.member_email_input);
+        groupNameLayout = view.findViewById(R.id.studyGroup_name_layout);
+        groupNameInput = view.findViewById(R.id.studyGroup_name_input);
+        memberEmailLayout = view.findViewById(R.id.groupMember_email_layout);
+        memberEmailInput = view.findViewById(R.id.groupMember_email_input);
         membersRecyclerView = view.findViewById(R.id.members_recycler_view);
-        currentMembersTitle = view.findViewById(R.id.current_members_title);
-        addMemberButton = view.findViewById(R.id.add_member_button);
+        currentMembersTitle = view.findViewById(R.id.current_groupMembers_title);
+        addMemberButton = view.findViewById(R.id.add_groupMember_button);
         deleteButton = view.findViewById(R.id.delete_button);
         cancelButton = view.findViewById(R.id.cancel_button);
-        saveButton = view.findViewById(R.id.save_button);
+        saveButton = view.findViewById(R.id.saveGroup_button);
     }
 
     private void setupRecyclerView() {
@@ -224,7 +223,7 @@ public class StudyGroupDialogFragment extends DialogFragment implements StudyGro
 
         if (isEditMode) {
             // Update existing group
-            apiService.updateStudyGroup(studyGroup, new ApiService.StudyGroupCallback() {
+            studyGroupService.updateStudyGroup(studyGroup, new StudyGroupService.StudyGroupCallback() {
                 @Override
                 public void onSuccess(StudyGroup updatedGroup) {
                     if (listener != null) {
@@ -248,7 +247,7 @@ public class StudyGroupDialogFragment extends DialogFragment implements StudyGro
                 return;
             }
 
-            apiService.createStudyGroup(userId, studyGroup, new ApiService.StudyGroupCallback() {
+            studyGroupService.createStudyGroup(userId, studyGroup, new StudyGroupService.StudyGroupCallback() {
                 @Override
                 public void onSuccess(StudyGroup createdGroup) {
                     if (listener != null) {
@@ -276,7 +275,7 @@ public class StudyGroupDialogFragment extends DialogFragment implements StudyGro
     }
 
     private void deleteStudyGroup() {
-        apiService.deleteStudyGroup(studyGroup.getId(), new ApiService.SuccessCallback() {
+        studyGroupService.deleteStudyGroup(studyGroup.getId(), new StudyGroupService.SuccessCallback() {
             @Override
             public void onSuccess() {
                 Toast.makeText(getContext(), "Study group deleted successfully",
@@ -297,7 +296,7 @@ public class StudyGroupDialogFragment extends DialogFragment implements StudyGro
     }
 
     private void addMemberToExistingGroup(String email) {
-        apiService.addStudyGroupMember(studyGroup.getId(), email, new ApiService.StudyGroupCallback() {
+        studyGroupService.addStudyGroupMember(studyGroup.getId(), email, new StudyGroupService.StudyGroupCallback() {
             @Override
             public void onSuccess(StudyGroup updatedGroup) {
                 studyGroup = updatedGroup;
@@ -341,8 +340,8 @@ public class StudyGroupDialogFragment extends DialogFragment implements StudyGro
     public void onRemoveMember(StudyGroupMember member, int position) {
         if (isEditMode) {
             // Remove via API
-            apiService.removeStudyGroupMember(studyGroup.getId(), member.getId(),
-                    new ApiService.StudyGroupCallback() {
+            studyGroupService.removeStudyGroupMember(studyGroup.getId(), member.getId(),
+                    new StudyGroupService.StudyGroupCallback() {
                         @Override
                         public void onSuccess(StudyGroup updatedGroup) {
                             studyGroup = updatedGroup;
