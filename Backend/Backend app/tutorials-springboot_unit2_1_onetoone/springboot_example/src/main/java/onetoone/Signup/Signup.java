@@ -13,7 +13,7 @@ import onetoone.Persons.PersonRepository;
 
 /**
  * 
- * @author Vivek Bengre
+ * @author Sonia Patil
  */ 
 
 @Entity
