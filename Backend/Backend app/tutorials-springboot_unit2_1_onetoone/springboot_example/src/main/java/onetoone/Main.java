@@ -5,6 +5,7 @@ import onetoone.Login.Login;
 import onetoone.Login.LoginRepository;
 import onetoone.Signup.Signup;
 import onetoone.Signup.SignupRepository;
+import onetoone.StudyTable.StudyTable;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -98,11 +99,8 @@ class Main {
             Signup signup3 = new Signup("David Williams", "dwilliams", "davidw@example.com", "Davidw545", "Teacher");
             Signup signup4 = new Signup("Sonia Patil", "SoniaP", "john@somemail.com", "123456789", "Student");
 
-//            personRepository.save(person4); // Save the person first
 
-//            Signup signup3 = new Signup("Sonia Patil", "SoniaP", "john@somemail.com", "123456789", "Student");
-
-            //ID1
+            //Dummy Data 1
             signup1.setPerson(person1); // Set the already saved person
             person1.setSignupInfo(signup1);
             signupRepository.save(signup1); // Now save signup
@@ -116,12 +114,12 @@ class Main {
             person1.setLogin(login1);
             signup1.setLogin(login1);
             personRepository.save(person1);
-            signupRepository.save(signup1); // Now save signup
+            signupRepository.save(signup1);
 
-            //ID2
+            //Dummy Data 2
             signup2.setPerson(person2); // Set the already saved person
             person2.setSignupInfo(signup2);
-            signupRepository.save(signup2); // Now save signup
+            signupRepository.save(signup2);
             personRepository.save(person2);
 
             // Saving Login details
@@ -132,12 +130,12 @@ class Main {
             person2.setLogin(login2);
             signup2.setLogin(login2);
             personRepository.save(person2);
-            signupRepository.save(signup2); // Now save signup
+            signupRepository.save(signup2);
 
-            //ID3
+            //Dummy Data 3
             signup3.setPerson(person3); // Set the already saved person
             person3.setSignupInfo(signup3);
-            signupRepository.save(signup3); // Now save signup
+            signupRepository.save(signup3);
             personRepository.save(person3);
 
             // Saving Login details
@@ -148,12 +146,9 @@ class Main {
             person3.setLogin(login3);
             signup3.setLogin(login3);
             personRepository.save(person3);
-            signupRepository.save(signup3); // Now save signup
+            signupRepository.save(signup3);
 
-
-
-
-
+            //Dummy Data 4
             signup4.setPerson(person4); // Set the already saved person
             person4.setSignupInfo(signup4);
             signupRepository.save(signup4); // Now save signup
@@ -168,8 +163,9 @@ class Main {
             signup4.setLogin(login4);
             personRepository.save(person4);
             signupRepository.save(signup4); // Now save signup
-//            loginRepository.save(login2);
-//            loginRepository.save(login3);
+
+//            StudyTable studyTable1 = new StudyTable(1L, person1, person2);
+
 
             // Logging to console (optional, for verification)
             System.out.println("Sample login and person data inserted into the database.");
