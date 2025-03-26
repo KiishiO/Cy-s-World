@@ -4,9 +4,12 @@ public class StudyGroupMember {
     private long id;
     private String name;
 
-    public StudyGroupMember(long id, String name) {
+    private String email;
+
+    public StudyGroupMember(long id, String name, String email) {
         this.id = id;
         this.name = name;
+        this.email = email;
     }
 
     public long getId() {
@@ -21,7 +24,11 @@ public class StudyGroupMember {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setName(String name) {this.name = name; }
+
+    public String getEmail() {
+        return email;
     }
+
+    public void setEmail(String email) {this.email = email; }
 }
