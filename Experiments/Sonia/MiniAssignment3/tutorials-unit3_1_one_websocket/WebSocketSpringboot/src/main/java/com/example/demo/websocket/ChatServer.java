@@ -69,6 +69,10 @@ public class ChatServer {
             // send to the user joining in
             sendMessageToPArticularUser(username, "Welcome to the chat server, "+username);
 
+            //added functionality that shows how many users are active int he chat
+            int activeUsers = sessionUsernameMap.size();
+            sendMessageToPArticularUser(username, "There are currently " + activeUsers + " users in the chat");
+
             // send to everyone in the chat
             broadcast("User: " + username + " has Joined the Chat");
         }
@@ -89,6 +93,9 @@ public class ChatServer {
         // server side log
         logger.info("[onMessage] " + username + ": " + message);
 
+        //gets the current time of the message
+        String timestamp = "[" + java.time.LocalDateTime.now() + "]";
+
         // Direct message to a user using the format "@username <message>"
         if (message.startsWith("@")) {
 
@@ -102,13 +109,43 @@ public class ChatServer {
             }
             String destUserName = split_msg[0].substring(1);    //@username and get rid of @
             String actualMessage = actualMessageBuilder.toString();
-            sendMessageToPArticularUser(destUserName, "[DM from " + username + "]: " + actualMessage);
-            sendMessageToPArticularUser(username, "[DM from " + username + "]: " + actualMessage);
+            //actualMessage = formatMessage(actualMessage);
+            sendMessageToPArticularUser(destUserName, "[DM from " + username + "]: " + actualMessage + " " +timestamp);
+            sendMessageToPArticularUser(username, "[DM from " + username + "]: " + actualMessage + " " + timestamp);
+        }else if(message.startsWith("!announce")) {
+            String announcement = message.substring(9).trim(); //remove the !announce from message
+            if((!announcement.isEmpty())) {
+                broadcastAnnouncement(username, announcement);
+            }
         }
         else { // Message to whole chat
-            broadcast(username + ": " + message);
+            broadcast(username + ": " + message + " " + timestamp);
         }
     }
+
+    private void broadcastAnnouncement(String username, String message) {
+        String announcement = "[ANNOUNCEMENT from " + username + "]" + message;
+        sessionUsernameMap.forEach((session, user) ->{
+            try {
+                session.getBasicRemote().sendText("<b><font color='red'>" + announcement + "</font></b>");
+            } catch (IOException e) {
+                logger.info("[Announcment Exception] " +  e.getMessage());
+            }
+        });
+    }
+
+    /**
+     * Format the message to support bold (*bold*) and italic (_italic_)
+     */
+//    private String formatMessage(String message) {
+//        // Convert *bold* to <b>bold</b>
+//        message = message.replaceAll("\\*(.*?)\\*", "<b>$1</b>");
+//
+//        // Convert _italic_ to <i>italic</i>
+//        message = message.replaceAll("_([^_]+)_", "<i>$1</i>");
+//
+//        return message;
+//    }
 
     /**
      * Handles the closure of a WebSocket connection.
