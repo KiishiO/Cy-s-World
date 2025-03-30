@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Chat Client</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .connection-info {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        #log {
+            height: 300px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            font-family: monospace;
+            background-color: #f8f9fa;
+        }
+        
+        .input-container {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        
+        #username {
+            padding: 8px;
+            margin-right: 10px;
+            flex-grow: 1;
+        }
+        
+        #connectBtn {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        #disconnectBtn {
+            padding: 8px 15px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        .message-container {
+            display: flex;
+            margin-top: 15px;
+        }
+        
+        #msg {
+            padding: 8px;
+            margin-right: 10px;
+            flex-grow: 1;
+        }
+        
+        #sendBtn {
+            padding: 8px 15px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .note {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 20px;
+        }
+        
+        .connected {
+            background-color: #d4edda !important;
+        }
+        
+        .disconnected {
+            background-color: #f8d7da !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>WebSocket Chat Client</h1>
+    </div>
+    
+    <div class="connection-info disconnected" id="connectionInfo">
+        <p>Status: <span id="status">Disconnected</span></p>
+    </div>
+    
+    <div class="input-container">
+        <input type="text" id="username" placeholder="Enter your username">
+        <button id="connectBtn">Connect</button>
+        <button id="disconnectBtn" disabled>Disconnect</button>
+    </div>
+    
+    <div id="log"></div>
+    
+    <div class="message-container">
+        <input type="text" id="msg" placeholder="Type your message here..." disabled>
+        <button id="sendBtn" disabled>Send</button>
+    </div>
+    
+    <div class="note">
+        <p>Note: To send a direct message to a specific user, start your message with "@username".</p>
+        <p>Example: "@John Hello there!" will only be sent to John.</p>
+    </div>
+    
+    <script>
+        // DOM elements
+        const log = document.getElementById('log');
+        const username = document.getElementById('username');
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const msg = document.getElementById('msg');
+        const sendBtn = document.getElementById('sendBtn');
+        const status = document.getElementById('status');
+        const connectionInfo = document.getElementById('connectionInfo');
+        
+        let webSocket;
+        
+        // Connect to WebSocket server
+        function connect() {
+            const user = username.value.trim();
+            if (!user) {
+                appendToLog('Please enter a username', 'error');
+                return;
+            }
+            
+            // Use the correct WebSocket URL based on your server
+            const serverUrl = `ws://192.168.1.150:8080/chat/${user}`;
+            
+            try {
+                webSocket = new WebSocket(serverUrl);
+                
+                webSocket.onopen = function(event) {
+                    appendToLog('Connected to server', 'system');
+                    status.textContent = 'Connected';
+                    connectionInfo.classList.remove('disconnected');
+                    connectionInfo.classList.add('connected');
+                    
+                    // Enable/disable appropriate buttons
+                    connectBtn.disabled = true;
+                    disconnectBtn.disabled = false;
+                    msg.disabled = false;
+                    sendBtn.disabled = false;
+                    username.disabled = true;
+                };
+                
+                webSocket.onmessage = function(event) {
+                    appendToLog(event.data, 'received');
+                };
+                
+                webSocket.onclose = function(event) {
+                    appendToLog('Disconnected from server', 'system');
+                    status.textContent = 'Disconnected';
+                    connectionInfo.classList.remove('connected');
+                    connectionInfo.classList.add('disconnected');
+                    
+                    // Reset buttons
+                    connectBtn.disabled = false;
+                    disconnectBtn.disabled = true;
+                    msg.disabled = true;
+                    sendBtn.disabled = true;
+                    username.disabled = false;
+                };
+                
+                webSocket.onerror = function(event) {
+                    appendToLog('Error: ' + event.data, 'error');
+                };
+            } catch (error) {
+                appendToLog('Error: ' + error.message, 'error');
+            }
+        }
+        
+        // Disconnect from server
+        function disconnect() {
+            if (webSocket) {
+                webSocket.close();
+            }
+        }
+        
+        // Send message to server
+        function sendMessage() {
+            if (webSocket && webSocket.readyState === WebSocket.OPEN) {
+                const message = msg.value.trim();
+                if (message) {
+                    webSocket.send(message);
+                    msg.value = '';
+                }
+            } else {
+                appendToLog('Not connected to server', 'error');
+            }
+        }
+        
+        // Append message to log
+        function appendToLog(message, type) {
+            const messageElement = document.createElement('div');
+            messageElement.textContent = message;
+            messageElement.className = type || '';
+            
+            log.appendChild(messageElement);
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        // Event listeners
+        connectBtn.addEventListener('click', connect);
+        disconnectBtn.addEventListener('click', disconnect);
+        sendBtn.addEventListener('click', sendMessage);
+        
+        msg.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
