@@ -56,15 +56,16 @@
             android:textSize="20dp"
             android:id="@+id/serverEdt"
             android:textColor="@color/white"/>
+
         <EditText
-            android:layout_marginTop="20dp"
-            android:layout_height="50dp"
-            android:layout_width="match_parent"
-            android:hint="username"
-            android:textColorHint="@color/white"
-            android:textSize="20dp"
             android:id="@+id/unameEdt"
-            android:textColor="@color/white"/>
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="20dp"
+            android:hint="username"
+            android:textColor="@color/white"
+            android:textColorHint="#70FFFFFF"
+            android:textSize="20dp" />
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

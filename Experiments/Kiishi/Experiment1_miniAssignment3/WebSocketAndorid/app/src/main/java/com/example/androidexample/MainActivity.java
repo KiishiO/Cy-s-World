@@ -26,6 +26,8 @@ public class MainActivity extends AppCompatActivity implements WebSocketListener
 
         /* connect button listener */
         connectBtn.setOnClickListener(view -> {
+            String userInput = usernameEtx.getText().toString();
+
             String serverUrl = serverEtx.getText().toString() + usernameEtx.getText().toString();
 
             // Establish WebSocket connection and set listener
@@ -34,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements WebSocketListener
 
             // got to chat activity
             Intent intent = new Intent(this, ChatActivity.class);
+            intent.putExtra("NAME", userInput);  // key-value to pass to the ChatActivity
             startActivity(intent);
         });
     }

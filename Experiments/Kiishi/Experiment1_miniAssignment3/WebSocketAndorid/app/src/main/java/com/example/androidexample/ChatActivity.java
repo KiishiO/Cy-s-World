@@ -2,10 +2,12 @@ package com.example.androidexample;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import org.java_websocket.handshake.ServerHandshake;
@@ -13,6 +15,8 @@ import org.java_websocket.handshake.ServerHandshake;
 public class ChatActivity extends AppCompatActivity implements WebSocketListener{
 
     private Button sendBtn;
+
+    private ImageButton backBtn;
     private EditText msgEtx;
     private TextView msgTv;
 
@@ -25,9 +29,18 @@ public class ChatActivity extends AppCompatActivity implements WebSocketListener
 
         /* initialize UI elements */
         sendBtn = (Button) findViewById(R.id.sendBtn);
+        backBtn = (ImageButton) findViewById(R.id.backBtn);
         msgEtx = (EditText) findViewById(R.id.msgEdt);
         msgTv = (TextView) findViewById(R.id.tx1);
         userText = (TextView) findViewById(R.id.username);
+
+        /* extract data passed into this activity from another activity */
+        String receivedInput = getIntent().getStringExtra("NAME");
+        if(receivedInput == null) {
+            userText.setText("Username");
+        } else {
+            userText.setText(receivedInput);
+        }
 
         /* connect this activity to the websocket instance */
         WebSocketManager.getInstance().setWebSocketListener(ChatActivity.this);
@@ -40,6 +53,12 @@ public class ChatActivity extends AppCompatActivity implements WebSocketListener
             } catch (Exception e) {
                 Log.d("ExceptionSendMessage:", e.getMessage().toString());
             }
+        });
+
+        /* back button listener */
+        backBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(ChatActivity.this, MainActivity.class);
+            startActivity(intent);
         });
     }
 
