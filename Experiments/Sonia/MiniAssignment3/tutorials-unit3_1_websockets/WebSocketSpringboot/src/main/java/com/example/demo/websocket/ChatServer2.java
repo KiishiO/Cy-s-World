@@ -99,8 +99,12 @@ public class ChatServer2 {
             String actualMessage = actualMessageBuilder.toString();
             sendMessageToPArticularUser(destUserName, "[DM from " + username + "]: " + actualMessage);
             sendMessageToPArticularUser(username, "[DM from " + username + "]: " + actualMessage);
-        }
-        else { // Message to whole chat
+        } else if (message.startsWith("!shout ")) {
+            String loudMessage = message.substring(7).trim();
+            if((!loudMessage.isEmpty())) {
+                broadcast(username + " SHOUTS: " + loudMessage.toUpperCase());
+            }
+        } else { // Message to whole chat
             broadcast(username + ": " + message);
         }
     }

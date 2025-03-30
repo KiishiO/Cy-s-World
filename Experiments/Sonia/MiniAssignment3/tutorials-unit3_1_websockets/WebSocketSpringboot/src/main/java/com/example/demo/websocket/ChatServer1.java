@@ -104,6 +104,11 @@ public class ChatServer1 {
             String actualMessage = actualMessageBuilder.toString();
             sendMessageToPArticularUser(destUserName, "[DM from " + username + "]: " + actualMessage);
             sendMessageToPArticularUser(username, "[DM from " + username + "]: " + actualMessage);
+        } else if (message.startsWith("!shout ")) {
+            String loudMessage = message.substring(7).trim();
+            if(!loudMessage.isEmpty()) {
+                broadcast(username + " SHOUTS: " + loudMessage.toUpperCase());
+            }
         }
         else { // Message to whole chat
             broadcast(username + ": " + message);
