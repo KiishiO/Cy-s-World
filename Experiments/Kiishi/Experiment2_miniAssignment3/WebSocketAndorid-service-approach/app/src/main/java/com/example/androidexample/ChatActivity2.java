@@ -7,10 +7,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,20 +21,35 @@ public class ChatActivity2 extends AppCompatActivity {
     private Button sendBtn;
     private EditText msgEtx;
     private TextView msgTv;
-    private Button backMainBtn;
+    private ImageButton backMainBtn;
+    private TextView userText;
     private static final String TAG = "ChatActivity2"; // For logging
+    SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat2);
+        Log.d(TAG, "onCreate: ChatActivity2 initialized.");
 
         /* initialize UI elements */
         sendBtn = (Button) findViewById(R.id.sendBtn2);
         msgEtx = (EditText) findViewById(R.id.msgEdt2);
         msgTv = (TextView) findViewById(R.id.tx2);
-        backMainBtn = (Button) findViewById(R.id.backMainBtn);
-        Log.d(TAG, "onCreate: ChatActivity2 initialized.");
+        backMainBtn = (ImageButton) findViewById(R.id.backMainBtn);
+        userText = (TextView) findViewById(R.id.username);
+
+        //Retrieving saved data, if any
+        sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        // Retrieve and display saved input
+        String receivedInput = sharedPreferences.getString("USER_INPUT_2", "Username");
+
+        /* extract data passed into this activity from another activity */
+        if(receivedInput == null) {
+            userText.setText("Username");
+        } else {
+            userText.setText(receivedInput);
+        }
 
         /* send button listener */
         sendBtn.setOnClickListener(v -> {

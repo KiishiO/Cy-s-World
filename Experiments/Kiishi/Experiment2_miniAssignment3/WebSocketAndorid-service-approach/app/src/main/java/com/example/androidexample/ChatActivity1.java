@@ -7,20 +7,25 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import org.java_websocket.handshake.ServerHandshake;
 
 public class ChatActivity1 extends AppCompatActivity {
 
-    private Button sendBtn, backMainBtn;
+    private Button sendBtn;
+    private ImageButton backMainBtn;
     private EditText msgEtx;
     private TextView msgTv;
+    private TextView userText;
     private static final String TAG = "ChatActivity1";
+    SharedPreferences sharedPreferences;
 
 
     @Override
@@ -32,9 +37,22 @@ public class ChatActivity1 extends AppCompatActivity {
 
         /* initialize UI elements */
         sendBtn = (Button) findViewById(R.id.sendBtn);
-        backMainBtn = (Button) findViewById(R.id.backMainBtn);
+        backMainBtn = (ImageButton) findViewById(R.id.backMainBtn);
         msgEtx = (EditText) findViewById(R.id.msgEdt);
         msgTv = (TextView) findViewById(R.id.tx1);
+        userText = (TextView) findViewById(R.id.username);
+
+        //Retrieving saved data, if any
+        sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        // Retrieve and display saved input
+        String receivedInput = sharedPreferences.getString("USER_INPUT_1", "Username");
+
+        /* extract data passed into this activity from another activity */
+        if(receivedInput == null) {
+            userText.setText("Username");
+        } else {
+            userText.setText(receivedInput);
+        }
 
         /* send button listener */
         sendBtn.setOnClickListener(v -> {
