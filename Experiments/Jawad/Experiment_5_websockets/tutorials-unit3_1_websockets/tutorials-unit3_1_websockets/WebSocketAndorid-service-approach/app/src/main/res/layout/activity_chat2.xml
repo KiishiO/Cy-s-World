@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ChatActivity2"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#F0F8FF">
+
+    <!-- Header -->
+    <TextView
+        android:id="@+id/chatHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Chat Room 2"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#009688"
+        android:gravity="center"
+        android:padding="8dp"
+        android:layout_marginBottom="8dp"/>
+
+    <!-- Chat Display Area -->
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#E0F2F1"
+        android:layout_marginBottom="10dp">
+
+        <TextView
+            android:id="@+id/tx2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="The Conversation will appear here:"
+            android:textSize="18sp"
+            android:padding="12dp"
+            android:textColor="#00796B"
+            android:gravity="start" />
+    </ScrollView>
+
+    <!-- Quick Reply Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
+
+        <Button
+            android:id="@+id/btnHello"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="👋 Hello"
+            android:textSize="14sp"
+            android:layout_marginEnd="4dp"
+            android:backgroundTint="#B2DFDB" />
+
+        <Button
+            android:id="@+id/btnQuestion"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="❓ Question"
+            android:textSize="14sp"
+            android:layout_marginEnd="4dp"
+            android:backgroundTint="#B2DFDB" />
+
+        <Button
+            android:id="@+id/btnAgreement"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="✅ Agree"
+            android:textSize="14sp"
+            android:backgroundTint="#B2DFDB" />
+    </LinearLayout>
+
+    <!-- Input Area -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
+
+        <EditText
+            android:id="@+id/msgEdt2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Type a message..."
+            android:textSize="16sp"
+            android:padding="12dp"
+            android:minHeight="50dp"
+            android:background="@android:drawable/editbox_background"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/emojiBtn"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:text="😊"
+            android:textSize="20sp"
+            android:layout_marginEnd="8dp"
+            android:backgroundTint="#4DB6AC" />
+
+        <Button
+            android:id="@+id/sendBtn2"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:text="Send"
+            android:padding="12dp"
+            android:backgroundTint="#009688" />
+    </LinearLayout>
+
+    <!-- Back Button -->
+    <Button
+        android:id="@+id/backMainBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Back to Main"
+        android:backgroundTint="#4DB6AC" />
+
+</LinearLayout>
