@@ -12,11 +12,11 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 
-//import lombok.Data;
+import lombok.Data;
 
 @Entity
 @Table(name = "campus_events")
-//@Data
+@Data
 public class CampusEvents {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -77,27 +77,51 @@ public class CampusEvents {
     }
 
     // Getters and setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id; }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public void setId(Long id) {
+        this.id = id; }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public String getTitle() {
+        return title; }
 
-    public String getLocation() { return location; }
-    public void setLocation(String location) { this.location = location; }
+    public void setTitle(String title) {
+        this.title = title; }
 
-    public LocalDateTime getStartTime() { return startTime; }
-    public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
+    public String getDescription() {
+        return description; }
 
-    public LocalDateTime getEndTime() { return endTime; }
-    public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; }
+    public void setDescription(String description) {
+        this.description = description; }
 
-    public String getCreator() { return creator; }
-    public void setCreator(String creator) { this.creator = creator; }
+    public String getLocation() {
+        return location; }
 
-    public String getCategory() { return category; }
-    public void setCategory(String category) { this.category = category; }
+    public void setLocation(String location) {
+        this.location = location; }
+
+    public LocalDateTime getStartTime() {
+        return startTime; }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime; }
+
+    public LocalDateTime getEndTime() {
+        return endTime; }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime; }
+
+    public String getCreator() {
+        return creator; }
+
+    public void setCreator(String creator) {
+        this.creator = creator; }
+
+    public String getCategory() {
+        return category; }
+
+    public void setCategory(String category) {
+        this.category = category; }
 }

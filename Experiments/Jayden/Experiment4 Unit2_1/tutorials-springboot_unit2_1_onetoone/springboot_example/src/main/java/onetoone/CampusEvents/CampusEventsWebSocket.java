@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -73,14 +74,14 @@ public class CampusEventsWebSocket {
             usernameSessionMap.put(username, session);
 
             // Send welcome message to the user joining
-            sendMessageToUser(username, "Welcome to the Campus Events notification system, " + username);
+            sendMessageToUser(username, "Welcome to the Campus Events notification, " + username);
 
             // Send the campus events history to the new user
             sendMessageToUser(username, getEventsHistory());
 
 
             // Notify everyone about new user
-            broadcast("User: " + username + " has joined the Campus Events system");
+            broadcast("User: " + username + " joined the Campus Events");
         }
     }
 
@@ -107,6 +108,9 @@ public class CampusEventsWebSocket {
             if (event.getCreator() == null || event.getCreator().isEmpty()) {
                 event.setCreator(username);
             }
+
+            // Save the event to the database
+            CampusEvents savedEvent = eventRepo.save(event);
 
             // Convert event back to JSON for broadcasting
             String eventJson = objectMapper.writeValueAsString(event);
@@ -138,7 +142,20 @@ public class CampusEventsWebSocket {
                 broadcast(username + ": " + message);
             }
         }
+
     }
+
+    //Helper to save user messages
+//    private void saveChatMessage(String username, String message) {
+//        CampusEvents chatMessage = new CampusEvents();
+//        chatMessage.setCreator(username);
+//        chatMessage.setTitle("Chat Message");
+//        chatMessage.setDescription(message);
+//        chatMessage.setStartTime(LocalDateTime.now()); // Timestamp of message
+//        chatMessage.setCategory("Chat");
+//
+//        eventRepo.save(chatMessage);
+//    }
 
     /**
      * Handles the closure of a WebSocket connection.
@@ -259,7 +276,7 @@ public class CampusEventsWebSocket {
                         .append("\n");
             }
         } else {
-            sb.append("No events scheduled at this time.\n");
+            sb.append("No new events have been Posted :)\n");
         }
 
         return sb.toString();
