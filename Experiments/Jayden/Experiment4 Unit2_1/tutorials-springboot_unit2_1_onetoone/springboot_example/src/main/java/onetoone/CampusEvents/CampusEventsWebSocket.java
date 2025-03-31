@@ -1,5 +1,5 @@
 package onetoone.CampusEvents;
-
+//Author: Jayden Sorter
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
@@ -120,25 +120,22 @@ public class CampusEventsWebSocket {
 
             logger.info("[Event Posted] by " + username + ": " + event.getTitle());
         } catch (IOException e) {
-            // If not a valid event JSON, treat as a command or chat message
+            // Handle non-JSON messages (commands or chat messages)
             if (message.startsWith("/subscribe ")) {
-                // Implementation for subscribing to specific event categories could go here
                 String category = message.substring(11);
+                saveChatMessage(username, "Subscribed to category: " + category);
                 sendMessageToUser(username, "You've subscribed to events in category: " + category);
             } else if (message.startsWith("/help")) {
-                // Send help information
                 sendMessageToUser(username, "Available commands: \n" +
                         "/help - Show this help message\n" +
                         "/list - Show all campus events\n" +
                         "/subscribe [category] - Subscribe to specific event category\n" +
                         "Or send a JSON event object to post a new event");
-
-            } else if(message.startsWith("/list")){
-                // Send the list of events to the user
+            } else if (message.startsWith("/list")) {
                 sendMessageToUser(username, getEventsHistory());
-
             } else {
-                // Regular chat message
+                // Save chat message as an event in the database
+                saveChatMessage(username, message);
                 broadcast(username + ": " + message);
             }
         }
@@ -146,16 +143,18 @@ public class CampusEventsWebSocket {
     }
 
     //Helper to save user messages
-//    private void saveChatMessage(String username, String message) {
-//        CampusEvents chatMessage = new CampusEvents();
-//        chatMessage.setCreator(username);
-//        chatMessage.setTitle("Chat Message");
-//        chatMessage.setDescription(message);
-//        chatMessage.setStartTime(LocalDateTime.now()); // Timestamp of message
-//        chatMessage.setCategory("Chat");
-//
-//        eventRepo.save(chatMessage);
-//    }
+    private void saveChatMessage(String username, String message) {
+        CampusEvents chatMessage = new CampusEvents();
+        chatMessage.setTitle("Chat Message");
+        chatMessage.setDescription(message);
+        chatMessage.setLocation("N/A"); // No location for chat messages
+        chatMessage.setStartTime(LocalDateTime.now()); // Timestamp of message
+        chatMessage.setCreator(username);
+        chatMessage.setCategory("Chat");
+
+        // Save the chat message to the eventRepo (database)
+        eventRepo.save(chatMessage);
+    }
 
     /**
      * Handles the closure of a WebSocket connection.
@@ -264,19 +263,23 @@ public class CampusEventsWebSocket {
         List<CampusEvents> events = eventRepo.findAll();
 
         StringBuilder sb = new StringBuilder();
-        sb.append("=== CAMPUS EVENTS ===\n");
+        sb.append("=== CAMPUS EVENTS & CHAT HISTORY ===\n");
 
         if (events != null && !events.isEmpty()) {
             for (CampusEvents event : events) {
-                sb.append("Event: ").append(event.getTitle())
-                        .append(" | Location: ").append(event.getLocation())
-                        .append(" | Start: ").append(event.getStartTime())
-                        .append(" | Created by: ").append(event.getCreator())
-                        .append(" | Category: ").append(event.getCategory())
-                        .append("\n");
+                sb.append("[").append(event.getCategory()).append("] ")
+                        .append(event.getCreator()).append(": ")
+                        .append(event.getTitle()).append("\n").append(event.getDescription()).append("\n");
+
+                if (!"Chat".equals(event.getCategory())) {
+                    sb.append(" | Location: ").append(event.getLocation())
+                            .append(" | Start: ").append(event.getStartTime());
+                }
+
+                sb.append("\n");
             }
         } else {
-            sb.append("No new events have been Posted :)\n");
+            sb.append("No events or messages have been posted yet.\n");
         }
 
         return sb.toString();
