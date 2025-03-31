@@ -9,7 +9,7 @@ import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private Button uploadBtn, imgBtn;
+    private Button uploadBtn, imgBtn, wsBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,10 +18,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         uploadBtn = findViewById(R.id.btnUploadImage);
         imgBtn = findViewById(R.id.btnImageRequest);
+        wsBtn = findViewById(R.id.btnWebSocketImage);
 
         /* button click listeners */
         uploadBtn.setOnClickListener(this);
         imgBtn.setOnClickListener(this);
+        wsBtn.setOnClickListener(this);
     }
 
     @Override
@@ -32,6 +34,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         else if (id == R.id.btnImageRequest) {
             startActivity(new Intent(MainActivity.this, ImageReqActivity.class));
+        }
+        else if (id == R.id.btnWebSocketImage) {
+            startActivity(new Intent(MainActivity.this, WebSocketImageActivity.class));
         }
     }
 }
