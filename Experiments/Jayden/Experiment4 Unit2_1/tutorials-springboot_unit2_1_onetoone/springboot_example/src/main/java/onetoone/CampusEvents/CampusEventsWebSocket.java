@@ -7,9 +7,11 @@ import jakarta.websocket.server.ServerEndpoint;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,6 +31,14 @@ import java.util.concurrent.ConcurrentHashMap;
 @ServerEndpoint("/events/{username}")
 @Component
 public class CampusEventsWebSocket {
+
+    private static CampusEventsRepository eventRepo;
+
+    @Autowired
+    public void setCampusEventsRepository(CampusEventsRepository repo){
+        eventRepo = repo;
+
+    }
 
     // Store all socket sessions and their corresponding username
     private static Map<Session, String> sessionUsernameMap = new ConcurrentHashMap<>();
@@ -64,6 +74,10 @@ public class CampusEventsWebSocket {
 
             // Send welcome message to the user joining
             sendMessageToUser(username, "Welcome to the Campus Events notification system, " + username);
+
+            // Send the campus events history to the new user
+            sendMessageToUser(username, getEventsHistory());
+
 
             // Notify everyone about new user
             broadcast("User: " + username + " has joined the Campus Events system");
@@ -111,8 +125,14 @@ public class CampusEventsWebSocket {
                 // Send help information
                 sendMessageToUser(username, "Available commands: \n" +
                         "/help - Show this help message\n" +
+                        "/list - Show all campus events\n" +
                         "/subscribe [category] - Subscribe to specific event category\n" +
                         "Or send a JSON event object to post a new event");
+
+            } else if(message.startsWith("/list")){
+                // Send the list of events to the user
+                sendMessageToUser(username, getEventsHistory());
+
             } else {
                 // Regular chat message
                 broadcast(username + ": " + message);
@@ -222,4 +242,29 @@ public class CampusEventsWebSocket {
                     "[BroadcastEvent Serialization Exception] " + e.getMessage());
         }
     }
+
+    private String getEventsHistory() {
+        List<CampusEvents> events = eventRepo.findAll();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("=== CAMPUS EVENTS ===\n");
+
+        if (events != null && !events.isEmpty()) {
+            for (CampusEvents event : events) {
+                sb.append("Event: ").append(event.getTitle())
+                        .append(" | Location: ").append(event.getLocation())
+                        .append(" | Start: ").append(event.getStartTime())
+                        .append(" | Created by: ").append(event.getCreator())
+                        .append(" | Category: ").append(event.getCategory())
+                        .append("\n");
+            }
+        } else {
+            sb.append("No events scheduled at this time.\n");
+        }
+
+        return sb.toString();
+    }
+
+
+
 }

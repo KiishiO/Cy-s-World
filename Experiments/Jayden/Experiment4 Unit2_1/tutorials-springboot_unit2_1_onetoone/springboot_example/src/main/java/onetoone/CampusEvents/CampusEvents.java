@@ -2,23 +2,70 @@ package onetoone.CampusEvents;
 
 import java.time.LocalDateTime;
 
-public class CampusEvents {
-    private Long id;
-    private String title;
-    private String description;
-    private String location;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private String creator;
-    private String category;
-//    private String image;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
-    // Constructors
+//import lombok.Data;
+
+@Entity
+@Table(name = "campus_events")
+//@Data
+public class CampusEvents {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String title;
+
+    @Lob
+    @Column(nullable = false)
+    private String description;
+
+    @Column(nullable = false)
+    private String location;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "start_time", nullable = false)
+    private LocalDateTime startTime = LocalDateTime.now();
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "end_time")
+    private LocalDateTime endTime;
+
+    @Column(name = "creator", nullable = false)
+    private String creator;
+
+    @Column
+    private String category;
+
+    // Default constructor
     public CampusEvents() {}
 
+    // Constructor with parameters
+    public CampusEvents(String title, String description, String location,
+                        LocalDateTime startTime, LocalDateTime endTime, String creator,
+                        String category) {
+        this.title = title;
+        this.description = description;
+        this.location = location;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.creator = creator;
+        this.category = category;
+    }
+
+    // Full constructor with ID
     public CampusEvents(Long id, String title, String description, String location,
-                       LocalDateTime startTime, LocalDateTime endTime, String creator,
-                       String category) {
+                        LocalDateTime startTime, LocalDateTime endTime, String creator,
+                        String category) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -27,7 +74,6 @@ public class CampusEvents {
         this.endTime = endTime;
         this.creator = creator;
         this.category = category;
-
     }
 
     // Getters and setters
@@ -37,45 +83,21 @@ public class CampusEvents {
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
 
-    public String getDescription() {
-        return description; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public void setDescription(String description) {
-        this.description = description; }
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
 
-    public String getLocation() {
-        return location; }
+    public LocalDateTime getStartTime() { return startTime; }
+    public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
 
-    public void setLocation(String location) {
-        this.location = location; }
+    public LocalDateTime getEndTime() { return endTime; }
+    public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; }
 
-    public LocalDateTime getStartTime() {
-        return startTime; }
+    public String getCreator() { return creator; }
+    public void setCreator(String creator) { this.creator = creator; }
 
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime; }
-
-    public LocalDateTime getEndTime() {
-        return endTime; }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime; }
-
-    public String getCreator() {
-        return creator; }
-
-    public void setCreator(String creator) {
-        this.creator = creator; }
-
-    public String getCategory() {
-        return category; }
-
-    public void setCategory(String category) {
-        this.category = category; }
-
-//    public String getImage() {
-//        return image; }
-//
-//    public void setImage(String image) {
-//        this.image = image; }
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 }
