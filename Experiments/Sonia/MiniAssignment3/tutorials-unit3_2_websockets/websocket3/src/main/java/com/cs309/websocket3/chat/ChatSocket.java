@@ -41,6 +41,7 @@ public class ChatSocket {
 	// Store all socket session and their corresponding username.
 	private static Map<Session, String> sessionUsernameMap = new Hashtable<>();
 	private static Map<String, Session> usernameSessionMap = new Hashtable<>();
+	private static Map<String, String> userStatusMap = new Hashtable<>(); //Stores the user status
 
 	private final Logger logger = LoggerFactory.getLogger(ChatSocket.class);
 
@@ -53,12 +54,13 @@ public class ChatSocket {
     // store connecting user information
 		sessionUsernameMap.put(session, username);
 		usernameSessionMap.put(username, session);
+		userStatusMap.put(username, "online"); //Default status is online
 
 		//Send chat history to the newly connected user
 		sendMessageToPArticularUser(username, getChatHistory());
 		
     // broadcast that new user joined
-		String message = "User:" + username + " has Joined the Chat";
+		String message = "User:" + username + " has Joined the Chat [Online]";
 		broadcast(message);
 	}
 
@@ -69,6 +71,16 @@ public class ChatSocket {
 		// Handle new messages
 		logger.info("Entered into Message: Got Message:" + message);
 		String username = sessionUsernameMap.get(session);
+
+		//Handle status change
+		if(message.startsWith("__status__")) {
+			String status = message.split(" ")[1];
+			if(status.equals("active") || status.equals("online") || status.equals("inactive")) {
+				userStatusMap.put(username, status);
+				broadcast(username + " is now " + status);
+			}
+			return;
+		}
 
     // Direct message to a user using the format "@username <message>"
 		if (message.startsWith("@")) {
@@ -98,8 +110,9 @@ public class ChatSocket {
 		usernameSessionMap.remove(username);
 
     // broadcase that the user disconnected
-		String message = username + " disconnected";
+		String message = username + " disconnected [INACTIVE]";
 		broadcast(message);
+		userStatusMap.put(username, "inactive");
 	}
 
 
