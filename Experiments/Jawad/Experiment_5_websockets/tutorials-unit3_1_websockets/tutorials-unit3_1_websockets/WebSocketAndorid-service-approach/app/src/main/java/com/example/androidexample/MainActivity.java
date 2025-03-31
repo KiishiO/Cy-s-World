@@ -16,7 +16,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText serverEtx1, usernameEtx1, serverEtx2, usernameEtx2;
     private static final String TAG = "MainActivity";
 
-    // Change this to your laptop's actual IP address on your network
+    // Change this to laptop's actual IP address on current network
     // For example: "192.168.1.5" (not localhost or 10.0.2.2)
     // Found IP by running "ipconfig" on Windows
     private static final String LAPTOP_IP = "192.168.1.150";
