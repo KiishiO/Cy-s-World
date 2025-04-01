@@ -50,7 +50,7 @@
             android:exported="false" />
 
         <activity
-            android:name=".CampusNewsActivity"
+            android:name=".CampusEventsActivity"
             android:exported="false" />
 
         <activity
