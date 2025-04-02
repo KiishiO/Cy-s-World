@@ -1,6 +1,8 @@
 package onetoone.CampusEvents;
 //Author: Jayden Sorter
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
@@ -48,8 +50,17 @@ public class CampusEventsWebSocket {
     // JSON object mapper
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
+    static {
+        // Register the JavaTimeModule to handle LocalDateTime
+        objectMapper.registerModule(new JavaTimeModule());
+
+        // Disable timestamp serialization as arrays which can cause problems
+        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+    }
+
     // Server side logger
     private final Logger logger = LoggerFactory.getLogger(CampusEventsWebSocket.class);
+
 
     /**
      * This method is called when a new WebSocket connection is established.
@@ -100,30 +111,41 @@ public class CampusEventsWebSocket {
         // Server side log
         logger.info("[onMessage] " + username + ": " + message);
 
-        try {
-            // Try to parse the incoming message as a CampusEvent
-            CampusEvents event = objectMapper.readValue(message, CampusEvents.class);
+        // Check if the message appears to be JSON (starts with { and ends with })
+        // This is a basic validation that can be enhanced for more accuracy
+        if (message.trim().startsWith("{") && message.trim().endsWith("}")) {
+            try {
+                // First try to parse as a generic Map to validate JSON structure
+                Map<String, Object> jsonMap = objectMapper.readValue(message, Map.class);
+                logger.info("Successfully parsed as JSON structure: " + jsonMap);
 
-            // Add the username as the creator of the event if not already set
-            if (event.getCreator() == null || event.getCreator().isEmpty()) {
-                event.setCreator(username);
+                // Try to parse the incoming message as a CampusEvent
+                CampusEvents event = objectMapper.readValue(message, CampusEvents.class);
+
+                // Add the username as the creator of the event if not already set
+                if (event.getCreator() == null || event.getCreator().isEmpty()) {
+                    event.setCreator(username);
+                }
+
+                // Save the event to the database
+                CampusEvents savedEvent = eventRepo.save(event);
+
+                // Convert event back to JSON for broadcasting
+                String eventJson = objectMapper.writeValueAsString(savedEvent);
+
+                // Broadcast the new event to all connected users
+                broadcast("NEW_EVENT: " + eventJson);
+
+                logger.info("[Event Posted] by " + username + ": " + event.getTitle());
+            } catch (IOException e) {
+                // JSON parsing failed - this could be malformed JSON
+                logger.error("Failed to parse JSON: " + e.getMessage(), e);
+                sendMessageToUser(username, "Error: Invalid event format. Please check your JSON syntax." + e.getMessage());
             }
-
-            // Save the event to the database
-            CampusEvents savedEvent = eventRepo.save(event);
-
-            // Convert event back to JSON for broadcasting
-            String eventJson = objectMapper.writeValueAsString(event);
-
-            // Broadcast the new event to all connected users
-            broadcast("NEW_EVENT: " + eventJson);
-
-            logger.info("[Event Posted] by " + username + ": " + event.getTitle());
-        } catch (IOException e) {
-            // Handle non-JSON messages (commands or chat messages)
+        } else if (message.startsWith("/")) {
+            // Handle commands
             if (message.startsWith("/subscribe ")) {
                 String category = message.substring(11);
-                saveChatMessage(username, "Subscribed to category: " + category);
                 sendMessageToUser(username, "You've subscribed to events in category: " + category);
             } else if (message.startsWith("/help")) {
                 sendMessageToUser(username, "Available commands: \n" +
@@ -134,23 +156,24 @@ public class CampusEventsWebSocket {
             } else if (message.startsWith("/list")) {
                 sendMessageToUser(username, getEventsHistory());
             } else {
-                // Save chat message as an event in the database
-                saveChatMessage(username, message);
-                broadcast(username + ": " + message);
+                sendMessageToUser(username, "Unknown command. Type /help for available commands.");
             }
+        } else {
+            // Handle as regular chat message
+            saveChatMessage(username, message);
+            broadcast(username + ": " + message);
         }
-
     }
 
     //Helper to save user messages
     private void saveChatMessage(String username, String message) {
         CampusEvents chatMessage = new CampusEvents();
-        chatMessage.setTitle("Chat Message");
+        chatMessage.setTitle("Text Message");
         chatMessage.setDescription(message);
         chatMessage.setLocation("N/A"); // No location for chat messages
         chatMessage.setStartTime(LocalDateTime.now()); // Timestamp of message
         chatMessage.setCreator(username);
-        chatMessage.setCategory("Chat");
+        chatMessage.setCategory("Chat Message");
 
         // Save the chat message to the eventRepo (database)
         eventRepo.save(chatMessage);
@@ -220,15 +243,15 @@ public class CampusEventsWebSocket {
      * @param message The message to be broadcasted to all users.
      */
     private void broadcast(String message) {
-        sessionUsernameMap.forEach((session, username) -> {
-            try {
-                if (session.isOpen()) {
+        for (Session session : sessionUsernameMap.keySet()) {
+            if (session.isOpen()) {
+                try {
                     session.getBasicRemote().sendText(message);
+                } catch (IOException e) {
+                    logger.error("Error broadcasting message: " + e.getMessage());
                 }
-            } catch (IOException e) {
-                logger.error("[Broadcast Exception] " + e.getMessage());
             }
-        });
+        }
     }
 
     /**
@@ -263,20 +286,29 @@ public class CampusEventsWebSocket {
         List<CampusEvents> events = eventRepo.findAll();
 
         StringBuilder sb = new StringBuilder();
-        sb.append("=== CAMPUS EVENTS & CHAT HISTORY ===\n");
+        sb.append("=== CAMPUS EVENTS & CHAT HISTORY ===\n\n");
 
         if (events != null && !events.isEmpty()) {
             for (CampusEvents event : events) {
-                sb.append("[").append(event.getCategory()).append("] ")
-                        .append(event.getCreator()).append(": ")
-                        .append(event.getTitle()).append("\n").append(event.getDescription()).append("\n");
-
-                if (!"Chat".equals(event.getCategory())) {
-                    sb.append(" | Location: ").append(event.getLocation())
-                            .append(" | Start: ").append(event.getStartTime());
+                if ("Chat Message".equals(event.getCategory())) {
+                    // Format as chat/text message
+                    sb.append("💬 ").append(event.getCreator()).append(": ")
+                            .append(event.getDescription())
+                            .append(" [").append(formatTime(event.getStartTime())).append("]")
+                            .append("\n\n");
+                } else {
+                    // Format as email/notification
+                    sb.append("📢 NEW EVENT NOTIFICATION ").append("#").append(event.getId()).append("\n")
+                            .append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+                            .append("📌 Title: ").append(event.getTitle()).append("\n")
+                            .append("📝 Description: ").append(event.getDescription()).append("\n")
+                            .append("📍 Location: ").append(event.getLocation()).append("\n")
+                            .append("🕒 Starts: ").append(formatDateTime(event.getStartTime())).append("\n")
+                            .append("🕓 Ends: ").append(formatDateTime(event.getEndTime())).append("\n")
+                            .append("👤 Posted by: ").append(event.getCreator()).append("\n")
+                            .append("🏷️ Category: ").append(event.getCategory()).append("\n")
+                            .append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n");
                 }
-
-                sb.append("\n");
             }
         } else {
             sb.append("No events or messages have been posted yet.\n");
@@ -285,6 +317,28 @@ public class CampusEventsWebSocket {
         return sb.toString();
     }
 
+    /**
+     * Formats a LocalDateTime object to a user-friendly date and time string
+     */
+    private String formatDateTime(LocalDateTime dateTime) {
+        if (dateTime == null) {
+            return "N/A";
+        }
+        // Format: "Monday, April 10, 2025 at 2:00 PM"
+        return dateTime.format(java.time.format.DateTimeFormatter
+                .ofPattern("EEEE, MMMM d, yyyy 'at' h:mm a"));
+    }
+
+    /**
+     * Formats a LocalDateTime object to show just the time for chat messages
+     */
+    private String formatTime(LocalDateTime dateTime) {
+        if (dateTime == null) {
+            return "N/A";
+        }
+        // Format: "2:00 PM"
+        return dateTime.format(java.time.format.DateTimeFormatter.ofPattern("h:mm a"));
+    }
 
 
 }

@@ -38,7 +38,7 @@ public class CampusEvents {
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "end_time")
-    private LocalDateTime endTime;
+    private LocalDateTime endTime = LocalDateTime.from(startTime);
 
     @Column(name = "creator", nullable = false)
     private String creator;
