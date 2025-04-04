@@ -1,25 +1,20 @@
 package onetoone.Signup;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import com.fasterxml.jackson.annotation.*;
+import jakarta.persistence.*;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import onetoone.Login.Login;
 import onetoone.Persons.Person;
 import onetoone.Persons.PersonRepository;
 
 /**
- * 
- * @author Sonia Patil
- */ 
-
+ *
+ * @author Vivek Bengre
+ */
 @Entity
 public class Signup {
-    
-    /* 
+
+    /*
      * The annotation @ID marks the field below as the primary key for the table created by springboot
      * The @GeneratedValue generates a value if not already present, The strategy in this case is to start from 1 and increment for each table
      */
@@ -30,23 +25,31 @@ public class Signup {
     private String email;
     private String password;
     private String firstAndLastName;
+    private String roles;
 
     /*
      * @OneToOne creates a relation between the current entity/table(Laptop) with the entity/table defined below it(Person)
      * @JsonIgnore is to assure that there is no infinite loop while returning either Person/laptop objects (laptop->Person->laptop->...)
      */
-    @OneToOne
+    @OneToOne(mappedBy = "signup")
+   // @JsonManagedReference
     @JsonIgnore
     private Person person;
 
-    public Signup(String firstAndLastName, String username, String email, String password) {
+
+    @OneToOne(mappedBy = "signup")
+    //@JsonManagedReference // Prevents infinite recursion in Signup
+    @JsonIgnore
+    private Login login;
+
+    public Signup(String firstAndLastName, String username, String email, String password, String roles) {
         this.username = username;
         this.email = email;
         this.password = password;
         this.firstAndLastName = firstAndLastName;
+        this.roles = roles;
         //this.person = person;
         //createNewPerson
-        this.person = new Person(firstAndLastName, email);
 
     }
 
@@ -102,5 +105,18 @@ public class Signup {
 
     public void setPerson(Person person) {
         this.person = person;
+    }
+
+    public Login getLogin() {
+        return login;
+    }
+    public void setLogin(Login login) {
+        this.login = login;
+    }
+    public String getRoles(){
+        return roles;
+    }
+    public void setRoles(String roles){
+        this.roles = roles;
     }
 }

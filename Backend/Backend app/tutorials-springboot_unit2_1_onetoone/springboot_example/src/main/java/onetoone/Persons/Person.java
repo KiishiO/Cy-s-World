@@ -1,28 +1,21 @@
 package onetoone.Persons;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
-import lombok.*;
-import onetoone.FriendRequest.FriendRequest;
 import onetoone.Laptops.Laptop;
 import onetoone.Login.Login;
 import onetoone.Signup.Signup;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 /**
  * 
- * @author Sonia Patil, Jayden Sorter
+ * @author Vivek Bengre
  * 
- */ 
-
+ */
 @Entity
-@JsonIdentityInfo(
-        generator = ObjectIdGenerators.PropertyGenerator.class,
-        property = "id"
-)
 public class Person {
 
      /* 
@@ -35,6 +28,7 @@ public class Person {
     private String name;
     private String phoneNumber;
     private boolean ifActive;
+    private String roles;
 
     /*
      * @OneToOne creates a relation between the current entity/table(Laptop) with the entity/table defined below it(Person)
@@ -46,43 +40,15 @@ public class Person {
     @JoinColumn(name = "laptop_id")
     private Laptop laptop;
 
-    //    public Laptop getLaptop(){
-    //        return laptop;
-    //    }
-    //
-    //    public void setLaptop(Laptop laptop){
-    //        this.laptop = laptop;
-    //    }
-    @Getter
-    @ManyToOne(fetch = FetchType.EAGER)
+//    @ManyToOne(fetch = FetchType.EAGER)
 //    @ManyToOne(cascade = CascadeType.ALL)
-    @OneToOne(cascade = CascadeType.ALL)
-    @JsonBackReference
+    @OneToOne(mappedBy = "person")
+    @JsonIgnore
     private Login login; // Associating `Person` with `Login`
 
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "signup_id")
+    @OneToOne
+    @JoinColumn
     private Signup signup;
-
-    //sent friend requests
-    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
-    @JsonManagedReference(value = "sender-reference")
-    private List<FriendRequest> sentRequests;
-
-    //received friend requests
-    @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL)
-    @JsonManagedReference(value = "recieved-reference")
-    private List<FriendRequest> receivedRequests;
-
-    //Friends list (Accepted Requests)
-    @ManyToMany
-    @JoinTable(
-            name = "friends",
-            joinColumns = @JoinColumn(name = "person_id"),
-            inverseJoinColumns = @JoinColumn(name = "friend_id")
-    )
-    private List<Person> friends;
 
     // =============================== Constructors ================================== //
 
@@ -90,10 +56,11 @@ public class Person {
         this.ifActive = true;
     }
 
-    public Person(String name, String phoneNumber) {
+    public Person(String name, String phoneNumber, String roles) {
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.ifActive = true;
+        this.roles = roles;
     }
 
 
@@ -131,6 +98,17 @@ public class Person {
         this.ifActive = ifActive;
     }
 
+//    public Laptop getLaptop(){
+//        return laptop;
+//    }
+//
+//    public void setLaptop(Laptop laptop){
+//        this.laptop = laptop;
+//    }
+    public Login getLogin() {
+        return login;
+    }
+
     public void setLogin(Login login) {
         this.login = login;
     }
@@ -142,12 +120,11 @@ public class Person {
     public void setSignupInfo(Signup signup){
         this.signup = signup;
     }
-
-    public List<Person> getFriends() {
-        return friends;
+    public String getRoles(){
+        return roles;
     }
-
-    public void setFriends(List<Person> friends) {
-        this.friends = friends;
+    public void setRoles(String roles){
+        this.roles = roles;
     }
+    
 }

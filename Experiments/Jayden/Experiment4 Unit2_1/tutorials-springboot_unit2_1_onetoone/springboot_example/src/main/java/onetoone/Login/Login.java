@@ -1,5 +1,9 @@
 package onetoone.Login;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -10,7 +14,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.*;
 import onetoone.Persons.Person;
-
+import onetoone.Signup.Signup;
 
 @Entity
 @Table(name = "login")
@@ -30,11 +34,14 @@ public class Login {
     @Column(nullable = false)
     private boolean ifActive;
 
-    @ManyToOne(fetch = FetchType.EAGER) //Allows to GET dummy data
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "person_id", referencedColumnName = "id")
-    @JsonManagedReference
+    @OneToOne
+    @JoinColumn
     private Person person;  // Storing related person details
+
+    @OneToOne
+    @JoinColumn
+    @JsonIgnore
+    private Signup signup;
 
     // =============================== Constructors ================================== //
 
@@ -42,12 +49,12 @@ public class Login {
         this.ifActive = true;  // Default active state
     }
 
-    public Login(String name, String emailId, String password, Person person) {
+    public Login(String name, String emailId, String password) {
         this.name = name;
         this.emailId = emailId;
         this.password = password;
         this.ifActive = true;
-        this.person = person;
+
     }
 
     // =============================== Getters and Setters ================================== //
@@ -94,5 +101,13 @@ public class Login {
 
     public void setPerson(Person person) {
         this.person = person;
+    }
+
+    public Signup getSignup() {
+        return signup;
+    }
+
+    public void setSignup(Signup signup) {
+        this.signup = signup;
     }
 }
