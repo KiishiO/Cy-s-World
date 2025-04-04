@@ -17,14 +17,11 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
-import com.android.volley.Request;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.checkbox.MaterialCheckBox;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
@@ -32,12 +29,26 @@ import com.google.android.material.textfield.TextInputEditText;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class SignUpActivity extends AppCompatActivity{
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+public class SignUpActivity extends AppCompatActivity {
 
     private ProgressBar passwordStrengthBar;
     private CircularProgressIndicator loadingProgress;
-    //private MaterialCheckBox rememberMeCheckbox;
-    private static final String BASE_URL = "https://f49570a7-61b6-48be-ab64-48b271041323.mock.pstmn.io/";
+    private MaterialButton btnNext;
+    private MaterialButton btnRoleSelection;
+    private String selectedRole = "";
+
+    // Let's try the Login endpoint as a last resort
+    private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu:8080/Logins/new";
+    private static final String TAG = "SignUpActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,13 +60,13 @@ public class SignUpActivity extends AppCompatActivity{
         TextInputEditText etConfirmPassword = findViewById(R.id.signUp_et_Confirm_Password);
         TextInputEditText etPassword = findViewById((R.id.signUp_etPassword));
         TextInputEditText etEmail = findViewById(R.id.signUp_etEmail);
-        MaterialButton btnNext = findViewById(R.id.signUp_btnNext);
+        btnNext = findViewById(R.id.signUp_btnNext);
+        btnRoleSelection = findViewById(R.id.signUp_btnRoleSelection);
         TextView tvAlreadyHaveAccount = findViewById(R.id.signUp_tvAlreadyHaveAccount);
         ImageView logo = findViewById(R.id.signUp_ivLogo);
 
         passwordStrengthBar = findViewById(R.id.signUp_passwordStrengthBar);
         loadingProgress = findViewById(R.id.signUp_loadingProgress);
-        //rememberMeCheckbox = findViewById(R.id.rememberMeCheckbox);
 
         // Set initial states
         signUpCard.setTranslationY(1000f);
@@ -75,6 +86,9 @@ public class SignUpActivity extends AppCompatActivity{
                                 .setDuration(1000)
                                 .setInterpolator(new AccelerateDecelerateInterpolator())
                 );
+
+        // Setup role selection dialog
+        btnRoleSelection.setOnClickListener(v -> showRoleSelectionDialog());
 
         // Password strength watcher
         etConfirmPassword.addTextChangedListener(new TextWatcher() {
@@ -106,29 +120,37 @@ public class SignUpActivity extends AppCompatActivity{
             if (username.isEmpty() || password.isEmpty() || email.isEmpty() || passwordConfirmed.isEmpty()) {
                 showError("Please fill in all fields");
                 shakeView(username.isEmpty() ? etUsername : etPassword);
-            } else if (isPasswordMatch(password, passwordConfirmed) == false){
+            } else if (selectedRole.isEmpty()) {
+                showError("Please select a role");
+                shakeView(btnRoleSelection);
+            } else if (!isPasswordMatch(password, passwordConfirmed)) {
                 showError("Passwords do not match");
-            } else{
-                    showSignUpAnimation(btnNext);
-                    performSignUp(username, password, email);
+            } else {
+                showSignUpAnimation();
+                performSignUp(username, password, email, selectedRole);
             }
         });
 
-        // Add click listener for forgot password
+        // Add click listener for already have account
         tvAlreadyHaveAccount.setOnClickListener(v -> {
-
             /* when pressed, use intent to switch to Login Activity */
             Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
             startActivity(intent);
-
-            //String username = etUsername.getText().toString();
-            //if (username.isEmpty()) {
-              //  showError("Please enter your Net-ID first");
-                //shakeView(etUsername);
-            //} else {
-            //    sendPasswordResetRequest(username);
-            //}
         });
+    }
+
+    private void showRoleSelectionDialog() {
+        final String[] roles = {"Teacher", "Student", "TA"};
+
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Select Your Role")
+                .setBackground(getDrawable(R.drawable.dialog_background))
+                .setItems(roles, (dialog, which) -> {
+                    selectedRole = roles[which];
+                    btnRoleSelection.setText(selectedRole);
+                    btnRoleSelection.setIcon(null);
+                })
+                .show();
     }
 
     private void updatePasswordStrength(String password) {
@@ -155,95 +177,106 @@ public class SignUpActivity extends AppCompatActivity{
         return score;
     }
 
-    private Boolean isPasswordMatch(String password, String confirm){
-        if(password.equals(confirm)){
-            return true;
-        }
-        return false;
+    private Boolean isPasswordMatch(String password, String confirm) {
+        return password.equals(confirm);
     }
 
-    private void performSignUp(String username, String password, String email) {
-        String url = BASE_URL + "users/login";
-        Log.d("Sign Up", "Attempting sign up to: " + url);
+    private void performSignUp(String username, String password, String email, String role) {
+        // Use a background thread for network operations
+        new Thread(() -> {
+            HttpURLConnection urlConnection = null;
+            try {
+                JSONObject jsonBody = new JSONObject();
+                // Using Login endpoint field names since we're using that endpoint
+                jsonBody.put("name", username);
+                jsonBody.put("password", password);
+                jsonBody.put("emailId", email);
+                // Add role field
+                jsonBody.put("role", role);
+                // Add ifActive field which may be required
+                jsonBody.put("ifActive", true);
 
-        JSONObject jsonBody = new JSONObject();
-        try {
-            jsonBody.put("username", username);
-            jsonBody.put("password", password);
-            jsonBody.put("email", email);
+                Log.d(TAG, "Sending data to " + BASE_URL + ": " + jsonBody.toString());
 
-            Log.d("Sign Up", "Sending data: " + jsonBody.toString());
+                URL requestUrl = new URL(BASE_URL);
+                urlConnection = (HttpURLConnection) requestUrl.openConnection();
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestProperty("Accept", "application/json");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
 
-            JsonObjectRequest request = new JsonObjectRequest(
-                    Request.Method.POST,
-                    url,
-                    jsonBody,
-                    response -> {
-                        Log.d("Sign Up", "Success response: " + response.toString());
-                        try {
-                            String message = response.getString("message");
-                            showSuccess(message);
-                        } catch (JSONException e) {
-                            showError("Error parsing response");
-                        }
-                    },
-                    error -> {
-                        Log.e("Sign Up", "Error: " + error.toString());
-                        NetworkResponse networkResponse = error.networkResponse;
-                        if (networkResponse != null && networkResponse.data != null) {
-                            String errorResponse = new String(networkResponse.data);
-                            Log.e("Sign Up", "Error response: " + errorResponse);
-                        }
-                        showError("Sign up failed: " + getVolleyErrorMessage(error));
+                // Write the JSON to the request body
+                try (OutputStream os = urlConnection.getOutputStream()) {
+                    byte[] input = jsonBody.toString().getBytes("utf-8");
+                    os.write(input, 0, input.length);
+                }
+
+                // Get the response code
+                int responseCode = urlConnection.getResponseCode();
+                Log.d(TAG, "Response code: " + responseCode);
+
+                // Read response
+                StringBuilder response = new StringBuilder();
+                try {
+                    InputStream is;
+                    if (responseCode >= 200 && responseCode < 400) {
+                        is = urlConnection.getInputStream();
+                    } else {
+                        is = urlConnection.getErrorStream();
                     }
-            );
 
-            request.setRetryPolicy(new DefaultRetryPolicy(
-                    10000, // 10 seconds timeout
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-            ));
+                    if (is != null) {
+                        BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"));
+                        String responseLine;
+                        while ((responseLine = br.readLine()) != null) {
+                            response.append(responseLine.trim());
+                        }
+                        br.close();
+                    }
+                    Log.d(TAG, "Response: " + response.toString());
+                } catch (Exception e) {
+                    Log.e(TAG, "Error reading response", e);
+                }
 
-            VolleySingleton.getInstance(this).addToRequestQueue(request);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            showError("Error creating request");
-        }
-    }
+                // Update UI on main thread
+                final String finalResponse = response.toString();
+                final int finalResponseCode = responseCode;
 
-    private void sendPasswordResetRequest(String username) {
-        String url = BASE_URL + "users/forgot-password";
+                runOnUiThread(() -> {
+                    if (finalResponseCode >= 200 && finalResponseCode < 300) {
+                        showSuccess("Account created successfully");
 
-        JSONObject jsonBody = new JSONObject();
-        try {
-            jsonBody.put("username", username);
+                        // Navigate to login screen after successful signup
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                            Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
+                            startActivity(intent);
+                            finish(); // Close this activity
+                        }, 1500);
+                    } else {
+                        resetSignUpAnimation();
+                        String errorMsg = "Sign up failed with code " + finalResponseCode;
+                        if (!finalResponse.isEmpty()) {
+                            errorMsg += ": " + finalResponse;
+                        }
+                        showError(errorMsg);
+                    }
+                });
 
-            JsonObjectRequest request = new JsonObjectRequest(
-                    Request.Method.POST,
-                    url,
-                    jsonBody,
-                    response -> showSuccess("Password reset instructions sent"),
-                    error -> showError("Failed to send reset instructions: " + getVolleyErrorMessage(error))
-            );
+            } catch (Exception e) {
+                Log.e(TAG, "Error during signup", e);
+                final String errorMessage = e.getMessage();
 
-            VolleySingleton.getInstance(this).addToRequestQueue(request);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            showError("Error processing request");
-        }
-    }
-
-    private String getVolleyErrorMessage(VolleyError error) {
-        if (error.networkResponse != null) {
-            switch (error.networkResponse.statusCode) {
-                case 404: return "Server not found";
-                case 401: return "Invalid credentials";
-                case 400: return "Invalid request";
-                case 500: return "Server error";
-                default: return "Network error " + error.networkResponse.statusCode;
+                runOnUiThread(() -> {
+                    resetSignUpAnimation();
+                    showError("Sign up failed: " + errorMessage);
+                });
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
             }
-        }
-        return error.getMessage() != null ? error.getMessage() : "Unknown error occurred";
+        }).start();
     }
 
     private void shakeView(View view) {
@@ -262,16 +295,16 @@ public class SignUpActivity extends AppCompatActivity{
                 );
     }
 
-    private void showSignUpAnimation(MaterialButton button) {
-        button.setEnabled(false);
-        button.setText("");
+    private void showSignUpAnimation() {
+        btnNext.setEnabled(false);
+        btnNext.setText("Creating Account...");
         loadingProgress.setVisibility(View.VISIBLE);
+    }
 
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            loadingProgress.setVisibility(View.GONE);
-            button.setText("Next");
-            button.setEnabled(true);
-        }, 2000);
+    private void resetSignUpAnimation() {
+        loadingProgress.setVisibility(View.GONE);
+        btnNext.setText("Next");
+        btnNext.setEnabled(true);
     }
 
     private void showError(String message) {

@@ -7,8 +7,11 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 import onetoone.Laptops.Laptop;
+<<<<<<<< HEAD:Experiments/Jayden/Experiment5Websockets/tutorials-springboot_unit2_1_onetoone/springboot_example/src/main/java/onetoone/Persons/Person.java
 import onetoone.Login.Login;
 import onetoone.Signup.Signup;
+========
+>>>>>>>> origin:Experiments/Sonia/Experiment6/springboot_example/src/main/java/onetoone/Persons/Person.java
 
 /**
  * 
@@ -39,6 +42,7 @@ public class Person {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "laptop_id")
     private Laptop laptop;
+<<<<<<<< HEAD:Experiments/Jayden/Experiment5Websockets/tutorials-springboot_unit2_1_onetoone/springboot_example/src/main/java/onetoone/Persons/Person.java
 
 //    @ManyToOne(fetch = FetchType.EAGER)
 //    @ManyToOne(cascade = CascadeType.ALL)
@@ -49,6 +53,8 @@ public class Person {
     @OneToOne
     @JoinColumn
     private Signup signup;
+========
+>>>>>>>> origin:Experiments/Sonia/Experiment6/springboot_example/src/main/java/onetoone/Persons/Person.java
 
     // =============================== Constructors ================================== //
 
@@ -98,6 +104,7 @@ public class Person {
         this.ifActive = ifActive;
     }
 
+<<<<<<<< HEAD:Experiments/Jayden/Experiment5Websockets/tutorials-springboot_unit2_1_onetoone/springboot_example/src/main/java/onetoone/Persons/Person.java
 //    public Laptop getLaptop(){
 //        return laptop;
 //    }
@@ -115,10 +122,14 @@ public class Person {
 
     public Signup getSignupInfo(){
         return signup;
+========
+    public Laptop getLaptop(){
+        return laptop;
+>>>>>>>> origin:Experiments/Sonia/Experiment6/springboot_example/src/main/java/onetoone/Persons/Person.java
     }
 
-    public void setSignupInfo(Signup signup){
-        this.signup = signup;
+    public void setLaptop(Laptop laptop){
+        this.laptop = laptop;
     }
     public String getRoles(){
         return roles;

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    tools:context=".MainActivity"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Server URL:"
+        android:textStyle="bold"
+        android:textSize="16sp"/>
+
+    <EditText
+        android:layout_height="50dp"
+        android:layout_width="match_parent"
+        android:text="ws://192.168.1.150:8080/websocket?username="
+        android:textSize="16sp"
+        android:inputType="textUri"
+        android:id="@+id/serverEdt" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Username:"
+        android:textStyle="bold"
+        android:textSize="16sp"/>
+
+    <EditText
+        android:layout_height="50dp"
+        android:layout_width="match_parent"
+        android:hint="Enter your username"
+        android:textSize="16sp"
+        android:inputType="textPersonName"
+        android:id="@+id/unameEdt" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Connect to Chat"
+        android:textAllCaps="false"
+        android:id="@+id/connectBtn" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Note: Make sure WebSocket server is running on your laptop"
+        android:textSize="14sp"
+        android:textColor="#757575"
+        android:gravity="center"/>
+
+</androidx.appcompat.widget.LinearLayoutCompat>
