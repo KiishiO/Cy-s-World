@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Bean;
 import onetoone.Persons.Person;
 import onetoone.Persons.PersonRepository;
 import onetoone.Signup.SignupRepository;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
  * 
@@ -24,6 +25,7 @@ import onetoone.Signup.SignupRepository;
  */ 
 
 @SpringBootApplication
+//@ComponentScan(basePackages = {"onetoone.CampusEvents"})
 class Main {
 
     public static void main(String[] args) {
