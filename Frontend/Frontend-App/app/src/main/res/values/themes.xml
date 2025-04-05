@@ -2,4 +2,15 @@
 <resources>
 
     <style name="Theme.Own_Example" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- Calendar Text Styles -->
+    <style name="CalendarDateText" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textColor">@color/cardinal_red</item>
+    </style>
+
+    <style name="CalendarWeekDayText" parent="TextAppearance.AppCompat.Small">
+        <item name="android:textColor">@color/gold</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
 </resources>
