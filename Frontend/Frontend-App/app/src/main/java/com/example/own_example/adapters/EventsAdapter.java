@@ -11,17 +11,23 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.own_example.CampusEventsActivity;
 import com.example.own_example.R;
+import com.example.own_example.models.CampusEvent;
 
 import java.util.List;
 
 public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewHolder> {
 
-    private List<CampusEventsActivity.EventItem> events;
+    private List<CampusEvent> events;
+    private OnEventClickListener eventClickListener;
 
-    public EventsAdapter(List<CampusEventsActivity.EventItem> events) {
+    public interface OnEventClickListener {
+        void onEventClick(CampusEvent event);
+    }
+
+    public EventsAdapter(List<CampusEvent> events, OnEventClickListener listener) {
         this.events = events;
+        this.eventClickListener = listener;
     }
 
     @NonNull
@@ -34,25 +40,22 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
 
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
-        CampusEventsActivity.EventItem event = events.get(position);
+        CampusEvent event = events.get(position);
 
         // Set event details
         holder.titleTextView.setText(event.getTitle());
         holder.locationTextView.setText(event.getLocation());
         holder.attendeesTextView.setText(event.getAttendees() + " attending");
+        holder.dateTextView.setText(event.getFormattedStartTime());
 
         // Set category color
         setCategoryColor(holder.categoryIndicator, event.getCategory());
 
-        // Set RSVP button state
-        updateRsvpButton(holder.rsvpButton, event.isRsvped());
-
-        // Set RSVP button click listener
-        holder.rsvpButton.setOnClickListener(v -> {
-            boolean newRsvpState = !event.isRsvped();
-            event.setRsvped(newRsvpState);
-            updateRsvpButton(holder.rsvpButton, newRsvpState);
-            holder.attendeesTextView.setText(event.getAttendees() + " attending");
+        // Set item click listener
+        holder.itemView.setOnClickListener(v -> {
+            if (eventClickListener != null) {
+                eventClickListener.onEventClick(event);
+            }
         });
     }
 
@@ -77,24 +80,18 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         categoryIndicator.setBackgroundColor(color);
     }
 
-    private void updateRsvpButton(Button button, boolean isRsvped) {
-        if (isRsvped) {
-            button.setText("Cancel RSVP");
-            button.setBackgroundResource(R.drawable.rounded_button_gray);
-        } else {
-            button.setText("RSVP");
-            button.setBackgroundResource(R.drawable.rounded_button_red);
-        }
-    }
-
     @Override
     public int getItemCount() {
         return events.size();
     }
 
-    public void updateEvents(List<CampusEventsActivity.EventItem> newEvents) {
+    public void updateEvents(List<CampusEvent> newEvents) {
         this.events = newEvents;
         notifyDataSetChanged();
+    }
+
+    public List<CampusEvent> getEvents() {
+        return events;
     }
 
     static class EventViewHolder extends RecyclerView.ViewHolder {
@@ -102,7 +99,8 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         TextView titleTextView;
         TextView locationTextView;
         TextView attendeesTextView;
-        Button rsvpButton;
+        TextView dateTextView;
+        CardView cardView;
 
         EventViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -110,7 +108,8 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
             titleTextView = itemView.findViewById(R.id.event_title);
             locationTextView = itemView.findViewById(R.id.event_location);
             attendeesTextView = itemView.findViewById(R.id.event_attendees);
-            rsvpButton = itemView.findViewById(R.id.rsvp_button);
+            dateTextView = itemView.findViewById(R.id.event_date);
+            cardView = itemView.findViewById(R.id.event_card);
         }
     }
 }

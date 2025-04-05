@@ -1,5 +1,6 @@
 package com.example.own_example;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -9,14 +10,17 @@ import android.widget.CalendarView;
 import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.own_example.adapters.EventsAdapter;
-import com.google.android.material.card.MaterialCardView;
+import com.example.own_example.models.CampusEvent;
+import com.example.own_example.models.EventChat;
+import com.example.own_example.services.EventWebSocketClient;
+import com.example.own_example.services.UserService;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -25,7 +29,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class CampusEventsActivity extends AppCompatActivity {
+public class CampusEventsActivity extends AppCompatActivity implements
+        EventWebSocketClient.EventsListener,
+        EventsAdapter.OnEventClickListener {
 
     private static final String TAG = "CampusEventsActivity";
 
@@ -34,10 +40,16 @@ public class CampusEventsActivity extends AppCompatActivity {
     private SearchView searchView;
     private Spinner categorySpinner;
     private TextView selectedDateText;
+    private TextView noEventsText;
+    private TextView connectionStatusText;
 
     private EventsAdapter eventsAdapter;
-    private List<EventItem> allEvents;
-    private List<EventItem> filteredEvents;
+    private List<CampusEvent> allEvents = new ArrayList<>();
+    private List<CampusEvent> filteredEvents = new ArrayList<>();
+
+    private EventWebSocketClient webSocketClient;
+    private String selectedDate;
+    private String currentUsername;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,22 +59,30 @@ public class CampusEventsActivity extends AppCompatActivity {
             setContentView(R.layout.activity_campus_events);
             Log.d(TAG, "CampusEventsActivity onCreate");
 
+            // Initialize user service and get current username
+            currentUsername = UserService.getInstance().getCurrentUsername();
+            if (currentUsername == null || currentUsername.isEmpty()) {
+                // Redirect to login if not logged in
+                Toast.makeText(this, "Please log in to view events", Toast.LENGTH_SHORT).show();
+                // Redirect to login screen
+                finish();
+                return;
+            }
+
             // Initialize views
             calendarView = findViewById(R.id.calendar_view);
             eventsRecyclerView = findViewById(R.id.events_recycler_view);
             searchView = findViewById(R.id.search_view);
             categorySpinner = findViewById(R.id.category_spinner);
             selectedDateText = findViewById(R.id.selected_date_text);
+            noEventsText = findViewById(R.id.no_events_text);
+            connectionStatusText = findViewById(R.id.connection_status);
 
             // Set up RecyclerView
             eventsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-            // Initialize event lists
-            allEvents = generateSampleEvents(); // Replace with your actual data fetching method
-            filteredEvents = new ArrayList<>(allEvents);
-
             // Set up adapter
-            eventsAdapter = new EventsAdapter(filteredEvents);
+            eventsAdapter = new EventsAdapter(filteredEvents, this);
             eventsRecyclerView.setAdapter(eventsAdapter);
 
             // Set up category filter spinner
@@ -74,9 +94,26 @@ public class CampusEventsActivity extends AppCompatActivity {
             // Set up search functionality
             setupSearchView();
 
-            // Set initial date text
+            // Set initial date text and selected date
             Calendar calendar = Calendar.getInstance();
-            updateSelectedDateText(calendar.getTime());
+            Date today = calendar.getTime();
+            updateSelectedDateText(today);
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            selectedDate = dateFormat.format(today);
+
+            // Initialize WebSocket client
+            try {
+                webSocketClient = new EventWebSocketClient(this, currentUsername, this);
+            } catch (Exception e) {
+                Log.e(TAG, "Error connecting to WebSocket: " + e.getMessage(), e);
+                updateConnectionStatus(false);
+                // Don't crash the app, just show a message
+                Toast.makeText(this, "Couldn't connect to server", Toast.LENGTH_LONG).show();
+            }
+
+            // Set initial connection status
+            updateConnectionStatus(false);
 
         } catch (Exception e) {
             Log.e(TAG, "Error in onCreate: " + e.getMessage(), e);
@@ -93,8 +130,12 @@ public class CampusEventsActivity extends AppCompatActivity {
                 // Update the date display
                 updateSelectedDateText(selectedDate);
 
+                // Update selected date string
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+                this.selectedDate = dateFormat.format(selectedDate);
+
                 // Filter events by selected date
-                filterEventsByDate(selectedDate);
+                filterEventsByDate(this.selectedDate);
 
             } catch (Exception e) {
                 Log.e(TAG, "Error in calendar date change: " + e.getMessage());
@@ -148,19 +189,26 @@ public class CampusEventsActivity extends AppCompatActivity {
         selectedDateText.setText(dateFormat.format(date));
     }
 
-    private void filterEventsByDate(Date date) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-        String dateString = dateFormat.format(date);
-
-        List<EventItem> dateFilteredEvents = new ArrayList<>();
-        for (EventItem event : allEvents) {
-            if (event.getDate().equals(dateString)) {
+    private void filterEventsByDate(String dateString) {
+        List<CampusEvent> dateFilteredEvents = new ArrayList<>();
+        for (CampusEvent event : allEvents) {
+            if (event.getFormattedStartDate().equals(dateString)) {
                 dateFilteredEvents.add(event);
             }
         }
 
         filteredEvents.clear();
         filteredEvents.addAll(dateFilteredEvents);
+
+        // Update UI based on whether there are events
+        if (dateFilteredEvents.isEmpty()) {
+            noEventsText.setVisibility(View.VISIBLE);
+            eventsRecyclerView.setVisibility(View.GONE);
+        } else {
+            noEventsText.setVisibility(View.GONE);
+            eventsRecyclerView.setVisibility(View.VISIBLE);
+        }
+
         eventsAdapter.notifyDataSetChanged();
 
         // Apply any existing search or category filters
@@ -168,12 +216,13 @@ public class CampusEventsActivity extends AppCompatActivity {
     }
 
     private void filterEvents(String query, String category) {
-        List<EventItem> tempFilteredList = new ArrayList<>();
+        List<CampusEvent> tempFilteredList = new ArrayList<>();
 
-        for (EventItem event : filteredEvents) {
+        for (CampusEvent event : filteredEvents) {
             boolean matchesQuery = query.isEmpty() ||
                     event.getTitle().toLowerCase().contains(query.toLowerCase()) ||
-                    event.getLocation().toLowerCase().contains(query.toLowerCase());
+                    event.getLocation().toLowerCase().contains(query.toLowerCase()) ||
+                    event.getDescription().toLowerCase().contains(query.toLowerCase());
 
             boolean matchesCategory = category.isEmpty() ||
                     event.getCategory().equalsIgnoreCase(category);
@@ -183,88 +232,159 @@ public class CampusEventsActivity extends AppCompatActivity {
             }
         }
 
+        if (tempFilteredList.isEmpty() && !filteredEvents.isEmpty()) {
+            noEventsText.setVisibility(View.VISIBLE);
+            noEventsText.setText("No events match your search criteria");
+            eventsRecyclerView.setVisibility(View.GONE);
+        } else if (!tempFilteredList.isEmpty()) {
+            noEventsText.setVisibility(View.GONE);
+            eventsRecyclerView.setVisibility(View.VISIBLE);
+        }
+
         eventsAdapter.updateEvents(tempFilteredList);
     }
 
-    // This would be replaced by actual API call to fetch events data
-    private List<EventItem> generateSampleEvents() {
-        List<EventItem> events = new ArrayList<>();
+    private void updateConnectionStatus(boolean connected) {
+        runOnUiThread(() -> {
+            if (connected) {
+                connectionStatusText.setText("Connected");
+                connectionStatusText.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+            } else {
+                connectionStatusText.setText("Disconnected");
+                connectionStatusText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+            }
+        });
+    }
 
-        // Get current date for sample events
-        Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-        String currentDate = dateFormat.format(calendar.getTime());
+    // EventWebSocketClient.EventsListener implementation
 
-        // Add some events for current date
-        events.add(new EventItem("Career Fair", "Memorial Union", currentDate, "Career", 42));
-        events.add(new EventItem("Engineering Seminar", "Howe Hall", currentDate, "Academic", 18));
-        events.add(new EventItem("Concert in the Park", "Central Campus", currentDate, "Entertainment", 87));
-
-        // Add events for tomorrow
-        calendar.add(Calendar.DAY_OF_MONTH, 1);
-        String tomorrowDate = dateFormat.format(calendar.getTime());
-        events.add(new EventItem("Resume Workshop", "Careers Building", tomorrowDate, "Career", 15));
-        events.add(new EventItem("Study Group", "Parks Library", tomorrowDate, "Academic", 8));
-        events.add(new EventItem("Cyclones Game", "Hilton Coliseum", tomorrowDate, "Entertainment", 120));
-        events.add(new EventItem("Club Social", "Memorial Union", tomorrowDate, "Social", 35));
-
-        return events;
+    @Override
+    public void onEventsReceived(List<CampusEvent> events) {
+        runOnUiThread(() -> {
+            allEvents.clear();
+            allEvents.addAll(events);
+            filterEventsByDate(selectedDate);
+        });
     }
 
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        finish();
+    public void onNewEventReceived(CampusEvent event) {
+        runOnUiThread(() -> {
+            // Add to all events
+            allEvents.add(event);
+
+            // If the event is for the selected date, update filtered list
+            if (event.getFormattedStartDate().equals(selectedDate)) {
+                filteredEvents.add(event);
+                eventsAdapter.notifyItemInserted(filteredEvents.size() - 1);
+
+                // Update visibility of no events text
+                if (filteredEvents.size() > 0) {
+                    noEventsText.setVisibility(View.GONE);
+                    eventsRecyclerView.setVisibility(View.VISIBLE);
+                }
+            }
+
+            // Show a toast to notify about the new event
+            Toast.makeText(this, "New event added: " + event.getTitle(),
+                    Toast.LENGTH_SHORT).show();
+        });
     }
 
-    // Event item model class
-    public static class EventItem {
-        private String title;
-        private String location;
-        private String date;
-        private String category;
-        private int attendees;
-        private boolean isRsvped = false;
-
-        public EventItem(String title, String location, String date, String category, int attendees) {
-            this.title = title;
-            this.location = location;
-            this.date = date;
-            this.category = category;
-            this.attendees = attendees;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public String getLocation() {
-            return location;
-        }
-
-        public String getDate() {
-            return date;
-        }
-
-        public String getCategory() {
-            return category;
-        }
-
-        public int getAttendees() {
-            return attendees;
-        }
-
-        public boolean isRsvped() {
-            return isRsvped;
-        }
-
-        public void setRsvped(boolean rsvped) {
-            isRsvped = rsvped;
-            if (rsvped) {
-                attendees++;
-            } else {
-                attendees--;
+    @Override
+    public void onEventUpdated(CampusEvent updatedEvent) {
+        runOnUiThread(() -> {
+            // Update in all events list
+            for (int i = 0; i < allEvents.size(); i++) {
+                if (allEvents.get(i).getId().equals(updatedEvent.getId())) {
+                    allEvents.set(i, updatedEvent);
+                    break;
+                }
             }
+
+            // Update in filtered list if present
+            for (int i = 0; i < filteredEvents.size(); i++) {
+                if (filteredEvents.get(i).getId().equals(updatedEvent.getId())) {
+                    filteredEvents.set(i, updatedEvent);
+                    eventsAdapter.notifyItemChanged(i);
+                    break;
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onRsvpUpdated(String eventId, int attendees, boolean isRsvped) {
+        runOnUiThread(() -> {
+            // Update in all events list
+            for (CampusEvent event : allEvents) {
+                if (event.getId().equals(eventId)) {
+                    event.setAttendees(attendees);
+                    event.setRsvped(isRsvped);
+                    break;
+                }
+            }
+
+            // Update in filtered list if present
+            for (int i = 0; i < filteredEvents.size(); i++) {
+                CampusEvent event = filteredEvents.get(i);
+                if (event.getId().equals(eventId)) {
+                    event.setAttendees(attendees);
+                    event.setRsvped(isRsvped);
+                    eventsAdapter.notifyItemChanged(i);
+                    break;
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onChatMessageReceived(EventChat chatMessage) {
+        // Not handled in the main activity - only in EventDetailActivity
+    }
+
+    @Override
+    public void onConnectionStateChanged(boolean connected) {
+        updateConnectionStatus(connected);
+    }
+
+    @Override
+    public void onError(String errorMessage) {
+        runOnUiThread(() -> {
+            Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    // EventsAdapter.OnEventClickListener implementation
+
+    @Override
+    public void onEventClick(CampusEvent event) {
+        // Open event detail activity
+        Intent intent = new Intent(this, EventDetailActivity.class);
+        intent.putExtra("event_id", event.getId());
+        intent.putExtra("event_title", event.getTitle());
+        intent.putExtra("event_description", event.getDescription());
+        intent.putExtra("event_location", event.getLocation());
+        intent.putExtra("event_category", event.getCategory());
+        intent.putExtra("event_creator", event.getCreator());
+        intent.putExtra("event_attendees", event.getAttendees());
+        intent.putExtra("event_rsvped", event.isRsvped());
+
+        if (event.getStartTime() != null) {
+            intent.putExtra("event_start_time", event.getStartTime().getTime());
+        }
+        if (event.getEndTime() != null) {
+            intent.putExtra("event_end_time", event.getEndTime().getTime());
+        }
+
+        startActivity(intent);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (webSocketClient != null) {
+            webSocketClient.disconnect();
         }
     }
 }
