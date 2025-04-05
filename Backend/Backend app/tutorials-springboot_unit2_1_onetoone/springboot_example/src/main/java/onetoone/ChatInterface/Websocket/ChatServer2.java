@@ -1,27 +1,22 @@
 package onetoone.ChatInterface.Websocket;
 
-import java.io.IOException;
-import java.util.Hashtable;
-import java.util.Map;
-
-import jakarta.websocket.OnClose;
-import jakarta.websocket.OnError;
-import jakarta.websocket.OnMessage;
-import jakarta.websocket.OnOpen;
-import jakarta.websocket.Session;
+import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.util.Hashtable;
+import java.util.Map;
+
 /**
  * @author Sonia Patil
  */
-@ServerEndpoint("/chat/1/{username}")
+@ServerEndpoint("/chat/2/{username}")
 @Component
-public class ChatServer1 {
+public class ChatServer2 {
 
     // Store all socket session and their corresponding username
     // Two maps for the ease of retrieval by key
@@ -29,11 +24,10 @@ public class ChatServer1 {
     private static Map < String, Session > usernameSessionMap = new Hashtable < > ();
 
     // server side logger
-    private final Logger logger = LoggerFactory.getLogger(ChatServer1.class);
-
+    private final Logger logger = LoggerFactory.getLogger(ChatServer2.class);
 
     /**
-     * Method established what happens on open.
+     * This method is called when a new WebSocket connection is established.
      *
      * @param session represents the WebSocket session for the connected user.
      * @param username username specified in path parameter.
@@ -96,11 +90,10 @@ public class ChatServer1 {
             sendMessageToPArticularUser(username, "[DM from " + username + "]: " + actualMessage);
         } else if (message.startsWith("!shout ")) {
             String loudMessage = message.substring(7).trim();
-            if(!loudMessage.isEmpty()) {
+            if((!loudMessage.isEmpty())) {
                 broadcast(username + " SHOUTS: " + loudMessage.toUpperCase());
             }
-        }
-        else { // Message to whole chat
+        } else { // Message to whole chat
             broadcast(username + ": " + message);
         }
     }
