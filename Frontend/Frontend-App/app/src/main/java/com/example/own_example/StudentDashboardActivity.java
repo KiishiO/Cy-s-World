@@ -4,16 +4,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
-import android.view.View;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.navigation.NavigationBarView;
 
 public class StudentDashboardActivity extends AppCompatActivity {
 
@@ -123,7 +119,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
             if (firstInfoCard != null) {
                 firstInfoCard.setOnClickListener(v -> {
                     try {
-                        Intent intent = new Intent(StudentDashboardActivity.this, CampusNewsActivity.class);
+                        Intent intent = new Intent(StudentDashboardActivity.this, CampusEventsActivity.class);
                         startActivity(intent);
                     } catch (Exception e) {
                         Log.e(TAG, "Error navigating to CampusNewsActivity: " + e.getMessage());

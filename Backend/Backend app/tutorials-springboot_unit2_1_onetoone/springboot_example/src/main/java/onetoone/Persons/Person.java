@@ -12,7 +12,7 @@ import onetoone.Signup.Signup;
 
 /**
  * 
- * @author Vivek Bengre
+ * @author Sonia Patil
  * 
  */
 @Entity
@@ -62,7 +62,6 @@ public class Person {
         this.ifActive = true;
         this.roles = roles;
     }
-
 
     // =============================== Getters and Setters for each field ================================== //
 
@@ -126,5 +125,6 @@ public class Person {
     public void setRoles(String roles){
         this.roles = roles;
     }
-    
+
+
 }
