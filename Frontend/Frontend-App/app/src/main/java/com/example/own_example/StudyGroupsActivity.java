@@ -107,12 +107,12 @@ public class StudyGroupsActivity extends AppCompatActivity {
                     Intent intent = new Intent(StudyGroupsActivity.this, StudentDashboardActivity.class);
                     startActivity(intent);
                     return true;
-                } else if (itemId == R.id.nav_friends) {
-                    Intent intent = new Intent(StudyGroupsActivity.this, FriendsActivity.class);
+                } else if (itemId == R.id.nav_dining) {
+                    Intent intent = new Intent(StudyGroupsActivity.this, DiningHallActivity.class);
                     startActivity(intent);
                     return true;
-                } else if (itemId == R.id.nav_classes) {
-                    Intent intent = new Intent(StudyGroupsActivity.this, ClassesActivity.class);
+                } else if (itemId == R.id.nav_buses) {
+                    Intent intent = new Intent(StudyGroupsActivity.this, ClassesActivity.class);//needs to be changed to bus activity
                     startActivity(intent);
                     return true;
                 }
