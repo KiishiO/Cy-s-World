@@ -5,15 +5,11 @@
         android:icon="@drawable/ic_home"
         android:title="Home" />
     <item
-        android:id="@+id/nav_friends"
-        android:icon="@drawable/icon_people"
-        android:title="Friends" />
+        android:id="@+id/nav_dining"
+        android:icon="@drawable/icon_dining"
+        android:title="Dining" />
     <item
-        android:id="@+id/nav_classes"
-        android:icon="@drawable/icon_school"
-        android:title="Classes" />
-    <!--    <item-->
-    <!--        android:id="@+id/nav_profile"-->
-    <!--        android:icon="@drawable/ic_person"-->
-    <!--        android:title="Profile" />-->
+        android:id="@+id/nav_buses"
+        android:icon="@drawable/icon_bus"
+        android:title="Bus Routes" />
 </menu>

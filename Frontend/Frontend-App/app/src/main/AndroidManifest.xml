@@ -20,7 +20,7 @@
         tools:node="merge">
 
         <activity
-            android:name=".CampusEventsActivity"
+            android:name=".MainActivity"
             android:exported="true"
             tools:node="merge"
             tools:ignore="DuplicateActivity,Instantiatable">
@@ -66,11 +66,11 @@
             tools:node="merge"
             tools:ignore="DuplicateActivity,Instantiatable"/>
 
-<!--        <activity-->
-<!--            android:name=".CampusEventsActivity"-->
-<!--            android:exported="false"-->
-<!--            tools:node="merge"-->
-<!--            tools:ignore="DuplicateActivity,Instantiatable"/>-->
+        <activity
+            android:name=".CampusEventsActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
 
         <activity
             android:name=".StudyGroupsActivity"

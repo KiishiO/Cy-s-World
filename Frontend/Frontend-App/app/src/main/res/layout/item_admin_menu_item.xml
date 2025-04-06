@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp"
+    android:layout_margin="4dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+
+        <!-- Menu Item Name -->
+        <TextView
+            android:id="@+id/admin_menu_item_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Menu Item Name"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/cardinal_red"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/admin_menu_item_edit_button"/>
+
+        <!-- Description -->
+        <TextView
+            android:id="@+id/admin_menu_item_description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Description of the menu item with ingredients and preparation method."
+            android:textSize="14sp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/admin_menu_item_name"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <!-- Dietary Info -->
+        <TextView
+            android:id="@+id/admin_menu_item_dietary_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Vegetarian, Gluten-Free"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            android:textColor="@color/gold"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/admin_menu_item_description"/>
+
+        <!-- Allergen Info -->
+        <TextView
+            android:id="@+id/admin_menu_item_allergen_info"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Contains: wheat, dairy, eggs"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            android:layout_marginTop="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/admin_menu_item_dietary_info"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <!-- Edit Button -->
+        <ImageButton
+            android:id="@+id/admin_menu_item_edit_button"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/ic_edit"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Edit"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/admin_menu_item_delete_button"/>
+
+        <!-- Delete Button -->
+        <ImageButton
+            android:id="@+id/admin_menu_item_delete_button"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/ic_delete"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Delete"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>
