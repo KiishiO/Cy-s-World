@@ -54,7 +54,7 @@ public class AdminDiningHallService {
     }
 
     private void createInitialMockData() {
-        // Create some mock dining halls if empty
+        // Create some mock dining halls if empty to help showcase features
         if (diningHalls.isEmpty()) {
             // UDCC
             DiningHall udcc = new DiningHall(nextDiningHallId++, "Union Drive Community Center",
