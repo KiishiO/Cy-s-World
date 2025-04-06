@@ -3,6 +3,7 @@ package onetoone;
 import jakarta.transaction.Transactional;
 import onetoone.Login.Login;
 import onetoone.Login.LoginRepository;
+import onetoone.Signup.Signup;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -85,7 +86,7 @@ class Main {
             Login login2 = new Login("sarah_a", "sarah123@example.com","A_HARAS", person2);
             Login login3 = new Login("dwilliams", "davidw@example.com","Davidw545", person3);
 
-            //Signup signup3 = new Signup( "Sonia Patil",  "john@somemail.com", "123456789");
+            Signup signup3 = new Signup( "Sonia Patil",  "john@somemail.com", "123456789", "password");
 
             // Saving Login details
             loginRepository.save(login1);
