@@ -10,6 +10,9 @@ import onetoone.Laptops.Laptop;
 import onetoone.Login.Login;
 import onetoone.Signup.Signup;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 
  * @author Sonia Patil
@@ -49,6 +52,14 @@ public class Person {
     @OneToOne
     @JoinColumn
     private Signup signup;
+
+    @ManyToMany
+    @JoinTable(
+            name = "person_friends",
+            joinColumns = @JoinColumn(name = "person_id"),
+            inverseJoinColumns = @JoinColumn(name = "friend_id")
+    )
+    private List<Person> friends = new ArrayList<>();
 
     // =============================== Constructors ================================== //
 
@@ -126,5 +137,11 @@ public class Person {
         this.roles = roles;
     }
 
+    public List<Person> getFriends() {
+        return friends;
+    }
 
+    public void setFriends(List<Person> friends) {
+        this.friends = friends;
+    }
 }

@@ -1,5 +1,7 @@
 package onetoone.BusSystem;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,13 +19,13 @@ import java.awt.color.ColorSpace;
 @RequestMapping("/busOpt") //Must initial after the port number to use this class//
 public class BusController {
 
-    //Initializes busList which holds information of buses optional//
-    private final List<Bus> busList = new ArrayList<>();
+    @Autowired
+    private busRepository busRepository;
 
     // Create a new bus
     @PostMapping("/add")
     public String addBus(@RequestBody Bus bus) {
-        busList.add(bus);
+        busRepository.save(bus);
         return "A new Bus has been added successfully: " + bus.getBusName();
     }
 
@@ -31,65 +33,68 @@ public class BusController {
     // Get all buses
     @GetMapping("/all")
     public List<Bus> getAllBuses() {
-        return busList;
+        return busRepository.findAll();
     }
 
     // Get a bus by number
     @GetMapping("/{busNum}")
-    public Bus getBusByNumber(@PathVariable int busNum) {
-        return busList.stream()
-                .filter(bus -> bus.getBusNum() == busNum)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Bus not found"));
+    public ResponseEntity<Bus> getBusByNumber(@PathVariable int busNum) {
+        Optional<Bus> busOptional = busRepository.findByBusNum(busNum);
+        if (busOptional.isPresent()) {
+            return ResponseEntity.ok(busOptional.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     // Update the bus rating
     @PutMapping("/{busName}/rating")
-    public String updateBusRating(@PathVariable String busName, @RequestBody RatingRequest ratingRequest) {
-        char busRating = ratingRequest.getBusRating();
-        for (Bus bus : busList) {
-            if (bus.getBusName().equalsIgnoreCase(busName)) {
-                bus.setBusRating(busRating);
-                return "Bus rating updated successfully to " + busRating;
-            }
+    public ResponseEntity<String> updateBusRating(@PathVariable String busName, @RequestBody RatingRequest ratingRequest) {
+        Optional<Bus> busOptional = busRepository.findByBusName(busName);
+        if (busOptional.isPresent()) {
+            Bus bus = busOptional.get();
+            bus.setBusRating(ratingRequest.getBusRating());
+            busRepository.save(bus);
+            return ResponseEntity.ok("Bus rating updated successfully to " + ratingRequest.getBusRating());
+        } else {
+            return ResponseEntity.notFound().build();
         }
-        throw new RuntimeException("Bus not found");
     }
 
     @PutMapping("/{busName}/updateStop")
-    public String updateStopLocation(@PathVariable String busName, @RequestBody StopLocationRequest stopLocationRequest) {
-        String newStopLocation = stopLocationRequest.getStopLocation();
-        for (Bus bus : busList) {
-            if (bus.getBusName().equalsIgnoreCase(busName)) {
-                bus.updateStopLocation(newStopLocation);
-                return "Stop location updated to: " + newStopLocation + " at " + bus.getLastReportTime();
-            }
+    public ResponseEntity<String> updateStopLocation(@PathVariable String busName, @RequestBody StopLocationRequest stopLocationRequest) {
+        Optional<Bus> busOptional = busRepository.findByBusName(busName);
+        if (busOptional.isPresent()) {
+            Bus bus = busOptional.get();
+            bus.updateStopLocation(stopLocationRequest.getStopLocation());
+            busRepository.save(bus);
+            return ResponseEntity.ok("Stop location updated to: " + stopLocationRequest.getStopLocation() + " at " + bus.getLastReportTime());
+        } else {
+            return ResponseEntity.notFound().build();
         }
-        throw new RuntimeException("Bus not found");
     }
 
     // Delete a bus by Name
     @DeleteMapping("/{busName}")
-    public String deleteBus(@PathVariable String busName) {
-        boolean removed = busList.removeIf(bus -> bus.getBusName().equalsIgnoreCase(busName));
-
-        if (removed) {
-            return "Bus deleted successfully!";
+    public ResponseEntity<String> deleteBus(@PathVariable String busName) {
+        Optional<Bus> busOptional = busRepository.findByBusName(busName);
+        if (busOptional.isPresent()) {
+            busRepository.delete(busOptional.get());
+            return ResponseEntity.ok("Bus deleted successfully!");
         } else {
-            return "That is not a valid bus!";
+            return ResponseEntity.ok("That is not a valid bus!");
         }
     }
 
     @DeleteMapping("removeStop/{stopLocation}")
-    public String deleteLocation(@PathVariable String stopLocation){
-        for(Bus bus : busList){
-            if(bus.getStopLocation().equalsIgnoreCase(stopLocation)){
-                bus.setStopLocation("");
-                return "Bus stop Location has been removed from the bus: " + bus.getBusName();
-            }
+    public ResponseEntity<String> deleteLocation(@PathVariable String stopLocation) {
+        List<Bus> buses = busRepository.findByStopLocation(stopLocation);
+        if (!buses.isEmpty()) {
+            Bus bus = buses.get(0);
+            bus.setStopLocation("");
+            busRepository.save(bus);
+            return ResponseEntity.ok("Bus stop Location has been removed from the bus: " + bus.getBusName());
         }
-    return "Bus stop was not found for this bus!";
+        return ResponseEntity.ok("Bus stop was not found for this bus!");
     }
-
-
 }

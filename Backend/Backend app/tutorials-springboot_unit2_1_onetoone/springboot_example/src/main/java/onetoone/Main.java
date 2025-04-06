@@ -25,6 +25,7 @@ import org.springframework.context.annotation.ComponentScan;
  */ 
 
 @SpringBootApplication
+//@ComponentScan(basePackages = {"onetoone.CampusEvents"})
 class Main {
 
     public static void main(String[] args) {
