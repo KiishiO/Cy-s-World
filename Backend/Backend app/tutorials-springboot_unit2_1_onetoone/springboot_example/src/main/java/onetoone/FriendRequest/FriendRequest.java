@@ -1,4 +1,5 @@
 package onetoone.FriendRequest;
+import onetoone.FriendRequest.FriendRequestRepository;
 import lombok.Builder;
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.CascadeType;
