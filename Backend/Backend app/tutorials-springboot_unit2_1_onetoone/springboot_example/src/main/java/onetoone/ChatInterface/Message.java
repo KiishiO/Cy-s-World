@@ -1,4 +1,4 @@
-package onetoone.ChatInterface.Websocket;
+package onetoone.ChatInterface;
 
 import java.util.Date;
 

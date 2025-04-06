@@ -1,4 +1,4 @@
-package onetoone.ChatInterface.Websocket;
+package onetoone.ChatInterface;
 
 import java.io.IOException;
 import java.util.Hashtable;
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Controller;
  * @author Sonia Patil
  */
 @Controller
-@ServerEndpoint(value = "/chat/{username")
+@ServerEndpoint(value = "/chat/{username}")
 public class ChatSocket {
 
     // cannot autowire static directly (instead we do it by the below
