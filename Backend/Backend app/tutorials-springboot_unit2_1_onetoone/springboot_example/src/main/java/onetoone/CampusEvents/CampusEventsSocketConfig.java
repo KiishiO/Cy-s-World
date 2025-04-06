@@ -1,17 +1,20 @@
-package onetoone.CampusEvents;
+//package onetoone.CampusEvents;
+//
+//
+//import org.springframework.context.annotation.Bean;
+//import org.springframework.context.annotation.Configuration;
+//import org.springframework.web.socket.server.standard.ServerEndpointExporter;
+//
+//@Configuration
+//public class CampusEventsSocketConfig {
+//
+//    @Bean
+//    public ServerEndpointExporter serverEndpointExporter() {
+//        return new ServerEndpointExporter();
+//    }
+//
+//}
+//
 
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.server.standard.ServerEndpointExporter;
-
-@Configuration
-public class CampusEventsSocketConfig {
-
-    @Bean
-    public ServerEndpointExporter serverEndpointExporter() {
-        return new ServerEndpointExporter();
-    }
-
-}
-
+//Commented Out Since only one ServerEndPointExporter should be made for all websockets//
