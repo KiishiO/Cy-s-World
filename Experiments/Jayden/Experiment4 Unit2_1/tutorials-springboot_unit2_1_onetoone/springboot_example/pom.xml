@@ -41,6 +41,13 @@
         <scope>runtime</scope>
     </dependency>
 
+    <dependency>
+      <groupId>com.mysql</groupId>
+      <artifactId>mysql-connector-j</artifactId>
+      <version>8.0.33</version>  <!-- Use latest version -->
+      <scope>runtime</scope>
+    </dependency>
+
     <!-- The ORM JPA specs/hibernate impl -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -53,8 +60,22 @@
         <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
 
+    <!--		dependency for websocket-->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-websocket</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
 
   </dependencies>
+
+
 
   <build>
     <plugins>

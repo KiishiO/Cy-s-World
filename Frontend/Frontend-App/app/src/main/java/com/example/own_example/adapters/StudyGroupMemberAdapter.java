@@ -1,6 +1,5 @@
 package com.example.own_example.adapters;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,16 +16,14 @@ import java.util.List;
 
 public class StudyGroupMemberAdapter extends RecyclerView.Adapter<StudyGroupMemberAdapter.MemberViewHolder> {
 
-    private Context context;
     private List<StudyGroupMember> members;
     private OnMemberActionListener listener;
 
     public interface OnMemberActionListener {
-        void onRemoveMember(StudyGroupMember member, int position);
+        void onRemoveMember(StudyGroupMember member);
     }
 
-    public StudyGroupMemberAdapter(Context context, List<StudyGroupMember> members, OnMemberActionListener listener) {
-        this.context = context;
+    public StudyGroupMemberAdapter(List<StudyGroupMember> members, OnMemberActionListener listener) {
         this.members = members;
         this.listener = listener;
     }
@@ -34,7 +31,8 @@ public class StudyGroupMemberAdapter extends RecyclerView.Adapter<StudyGroupMemb
     @NonNull
     @Override
     public MemberViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_study_group_member, parent, false);
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_study_group_member, parent, false);
         return new MemberViewHolder(view);
     }
 
@@ -42,35 +40,33 @@ public class StudyGroupMemberAdapter extends RecyclerView.Adapter<StudyGroupMemb
     public void onBindViewHolder(@NonNull MemberViewHolder holder, int position) {
         StudyGroupMember member = members.get(position);
 
-        holder.memberName.setText(member.getName());
-        holder.memberStatus.setText(member.getStatus());
+        // Set member name and email/status
+        holder.memberNameText.setText(member.getName());
+        holder.memberEmailText.setText(member.getEmail());
 
+        // Remove button functionality
         holder.removeMemberButton.setOnClickListener(v -> {
             if (listener != null) {
-                listener.onRemoveMember(member, holder.getAdapterPosition());
+                listener.onRemoveMember(member);
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return members != null ? members.size() : 0;
+        return members.size();
     }
 
-    public void updateData(List<StudyGroupMember> newMembers) {
-        this.members = newMembers;
-        notifyDataSetChanged();
-    }
-
-    public class MemberViewHolder extends RecyclerView.ViewHolder {
-        TextView memberName;
-        TextView memberStatus;
+    static class MemberViewHolder extends RecyclerView.ViewHolder {
+        TextView memberNameText;
+        TextView memberEmailText;
         ImageButton removeMemberButton;
 
         public MemberViewHolder(@NonNull View itemView) {
             super(itemView);
-            memberName = itemView.findViewById(R.id.member_name);
-            memberStatus = itemView.findViewById(R.id.member_status);
+
+            memberNameText = itemView.findViewById(R.id.member_name);
+            memberEmailText = itemView.findViewById(R.id.member_email);
             removeMemberButton = itemView.findViewById(R.id.remove_member_button);
         }
     }

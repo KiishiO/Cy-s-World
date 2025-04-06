@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -15,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.own_example.adapters.StudyGroupAdapter;
 import com.example.own_example.adapters.StudyGroupAdapter;
 import com.example.own_example.models.Friend;
 import com.example.own_example.models.StudyGroup;
@@ -35,6 +37,8 @@ public class StudyGroupsActivity extends AppCompatActivity {
     private RecyclerView studyGroupsRecyclerView;
     private LinearLayout emptyStateView;
     private MaterialButton createGroupButton;
+
+    private ImageButton manageGroupButton;
     private BottomNavigationView bottomNavigationView;
 
     private StudyGroupAdapter studyGroupsAdapter;
@@ -71,6 +75,10 @@ public class StudyGroupsActivity extends AppCompatActivity {
         createGroupButton = findViewById(R.id.create_group_button);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
+        //setting up manage group button
+        View manageGroupView = getLayoutInflater().inflate(R.layout.item_study_group, studyGroupsRecyclerView, false);
+        manageGroupButton = manageGroupView.findViewById(R.id.manage_group_button);
+
         // Set up RecyclerView
         studyGroupsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         studyGroupsAdapter = new StudyGroupAdapter(studyGroups, this);
@@ -78,6 +86,16 @@ public class StudyGroupsActivity extends AppCompatActivity {
 
         // Set up create button
         createGroupButton.setOnClickListener(v -> showCreateTableDialog());
+
+        // Set up manage group button usage
+        manageGroupButton.setOnClickListener(v -> {
+            try {
+                Intent intent = new Intent(StudyGroupsActivity.this, ManageStudyGroupActivity.class);
+                startActivity(intent);
+            } catch (Exception e) {
+                Log.e(TAG, "Error navigating to ManageStudyGroupsActivity: " + e.getMessage());
+            }
+        });
 
         // Set up bottom navigation
         if (bottomNavigationView != null) {

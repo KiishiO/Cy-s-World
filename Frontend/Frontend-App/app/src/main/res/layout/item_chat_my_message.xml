@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="16dp"
+    android:paddingEnd="8dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
+
+    <!-- Message Bubble -->
+    <LinearLayout
+        android:id="@+id/message_bubble"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="80dp"
+        android:background="@drawable/rounded_message_sent"
+        android:backgroundTint="@color/cardinal_red"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <!-- Message Text -->
+        <TextView
+            android:id="@+id/text_message_body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            tools:text="This is my message that will appear on the right side" />
+
+    </LinearLayout>
+
+    <!-- Time Text -->
+    <TextView
+        android:id="@+id/text_message_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/message_bubble"
+        android:layout_alignEnd="@id/message_bubble"
+        android:layout_marginTop="2dp"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="10sp"
+        tools:text="2:45 PM" />
+
+</RelativeLayout>

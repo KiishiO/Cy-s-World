@@ -28,6 +28,12 @@ public class StudyGroupService {
     private Context context;
     private long currentUserId;
 
+    // New callback interfaces
+    public interface StudyGroupDetailsCallback {
+        void onSuccess(StudyGroup studyGroup, List<StudyGroupMember> members);
+        void onError(String error);
+    }
+
     public interface StudyTablesCallback {
         void onSuccess(List<StudyGroup> studyGroups);
         void onError(String error);
@@ -48,6 +54,131 @@ public class StudyGroupService {
         if (currentUserId == 0) {
             currentUserId = 1;
         }
+    }
+
+    // New method to get study group details
+    public void getStudyGroupDetails(long studyGroupId, StudyGroupDetailsCallback callback) {
+        String url = BASE_URL + "/details/" + studyGroupId;
+
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.GET,
+                url,
+                null,
+                response -> {
+                    try {
+                        // Parse the study group
+                        StudyGroup studyGroup = parseStudyTableFromJson(response);
+
+                        // Extract members from the response
+                        List<StudyGroupMember> members = new ArrayList<>();
+                        JSONArray membersArray = response.getJSONArray("friendGroup");
+                        for (int i = 0; i < membersArray.length(); i++) {
+                            JSONObject memberObj = membersArray.getJSONObject(i);
+                            long memberId = memberObj.getLong("id");
+                            String memberName = memberObj.getString("name");
+                            String memberEmail = memberObj.getString("email");
+
+                            StudyGroupMember member = new StudyGroupMember(memberId, memberName, memberEmail);
+                            members.add(member);
+                        }
+
+                        callback.onSuccess(studyGroup, members);
+                    } catch (JSONException e) {
+                        Log.e(TAG, "Error parsing study group details: " + e.getMessage());
+                        callback.onError("Error parsing data");
+                    }
+                },
+                error -> {
+                    Log.e(TAG, "Error fetching study group details: " + error.toString());
+                    callback.onError(getVolleyErrorMessage(error));
+                }
+        );
+
+        requestQueue.add(request);
+    }
+
+    // New method to add a member to a study group
+    public void addMemberToStudyGroup(long studyGroupId, String memberEmail, ActionCallback callback) {
+        String url = BASE_URL + "/addMember";
+
+        JSONObject requestBody = new JSONObject();
+        try {
+            requestBody.put("studyTableId", studyGroupId);
+            requestBody.put("email", memberEmail);
+        } catch (JSONException e) {
+            callback.onError("Error creating request: " + e.getMessage());
+            return;
+        }
+
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.POST,
+                url,
+                requestBody,
+                response -> {
+                    callback.onSuccess("Member added successfully");
+                },
+                error -> {
+                    callback.onError(getVolleyErrorMessage(error));
+                }
+        );
+
+        requestQueue.add(request);
+    }
+
+    // New method to remove a member from a study group
+    public void removeMemberFromStudyGroup(long studyGroupId, long memberId, ActionCallback callback) {
+        String url = BASE_URL + "/removeMember";
+
+        JSONObject requestBody = new JSONObject();
+        try {
+            requestBody.put("studyTableId", studyGroupId);
+            requestBody.put("memberId", memberId);
+        } catch (JSONException e) {
+            callback.onError("Error creating request: " + e.getMessage());
+            return;
+        }
+
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.DELETE,
+                url,
+                requestBody,
+                response -> {
+                    callback.onSuccess("Member removed successfully");
+                },
+                error -> {
+                    callback.onError(getVolleyErrorMessage(error));
+                }
+        );
+
+        requestQueue.add(request);
+    }
+
+    // New method to update a study group
+    public void updateStudyGroup(long studyGroupId, String newGroupName, ActionCallback callback) {
+        String url = BASE_URL + "/update";
+
+        JSONObject requestBody = new JSONObject();
+        try {
+            requestBody.put("studyTableId", studyGroupId);
+            requestBody.put("name", newGroupName);
+        } catch (JSONException e) {
+            callback.onError("Error creating request: " + e.getMessage());
+            return;
+        }
+
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.PUT,
+                url,
+                requestBody,
+                response -> {
+                    callback.onSuccess("Study group updated successfully");
+                },
+                error -> {
+                    callback.onError(getVolleyErrorMessage(error));
+                }
+        );
+
+        requestQueue.add(request);
     }
 
     public void getMyStudyGroups(StudyTablesCallback callback) {
@@ -208,8 +339,9 @@ public class StudyGroupService {
             JSONObject memberObj = membersArray.getJSONObject(i);
             long memberId = memberObj.getLong("id");
             String memberName = memberObj.getString("name");
+            String memberEmail = memberObj.getString("email");
 
-            StudyGroupMember member = new StudyGroupMember(memberId, memberName);
+            StudyGroupMember member = new StudyGroupMember(memberId, memberName, memberEmail);
             table.addMember(member);
         }
 

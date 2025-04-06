@@ -8,13 +8,15 @@ public class StudyGroup {
     private String leaderName;
     private long leaderId;
     private List<StudyGroupMember> members;
+    private String groupName;
+
     private String status;
 
-    public StudyGroup(long id, String leaderName, long leaderId, String status) {
+    public StudyGroup(long id, String leaderName, long leaderId, String groupName) {
         this.id = id;
         this.leaderName = leaderName;
         this.leaderId = leaderId;
-        this.status = status;
+        this.groupName = groupName;
         this.members = new ArrayList<>();
     }
 
@@ -55,6 +57,14 @@ public class StudyGroup {
             this.members = new ArrayList<>();
         }
         this.members.add(member);
+    }
+
+    public String getName() {
+        return groupName;
+    }
+
+    public void setName(String name) {
+        this.groupName = name;
     }
 
     public String getStatus() {
