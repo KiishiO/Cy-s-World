@@ -20,7 +20,7 @@
         tools:node="merge">
 
         <activity
-            android:name=".CampusEventsActivity"
+            android:name=".MainActivity"
             android:exported="true"
             tools:node="merge"
             tools:ignore="DuplicateActivity,Instantiatable">
@@ -29,6 +29,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".CampusEventsActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
 
         <activity
             android:name=".ProfilePick"
@@ -66,15 +72,16 @@
             tools:node="merge"
             tools:ignore="DuplicateActivity,Instantiatable"/>
 
-<!--        <activity-->
-<!--            android:name=".CampusEventsActivity"-->
-<!--            android:exported="false"-->
-<!--            tools:node="merge"-->
-<!--            tools:ignore="DuplicateActivity,Instantiatable"/>-->
-
         <activity
             android:name=".StudyGroupsActivity"
             android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".ChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
             tools:node="merge"
             tools:ignore="DuplicateActivity,Instantiatable"/>
     </application>
