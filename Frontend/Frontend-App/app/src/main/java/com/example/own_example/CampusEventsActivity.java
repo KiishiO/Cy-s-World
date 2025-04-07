@@ -51,6 +51,8 @@ public class CampusEventsActivity extends AppCompatActivity implements
     private String selectedDate;
     private String currentUsername;
 
+    private static final boolean USE_DUMMY_DATA = true; // Set to false when using real backend
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,13 +63,13 @@ public class CampusEventsActivity extends AppCompatActivity implements
 
             // Initialize user service and get current username
             currentUsername = UserService.getInstance().getCurrentUsername();
-            if (currentUsername == null || currentUsername.isEmpty()) {
-                // Redirect to login if not logged in
-                Toast.makeText(this, "Please log in to view events", Toast.LENGTH_SHORT).show();
-                // Redirect to login screen
-                finish();
-                return;
-            }
+//            if (currentUsername == null || currentUsername.isEmpty()) {
+//                // Redirect to login if not logged in
+//                Toast.makeText(this, "Please log in to view events", Toast.LENGTH_SHORT).show();
+//                // Redirect to login screen
+//                finish();
+//                return;
+//            }
 
             // Initialize views
             calendarView = findViewById(R.id.calendar_view);
@@ -84,6 +86,28 @@ public class CampusEventsActivity extends AppCompatActivity implements
             // Set up adapter
             eventsAdapter = new EventsAdapter(filteredEvents, this);
             eventsRecyclerView.setAdapter(eventsAdapter);
+
+            if (USE_DUMMY_DATA) {
+                // Add dummy data and bypass login check
+                currentUsername = "test_user";
+                loadSimpleDummyEvents();
+            } else {
+                if (currentUsername == null || currentUsername.isEmpty()) {
+                // Redirect to login if not logged in
+                Toast.makeText(this, "Please log in to view events", Toast.LENGTH_SHORT).show();
+                // Redirect to login screen
+                finish();
+                return;
+                }
+
+                if (currentUsername == null || currentUsername.isEmpty()) {
+                    Toast.makeText(this, "Please log in to view events", Toast.LENGTH_SHORT).show();
+                    finish();
+                    return;
+                }
+                // Initialize WebSocket client
+                webSocketClient = new EventWebSocketClient(this, currentUsername, this);
+            }
 
             // Set up category filter spinner
             setupCategorySpinner();
@@ -119,6 +143,60 @@ public class CampusEventsActivity extends AppCompatActivity implements
             Log.e(TAG, "Error in onCreate: " + e.getMessage(), e);
         }
     }
+
+// Method containing dummy data to showcase
+private void loadSimpleDummyEvents() {
+    List<CampusEvent> dummyEvents = new ArrayList<>();
+
+    // Create first dummy event
+    CampusEvent event1 = new CampusEvent();
+    event1.setId("event-001");
+    event1.setTitle("Career Fair 2025");
+    event1.setDescription("Join us for the largest career fair on campus! Meet representatives from over 200 companies.");
+    event1.setLocation("Memorial Union");
+    event1.setCategory("Career");
+    event1.setCreator("admin_user");
+    event1.setAttendees(87);
+
+    // Set dates for first event (tomorrow)
+    Calendar tomorrow = Calendar.getInstance();
+    tomorrow.add(Calendar.DAY_OF_MONTH, 1);
+    tomorrow.set(Calendar.HOUR_OF_DAY, 10);
+    event1.setStartTime(tomorrow.getTime());
+
+    tomorrow.add(Calendar.HOUR_OF_DAY, 3);
+    event1.setEndTime(tomorrow.getTime());
+
+    // Create second dummy event
+    CampusEvent event2 = new CampusEvent();
+    event2.setId("event-002");
+    event2.setTitle("Campus Movie Night");
+    event2.setDescription("Free outdoor movie screening on central campus. Bring blankets and chairs!");
+    event2.setLocation("Central Campus");
+    event2.setCategory("Entertainment");
+    event2.setCreator("events_coordinator");
+    event2.setAttendees(42);
+
+    // Set dates for second event (this weekend)
+    Calendar weekend = Calendar.getInstance();
+    weekend.add(Calendar.DAY_OF_MONTH, 3); // 3 days from now
+    weekend.set(Calendar.HOUR_OF_DAY, 19); // 7 PM
+    event2.setStartTime(weekend.getTime());
+
+    weekend.add(Calendar.HOUR_OF_DAY, 2); // 2 hour movie
+    event2.setEndTime(weekend.getTime());
+
+    // Add events to list
+    dummyEvents.add(event1);
+    dummyEvents.add(event2);
+
+    // Update the adapter
+    allEvents.clear();
+    allEvents.addAll(dummyEvents);
+    filteredEvents.clear();
+    filteredEvents.addAll(dummyEvents);
+    eventsAdapter.notifyDataSetChanged();
+}
 
     private void setupCalendarListener() {
         calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {

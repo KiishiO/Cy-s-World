@@ -55,6 +55,36 @@
             tools:ignore="DuplicateActivity,Instantiatable"/>
 
         <activity
+            android:name=".TeacherDashboardActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".AdminDashboardActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".AdminDiningHallActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".AdminDiningMenuActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".AdminEventsActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
             android:name=".FriendsActivity"
             android:exported="false"
             tools:node="merge"
@@ -68,6 +98,24 @@
 
         <activity
             android:name=".CampusEventsActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".DiningHallActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".DiningHallDetailActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".EventDetailActivity"
             android:exported="false"
             tools:node="merge"
             tools:ignore="DuplicateActivity,Instantiatable"/>
