@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.own_example.BusActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
 
@@ -17,6 +18,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
     private TextView welcomeText;
     private MaterialCardView friendRequestsCard;
     private MaterialCardView classesCard;
+    private MaterialCardView busTrackerCard;
     private BottomNavigationView bottomNavigationView;
 
     @Override
@@ -31,6 +33,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
             welcomeText = findViewById(R.id.welcome_text);
             friendRequestsCard = findViewById(R.id.friends_request_card);
             classesCard = findViewById(R.id.classes_card);
+            busTrackerCard = findViewById(R.id.bus_tracker_card);
             bottomNavigationView = findViewById(R.id.bottom_navigation);
 
             // Make sure bottom navigation isn't null before using it
@@ -89,6 +92,18 @@ public class StudentDashboardActivity extends AppCompatActivity {
                 });
             }
 
+            // Set click listener for bus tracker card
+            if (busTrackerCard != null) {
+                busTrackerCard.setOnClickListener(v -> {
+                    try {
+                        Intent intent = new Intent(StudentDashboardActivity.this, BusActivity.class);
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error navigating to BusActivity: " + e.getMessage());
+                    }
+                });
+            }
+
             // Set up bottom navigation
             if (bottomNavigationView != null) {
                 bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -105,6 +120,10 @@ public class StudentDashboardActivity extends AppCompatActivity {
                         } else if (itemId == R.id.nav_classes) {
                             Intent classesIntent = new Intent(StudentDashboardActivity.this, ClassesActivity.class);
                             startActivity(classesIntent);
+                            return true;
+                        } else if (itemId == R.id.nav_bus) {
+                            Intent busIntent = new Intent(StudentDashboardActivity.this, BusActivity.class);
+                            startActivity(busIntent);
                             return true;
                         }
                     } catch (Exception e) {
