@@ -90,5 +90,12 @@
             android:windowSoftInputMode="adjustResize"
             tools:node="merge"
             tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".BusActivity"
+            android:exported="false"
+            android:label="@string/title_activity_bus"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
     </application>
 </manifest>

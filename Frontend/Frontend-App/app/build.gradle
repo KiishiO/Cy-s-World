@@ -39,6 +39,9 @@ dependencies {
     implementation 'com.android.volley:volley:1.2.1'
     implementation libs.androidx.core.ktx
 
+    // SwipeRefreshLayout for pull-to-refresh functionality
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+
     // OkHttp for WebSocket support
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
 
