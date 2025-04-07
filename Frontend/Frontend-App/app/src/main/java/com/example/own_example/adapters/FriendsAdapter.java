@@ -21,6 +21,7 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.FriendVi
 
     public interface OnFriendActionListener {
         void onRemoveFriend(int friendId, int position);
+        void onChatWithFriend(Friend friend); // New method for chat functionality
     }
 
     public FriendsAdapter(List<Friend> friendsList, OnFriendActionListener listener) {
@@ -47,6 +48,13 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.FriendVi
                 listener.onRemoveFriend(friend.getId(), holder.getAdapterPosition());
             }
         });
+
+        // Add chat button click listener
+        holder.chatButton.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onChatWithFriend(friend);
+            }
+        });
     }
 
     @Override
@@ -58,12 +66,14 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.FriendVi
         TextView friendName;
         TextView friendStatus;
         ImageButton removeButton;
+        ImageButton chatButton; // Added chat button reference
 
         FriendViewHolder(View itemView) {
             super(itemView);
             friendName = itemView.findViewById(R.id.friend_name);
             friendStatus = itemView.findViewById(R.id.friend_status);
             removeButton = itemView.findViewById(R.id.remove_friend_button);
+            chatButton = itemView.findViewById(R.id.chat_friend_button); // Initialize chat button
         }
     }
 }

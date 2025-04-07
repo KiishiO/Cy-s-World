@@ -1,5 +1,6 @@
 package com.example.own_example;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -309,6 +310,33 @@ public class FriendsActivity extends AppCompatActivity implements
                 showSnackbar("Error removing connection: " + error);
             }
         });
+    }
+
+    // NEW METHOD: Implement chat functionality
+    @Override
+    public void onChatWithFriend(Friend friend) {
+        try {
+            // Create intent to launch chat activity
+            Intent chatIntent = new Intent(this, ChatActivity.class);
+
+            // Pass friend details to the chat activity
+            chatIntent.putExtra("friendId", friend.getId());
+            chatIntent.putExtra("friendName", friend.getName());
+            chatIntent.putExtra("friendStatus", friend.getStatus());
+
+            // Get username from SharedPreferences for the sender
+            SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+            String username = prefs.getString("username", "user");
+            chatIntent.putExtra("username", username);
+
+            // Start the chat activity
+            startActivity(chatIntent);
+
+            Log.d(TAG, "Starting chat with: " + friend.getName());
+        } catch (Exception e) {
+            Log.e(TAG, "Error starting chat: " + e.getMessage());
+            showSnackbar("Could not start chat. Please try again.");
+        }
     }
 
     // Implement RequestsAdapter.OnRequestActionListener

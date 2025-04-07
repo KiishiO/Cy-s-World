@@ -31,6 +31,12 @@
         </activity>
 
         <activity
+            android:name=".CampusEventsActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
             android:name=".ProfilePick"
             android:exported="false"
             tools:node="merge"
@@ -75,6 +81,13 @@
         <activity
             android:name=".StudyGroupsActivity"
             android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".ChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
             tools:node="merge"
             tools:ignore="DuplicateActivity,Instantiatable"/>
     </application>
