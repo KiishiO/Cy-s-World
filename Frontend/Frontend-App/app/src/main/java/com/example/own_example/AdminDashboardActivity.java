@@ -19,15 +19,14 @@ import com.google.android.material.card.MaterialCardView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TeacherDashboardActivity extends AppCompatActivity {
+public class AdminDashboardActivity extends AppCompatActivity {
 
     private TextView welcomeText;
     private MaterialCardView classesManagementCard;
-    private MaterialCardView gradingCard;
-    private MaterialCardView attendanceCard;
-    private MaterialCardView officeHoursCard;
+    private MaterialCardView eventManagementCard;
+    private MaterialCardView diningManagementCard;
+    private MaterialCardView busRouteCard;
     private RecyclerView recentActivityRecycler;
-    private BottomNavigationView bottomNavigationView;
 
     // Sample data structure for recent activities
     private List<RecentActivity> recentActivities = new ArrayList<>();
@@ -35,23 +34,18 @@ public class TeacherDashboardActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_teacher_dashboard);
+        setContentView(R.layout.activity_admin_dashboard);
 
         // Initialize views
         welcomeText = findViewById(R.id.welcome_text);
-        classesManagementCard = findViewById(R.id.classes_management_card);
-        officeHoursCard = findViewById(R.id.office_hours_card);
+        classesManagementCard = findViewById(R.id.admin_classes_management_card);
+        eventManagementCard = findViewById(R.id.admin_event_management_card);
+        diningManagementCard = findViewById(R.id.admin_dining_management_card);
+        busRouteCard = findViewById(R.id.admin_bus_management_card);
         recentActivityRecycler = findViewById(R.id.recent_activity_recycler);
-        bottomNavigationView = findViewById(R.id.bottom_navigation);
-
-        // Set up teacher name from SharedPreferences (assuming you have stored it)
-        setupTeacherName();
 
         // Set up click listeners for action cards
         setupCardClickListeners();
-
-        // Set up bottom navigation
-        setupBottomNavigation();
 
         // Initialize recent activities
         populateRecentActivities();
@@ -60,54 +54,41 @@ public class TeacherDashboardActivity extends AppCompatActivity {
         setupRecentActivitiesRecyclerView();
     }
 
-    private void setupTeacherName() {
-        SharedPreferences sharedPreferences = getSharedPreferences("TeacherPrefs", MODE_PRIVATE);
-        String teacherName = sharedPreferences.getString("teacherName", "");
-        if (!teacherName.isEmpty()) {
-            welcomeText.setText("Welcome, Professor " + teacherName);
-        }
-    }
 
     private void setupCardClickListeners() {
         classesManagementCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Navigate to class management activity
-                Intent intent = new Intent(TeacherDashboardActivity.this, ClassManagementActivity.class);
+                Intent intent = new Intent(AdminDashboardActivity.this, ClassManagementActivity.class); //need to change this to map to class management on the admin side
                 startActivity(intent);
             }
         });
 
-        officeHoursCard.setOnClickListener(new View.OnClickListener() {
+        eventManagementCard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navigate to grading activity
+                Intent intent = new Intent(AdminDashboardActivity.this, AdminEventsActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        diningManagementCard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navigate to attendance activity
+                Intent intent = new Intent(AdminDashboardActivity.this, AdminDiningHallActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        busRouteCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Navigate to office hours activity
-                Intent intent = new Intent(TeacherDashboardActivity.this, OfficeHoursActivity.class);
+                Intent intent = new Intent(AdminDashboardActivity.this, OfficeHoursActivity.class);//need to change this to map to bus management java class
                 startActivity(intent);
-            }
-        });
-    }
-
-    private void setupBottomNavigation() {
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                int itemId = item.getItemId();
-
-                // Handle navigation item clicks
-                if (itemId == R.id.nav_home) {
-                    // Already on dashboard, do nothing
-                    return true;
-                } else if (itemId == R.id.nav_dining) {
-                    Intent intent = new Intent(TeacherDashboardActivity.this, DiningHallActivity.class);
-                    startActivity(intent);
-                    return true;
-                } else if (itemId == R.id.nav_buses) {
-                    Intent intent = new Intent(TeacherDashboardActivity.this, GradingActivity.class);//needs to be changed to the bus java class
-                    startActivity(intent);
-                    return true;
-                }
-                return false;
             }
         });
     }
@@ -172,7 +153,7 @@ public class TeacherDashboardActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     // Handle item click - perhaps navigate to a detail view
-                    Toast.makeText(TeacherDashboardActivity.this,
+                    Toast.makeText(AdminDashboardActivity.this,
                             "Selected: " + activity.getActivityTitle(),
                             Toast.LENGTH_SHORT).show();
                 }

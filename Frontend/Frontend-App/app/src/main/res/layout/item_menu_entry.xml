@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="#F5F5F5">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+
+        <!-- Menu Item Name -->
+        <TextView
+            android:id="@+id/menu_item_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Menu Item Name"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/cardinal_red"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/dietary_icons" />
+
+        <!-- Dietary Icons (Vegetarian, Vegan, Gluten-Free, etc.) -->
+        <LinearLayout
+            android:id="@+id/dietary_icons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <ImageView
+                android:id="@+id/vegetarian_icon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="4dp"
+                android:src="@drawable/vegetarian_icon"
+                android:visibility="gone"
+                android:contentDescription="Vegetarian" />
+
+            <ImageView
+                android:id="@+id/vegan_icon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="4dp"
+                android:src="@drawable/vegan_icon"
+                android:visibility="gone"
+                android:contentDescription="Vegan" />
+
+            <ImageView
+                android:id="@+id/gluten_free_icon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="4dp"
+                android:src="@drawable/gluten_free_icon"
+                android:visibility="gone"
+                android:contentDescription="Gluten Free" />
+        </LinearLayout>
+
+        <!-- Menu Item Description -->
+        <TextView
+            android:id="@+id/menu_item_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Description of the menu item with ingredients and preparation style"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintTop_toBottomOf="@id/menu_item_name"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Nutritional Info Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/nutritional_info_button"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="Nutrition Info"
+            android:textSize="10sp"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/gold"
+            app:cornerRadius="4dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/menu_item_description"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <!-- Allergen Info -->
+        <TextView
+            android:id="@+id/allergen_info"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Contains: dairy, wheat"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            android:layout_marginStart="8dp"
+            app:layout_constraintTop_toTopOf="@id/nutritional_info_button"
+            app:layout_constraintBottom_toBottomOf="@id/nutritional_info_button"
+            app:layout_constraintStart_toEndOf="@id/nutritional_info_button"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

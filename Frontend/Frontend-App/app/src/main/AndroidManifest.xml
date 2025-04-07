@@ -73,6 +73,12 @@
             tools:ignore="DuplicateActivity,Instantiatable"/>
 
         <activity
+            android:name=".CampusEventsActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
             android:name=".StudyGroupsActivity"
             android:exported="false"
             tools:node="merge"
