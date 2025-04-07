@@ -103,7 +103,7 @@ public class TeacherDashboardActivity extends AppCompatActivity {
                     startActivity(intent);
                     return true;
                 } else if (itemId == R.id.nav_buses) {
-                    Intent intent = new Intent(TeacherDashboardActivity.this, GradingActivity.class);//needs to be changed to the bus java class
+                    Intent intent = new Intent(TeacherDashboardActivity.this, BusActivity.class);
                     startActivity(intent);
                     return true;
                 }

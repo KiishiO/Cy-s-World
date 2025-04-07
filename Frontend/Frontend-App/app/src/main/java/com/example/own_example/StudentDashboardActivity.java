@@ -118,12 +118,8 @@ public class StudentDashboardActivity extends AppCompatActivity {
                             startActivity(friendsIntent);
                             return true;
                         } else if (itemId == R.id.nav_buses) {
-                            Intent classesIntent = new Intent(StudentDashboardActivity.this, ClassesActivity.class); //needs to be changed to the bus java class
+                            Intent classesIntent = new Intent(StudentDashboardActivity.this, BusActivity.class);
                             startActivity(classesIntent);
-                            return true;
-                        } else if (itemId == R.id.nav_bus) {
-                            Intent busIntent = new Intent(StudentDashboardActivity.this, BusActivity.class);
-                            startActivity(busIntent);
                             return true;
                         }
                     } catch (Exception e) {

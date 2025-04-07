@@ -274,9 +274,8 @@
                 android:id="@+id/bus_icon"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
-                android:src="@android:drawable/ic_menu_directions"
+                android:src="@drawable/ic_busimage"
                 android:layout_margin="16dp"
-                app:tint="@color/cardinal_red"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" />

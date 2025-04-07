@@ -9,15 +9,7 @@
         android:icon="@drawable/icon_dining"
         android:title="Dining" />
     <item
-        android:id="@+id/nav_classes"
-        android:icon="@drawable/icon_school"
-        android:title="Classes" />
-    <item
-        android:id="@+id/nav_bus"
-        android:icon="@android:drawable/ic_menu_directions"
-        android:title="Bus" />
-    <!--    <item-->
-    <!--        android:id="@+id/nav_profile"-->
-    <!--        android:icon="@drawable/ic_person"-->
-    <!--        android:title="Profile" />-->
+        android:id="@+id/nav_buses"
+        android:icon="@drawable/icon_bus"
+        android:title="Bus Routes" />
 </menu>
