@@ -7,12 +7,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/white">
 
-    <!--Teacher Profile Icon-->
+    <!--Admin Profile Icon-->
     <ImageView
         android:id="@+id/teacherProfile_image"
         android:layout_width="match_parent"
         android:layout_height="250dp"
-        android:src="@drawable/iconpic_teacherprofile"
+        android:src="@drawable/iconpic_adminprofile"
         android:layout_marginTop="16dp"
         android:scaleType="fitCenter"
         app:layout_constraintTop_toTopOf="parent"
@@ -25,7 +25,7 @@
         android:id="@+id/welcome_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Welcome, Professor..."
+        android:text="Welcome, Administrator..."
         android:textStyle="italic"
         android:textSize="28sp"
         android:fontFamily="serif"
@@ -49,7 +49,7 @@
 
         <!-- Class Management Button -->
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/classes_management_card"
+            android:id="@+id/admin_classes_management_card"
             android:layout_width="0dp"
             android:layout_height="100dp"
             android:layout_weight="1"
@@ -80,9 +80,9 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Office Hours Button -->
+        <!-- Event Management Button -->
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/office_hours_card"
+            android:id="@+id/admin_event_management_card"
             android:layout_width="0dp"
             android:layout_height="100dp"
             android:layout_weight="1"
@@ -100,19 +100,98 @@
                 <ImageView
                     android:layout_width="160dp"
                     android:layout_height="60dp"
-                    android:src="@drawable/ic_hours"
-                    android:contentDescription="Office Hours" />
+                    android:src="@drawable/ic_events"
+                    android:contentDescription="Events Management" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Office Hours"
+                    android:text="Event Management"
                     android:textColor="@color/white"
                     android:textSize="16sp"
                     android:layout_marginTop="4dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
+
+    <!-- Second row of action buttons -->
+    <LinearLayout
+        android:id="@+id/action_buttons_row2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintTop_toBottomOf="@+id/action_buttons_layout">
+
+        <!-- Dining Management Button -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/admin_dining_management_card"
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#4A6572">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="160dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/ic_diningmanage"
+                    android:contentDescription="Dining Management"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dining Management"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Bus Management Button -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/admin_bus_management_card"
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@color/gold">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="160dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/ic_busmap"
+                    android:contentDescription="Bus Route Management" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bus Route Mapping"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+
 
     <!-- Recent Activity Section -->
     <TextView
@@ -127,7 +206,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="24dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/action_buttons_layout">
+        app:layout_constraintTop_toBottomOf="@+id/action_buttons_row2">
     </TextView>
 
     <!-- Recent Activity List -->
@@ -140,20 +219,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         app:layout_constraintTop_toBottomOf="@id/recent_activity_text"
-        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
-        tools:listitem="@layout/item_recent_activity" />
-
-    <!-- Bottom Navigation Bar -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_navigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/cardinal_red"
-        app:itemIconTint="@color/white"
-        app:itemTextColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:menu="@menu/teacher_bottom_navigation_menu" />
+        tools:listitem="@layout/item_recent_activity" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

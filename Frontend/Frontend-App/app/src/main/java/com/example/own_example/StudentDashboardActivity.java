@@ -113,12 +113,12 @@ public class StudentDashboardActivity extends AppCompatActivity {
                         if (itemId == R.id.nav_home) {
                             // Already on home
                             return true;
-                        } else if (itemId == R.id.nav_friends) {
-                            Intent friendsIntent = new Intent(StudentDashboardActivity.this, FriendsActivity.class);
+                        } else if (itemId == R.id.nav_dining) {
+                            Intent friendsIntent = new Intent(StudentDashboardActivity.this, DiningHallActivity.class);
                             startActivity(friendsIntent);
                             return true;
-                        } else if (itemId == R.id.nav_classes) {
-                            Intent classesIntent = new Intent(StudentDashboardActivity.this, ClassesActivity.class);
+                        } else if (itemId == R.id.nav_buses) {
+                            Intent classesIntent = new Intent(StudentDashboardActivity.this, ClassesActivity.class); //needs to be changed to the bus java class
                             startActivity(classesIntent);
                             return true;
                         } else if (itemId == R.id.nav_bus) {
