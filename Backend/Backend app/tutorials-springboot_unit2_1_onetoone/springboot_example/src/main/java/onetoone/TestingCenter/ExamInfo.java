@@ -16,7 +16,7 @@ public class ExamInfo {
     private String examDescription;
 
     @ManyToOne
-    @JoinColumn(name = "testingcenter_id")
+    @JoinColumn(name = "testingCenter_id")
     private TestingCenter testingCenter;
 
     public ExamInfo() {}

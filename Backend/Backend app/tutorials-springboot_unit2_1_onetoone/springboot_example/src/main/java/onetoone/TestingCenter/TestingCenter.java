@@ -20,7 +20,7 @@ public class TestingCenter {
     private String centerDescription;
 
     //list to hold the exams at a testing center
-    @OneToMany(mappedBy = "testingcenter", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "testingCenter", cascade = CascadeType.ALL)
     private List<ExamInfo> examInfo;
 
     public TestingCenter() {}
