@@ -1,12 +1,12 @@
 package onetoone.TestingCenter;
 
 import jakarta.persistence.*;
-import onetoone.DiningHall.MenuItems;
 import onetoone.TestingCenter.TestingCenter;
 
 /**
  * @Sonia Patil
  */
+@Entity
 public class ExamInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
