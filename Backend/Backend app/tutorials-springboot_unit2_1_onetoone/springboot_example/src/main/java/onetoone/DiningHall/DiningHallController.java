@@ -28,8 +28,8 @@ public class DiningHallController {
     @GetMapping("/{id}")
     public ResponseEntity<DiningHall> getDiningHallById(@PathVariable int id) {
         Optional<DiningHall> diningHall = diningHallRepository.findById(id);
-        return diningHall.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return diningHall.map(ResponseEntity::ok) //if theres a value, http 200 (ok) status
+                .orElseGet(() -> ResponseEntity.notFound().build()); //if optional is empty, http 404 (not found) status
     }
 
     // Create a new dining hall
