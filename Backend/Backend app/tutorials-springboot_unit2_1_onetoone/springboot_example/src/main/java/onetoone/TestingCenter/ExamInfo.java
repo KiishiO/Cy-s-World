@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import onetoone.TestingCenter.TestingCenter;
 
 /**
- * @Sonia Patil
+ * @author Sonia Patil
  */
 @Entity
 public class ExamInfo {
