@@ -165,6 +165,7 @@ class Main {
             signupRepository.save(signup4); // Now save signup
 
 //            StudyTable studyTable1 = new StudyTable(1L, person1, person2);
+           
 
 
             // Logging to console (optional, for verification)
