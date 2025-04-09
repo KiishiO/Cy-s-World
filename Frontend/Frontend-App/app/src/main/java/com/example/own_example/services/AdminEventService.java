@@ -28,7 +28,7 @@ import okio.ByteString;
 
 public class AdminEventService {
     private static final String TAG = "AdminEventService";
-    private static final String WS_BASE_URL = "ws://your-backend-url/events/";
+    private static final String WS_BASE_URL = "ws://coms-3090-017.class.las.iastate.edu:8080/events/";
     private static final int NORMAL_CLOSURE_STATUS = 1000;
     private static final int RECONNECT_DELAY = 5000; // 5 seconds
 

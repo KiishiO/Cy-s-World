@@ -1,24 +1,39 @@
 package com.example.own_example.models;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class DiningHall {
-    private long id;
+    @SerializedName("id")
+    private int id;
+
+    @SerializedName("name")
     private String name;
+
+    @SerializedName("location")
     private String location;
+
+    // Local UI fields (not in backend)
     private boolean isOpen;
     private String hours;
     private String popularItem;
     private int busynessLevel; // 0-100
-    private List<MenuCategory> menuCategories;
+
+    // Backend field for menu items
+    @SerializedName("menuItems")
+    private List<MenuItem> backendMenuItems = new ArrayList<>();
+
+    // UI organization for menu items
+    private List<MenuCategory> menuCategories = new ArrayList<>();
 
     public DiningHall() {
         this.menuCategories = new ArrayList<>();
     }
 
     public DiningHall(long id, String name, String location, boolean isOpen, String hours, String popularItem, int busynessLevel) {
-        this.id = id;
+        this.id = (int) id;
         this.name = name;
         this.location = location;
         this.isOpen = isOpen;
@@ -28,12 +43,61 @@ public class DiningHall {
         this.menuCategories = new ArrayList<>();
     }
 
+    /**
+     * Initialize menu categories based on backend menu items
+     */
+    public void initializeCategories() {
+        // Clear existing categories
+        menuCategories.clear();
+
+        if (backendMenuItems == null || backendMenuItems.isEmpty()) {
+            return;
+        }
+
+        // Create default categories
+        MenuCategory breakfast = new MenuCategory("Breakfast");
+        MenuCategory lunch = new MenuCategory("Lunch");
+        MenuCategory dinner = new MenuCategory("Dinner");
+
+        for (MenuItem item : backendMenuItems) {
+            // Simple logic to categorize items
+            String itemName = item.getName().toLowerCase();
+            if (itemName.contains("egg") || itemName.contains("pancake") ||
+                    itemName.contains("waffle") || itemName.contains("breakfast")) {
+                breakfast.addItem(item);
+            } else if (itemName.contains("salad") || itemName.contains("sandwich") ||
+                    itemName.contains("soup")) {
+                lunch.addItem(item);
+            } else {
+                dinner.addItem(item);
+            }
+        }
+
+        // Only add categories that have items
+        if (!breakfast.getItems().isEmpty()) {
+            menuCategories.add(breakfast);
+        }
+        if (!lunch.getItems().isEmpty()) {
+            menuCategories.add(lunch);
+        }
+        if (!dinner.getItems().isEmpty()) {
+            menuCategories.add(dinner);
+        }
+
+        // If no items were categorized but we have items, add all to "All Day" category
+        if (menuCategories.isEmpty() && !backendMenuItems.isEmpty()) {
+            MenuCategory allDay = new MenuCategory("All Day");
+            allDay.getItems().addAll(backendMenuItems);
+            menuCategories.add(allDay);
+        }
+    }
+
     // Getters and setters
-    public long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -97,6 +161,16 @@ public class DiningHall {
         this.menuCategories.add(category);
     }
 
+    public List<MenuItem> getMenuItems() {
+        return backendMenuItems;
+    }
+
+    public void setMenuItems(List<MenuItem> menuItems) {
+        this.backendMenuItems = menuItems;
+        // Update categories when menu items change
+        initializeCategories();
+    }
+
     /**
      * Class representing a menu category (Breakfast, Lunch, Dinner, etc.)
      */
@@ -134,7 +208,20 @@ public class DiningHall {
      * Class representing a menu item with dietary information
      */
     public static class MenuItem {
+        // Backend fields
+        @SerializedName("id")
+        private int id;
+
+        @SerializedName("name")
         private String name;
+
+        @SerializedName("price")
+        private double price;
+
+        @SerializedName("diningHall")
+        private DiningHall diningHall;
+
+        // UI fields (not in backend)
         private String description;
         private List<String> allergens;
         private boolean isVegetarian;
@@ -146,10 +233,22 @@ public class DiningHall {
         private double carbs;   // in grams
         private double fat;     // in grams
 
+        public MenuItem() {
+            this.allergens = new ArrayList<>();
+        }
+
         public MenuItem(String name, String description) {
             this.name = name;
             this.description = description;
             this.allergens = new ArrayList<>();
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
         }
 
         public String getName() {
@@ -158,6 +257,22 @@ public class DiningHall {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        public double getPrice() {
+            return price;
+        }
+
+        public void setPrice(double price) {
+            this.price = price;
+        }
+
+        public DiningHall getDiningHall() {
+            return diningHall;
+        }
+
+        public void setDiningHall(DiningHall diningHall) {
+            this.diningHall = diningHall;
         }
 
         public String getDescription() {
