@@ -20,7 +20,7 @@
         tools:node="merge">
 
         <activity
-            android:name=".CampusEventsActivity"
+            android:name=".MainActivity"
             android:exported="true"
             tools:node="merge"
             tools:ignore="DuplicateActivity,Instantiatable">
@@ -29,6 +29,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".CampusEventsActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
 
         <activity
             android:name=".ProfilePick"
@@ -55,6 +61,36 @@
             tools:ignore="DuplicateActivity,Instantiatable"/>
 
         <activity
+            android:name=".TeacherDashboardActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".AdminDashboardActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".AdminDiningHallActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".AdminDiningMenuActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".AdminEventsActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
             android:name=".FriendsActivity"
             android:exported="false"
             tools:node="merge"
@@ -66,15 +102,47 @@
             tools:node="merge"
             tools:ignore="DuplicateActivity,Instantiatable"/>
 
-<!--        <activity-->
-<!--            android:name=".CampusEventsActivity"-->
-<!--            android:exported="false"-->
-<!--            tools:node="merge"-->
-<!--            tools:ignore="DuplicateActivity,Instantiatable"/>-->
+        <activity
+            android:name=".CampusEventsActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".DiningHallActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".DiningHallDetailActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".EventDetailActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
 
         <activity
             android:name=".StudyGroupsActivity"
             android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".ChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".BusActivity"
+            android:exported="false"
+            android:label="@string/title_activity_bus"
             tools:node="merge"
             tools:ignore="DuplicateActivity,Instantiatable"/>
     </application>

@@ -233,6 +233,7 @@ public class LoginActivity extends AppCompatActivity {
         boolean loginSuccess = false;
         String fullName = "";
         String userId = "";
+        String userRole = ""; // Add this line to store the user's role
 
         for (JSONObject user : usersList) {
             try {
@@ -242,7 +243,11 @@ public class LoginActivity extends AppCompatActivity {
                 String storedName = user.getString("name").trim();
                 String storedId = user.getString("id");
 
-                Log.d(TAG, "Comparing with user: " + storedName + ", email: " + storedNetId);
+                // Try to get the role - add this block
+                String storedRole = "Student"; // Default to Student
+                if (user.has("role")) {
+                    storedRole = user.getString("role");
+                }
 
                 // Try matching by email or name
                 boolean credentialsMatch =
@@ -253,7 +258,8 @@ public class LoginActivity extends AppCompatActivity {
                 if (credentialsMatch) {
                     loginSuccess = true;
                     userId = storedId;
-                    Log.d(TAG, "Login match found for user: " + storedName);
+                    userRole = storedRole; // Store the role
+                    Log.d(TAG, "Login match found for user: " + storedName + " with role: " + userRole);
                     if (user.has("person")) {
                         fullName = user.getJSONObject("person").getString("name");
                         Log.d(TAG, "Found person name: " + fullName);
@@ -270,7 +276,8 @@ public class LoginActivity extends AppCompatActivity {
         if (loginSuccess) {
             final String welcomeName = fullName.isEmpty() ? username : fullName;
             final String finalUserId = userId;
-            Log.d(TAG, "Login successful for user: " + welcomeName + " with ID: " + finalUserId);
+            final String finalUserRole = userRole; // Store the role for use in the runnable
+            Log.d(TAG, "Login successful for user: " + welcomeName + " with ID: " + finalUserId + " and role: " + finalUserRole);
             showSuccess("Login successful! Welcome, " + welcomeName);
 
             // Save user data to both SharedPreferences
@@ -280,6 +287,7 @@ public class LoginActivity extends AppCompatActivity {
             userEditor.putString("username", welcomeName);
             userEditor.putLong("user_id", Long.parseLong(finalUserId));
             userEditor.putBoolean("is_logged_in", true);
+            userEditor.putString("user_role", finalUserRole); // Save the role
             userEditor.apply();
 
             // Save to LoginPrefs for other activities
@@ -288,6 +296,7 @@ public class LoginActivity extends AppCompatActivity {
             loginEditor.putString("username", welcomeName);
             loginEditor.putLong("user_id", Long.parseLong(finalUserId));
             loginEditor.putBoolean("is_logged_in", true);
+            loginEditor.putString("user_role", finalUserRole); // Save the role
 
             // Save the remember me preference if checkbox is checked
             if (rememberMeCheckbox != null && rememberMeCheckbox.isChecked()) {
@@ -296,9 +305,24 @@ public class LoginActivity extends AppCompatActivity {
 
             loginEditor.apply();
 
-            // Navigate to StudentDashboardActivity with clear task and new task flags
+            // Navigate to appropriate dashboard based on role
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                Intent intent = new Intent(LoginActivity.this, StudentDashboardActivity.class);
+                Intent intent;
+
+                // Check role and navigate accordingly
+                switch (finalUserRole.toLowerCase()) {
+                    case "admin":
+                        intent = new Intent(LoginActivity.this, AdminDashboardActivity.class);
+                        break;
+                    case "teacher":
+                        intent = new Intent(LoginActivity.this, TeacherDashboardActivity.class);
+                        break;
+                    case "student":
+                    default:
+                        intent = new Intent(LoginActivity.this, StudentDashboardActivity.class);
+                        break;
+                }
+
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 finish(); // Close login activity

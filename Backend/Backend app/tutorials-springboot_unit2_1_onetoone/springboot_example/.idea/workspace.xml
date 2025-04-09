@@ -19,7 +19,7 @@
     </option>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../../../.." />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../../.." />
   </component>
   <component name="GitLabMergeRequestFiltersHistory">{
   &quot;lastFilter&quot;: {
@@ -54,9 +54,9 @@
     "Maven.onetoone [package].executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "8-profile-interface-backend",
+    "git-widget-placeholder": "campusEvents-backend",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/Users/jrock25/2_swarna_4/Experiments/Jayden/Experiment4 Unit2_1/tutorials-springboot_unit2_1_onetoone/springboot_example/src/main/java/onetoone",
+    "last_opened_file_path": "/Users/jrock25/2_swarna_4/Backend/Backend app/tutorials-springboot_unit2_1_onetoone/springboot_example",
     "project.structure.last.edited": "SDKs",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2"

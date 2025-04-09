@@ -29,7 +29,7 @@ import okio.ByteString;
 
 public class EventWebSocketClient {
     private static final String TAG = "EventWebSocketClient";
-    private static final String WS_BASE_URL = "ws://your-backend-url/events/";
+    private static final String WS_BASE_URL = "ws://coms-3090-017.class.las.iastate.edu:8080/events/";
     private static final int NORMAL_CLOSURE_STATUS = 1000;
     private static final int RECONNECT_DELAY = 5000; // 5 seconds
 
@@ -70,8 +70,17 @@ public class EventWebSocketClient {
     }
 
     private void connectWebSocket() {
+        Log.d(TAG, "Connecting WebSocket with username: " + username);
+
+        // Make sure username is never null
+        if (username == null || username.isEmpty() || username.equals("null")) {
+            username = "guest_" + System.currentTimeMillis();
+            Log.d(TAG, "Using fallback username: " + username);
+        }
+
         String url = WS_BASE_URL + username;
         Request request = new Request.Builder().url(url).build();
+        
 
         WebSocketListener webSocketListener = new WebSocketListener() {
             @Override
@@ -84,6 +93,27 @@ public class EventWebSocketClient {
             @Override
             public void onMessage(WebSocket webSocket, String text) {
                 Log.d(TAG, "Message received: " + text);
+
+                if (text.contains("Username already exists")) {
+                    Log.e(TAG, "Username conflict detected: " + username);
+
+                    // Only try to reconnect if we're using a null username
+                    if (username != null && (username.contains("null") || username.equals("null"))) {
+                        username = "user_" + System.currentTimeMillis();
+                        Log.d(TAG, "Reconnecting with alternate username: " + username);
+
+                        // Close this connection
+                        webSocket.close(NORMAL_CLOSURE_STATUS, "Reconnecting with new username");
+
+                        // Reconnect with the new username (after a delay)
+                        mainHandler.postDelayed(() -> connectWebSocket(), 500);
+                    } else {
+                        // If this is a real username conflict, just log it and don't reconnect
+                        Log.d(TAG, "Not reconnecting - legitimate username conflict");
+                    }
+                    return;
+                }
+
                 processMessage(text);
             }
 
@@ -173,12 +203,17 @@ public class EventWebSocketClient {
     }
 
     private void processEventsHistory(String historyText) {
+        // Log the first bit of history to debug
+        Log.d(TAG, "Received history: " + (historyText.length() > 100 ?
+                historyText.substring(0, 100) + "..." : historyText));
+
         // Parse the formatted text history into events and chat messages
         List<CampusEvent> events = new ArrayList<>();
         List<EventChat> chats = new ArrayList<>();
 
-        // Split by double newline to separate events
+        // Split by double newline to separate entries
         String[] entries = historyText.split("\n\n");
+        Log.d(TAG, "Found " + entries.length + " entries in history");
 
         for (String entry : entries) {
             if (entry.startsWith("📢 NEW EVENT NOTIFICATION")) {
@@ -200,6 +235,8 @@ public class EventWebSocketClient {
 
         eventChats.clear();
         eventChats.addAll(chats);
+
+        Log.d(TAG, "Processed history: " + events.size() + " events, " + chats.size() + " chats");
 
         // Notify listeners on main thread
         mainHandler.post(() -> {
@@ -316,6 +353,28 @@ public class EventWebSocketClient {
     private void processNewEvent(String eventJson) {
         try {
             JSONObject jsonObject = new JSONObject(eventJson);
+            String title = jsonObject.getString("title");
+
+            // Check if this is an RSVP update or chat-like event
+            if (title.contains("RSVP Update") || title.contains("Chat Message")) {
+                // Create a chat message from this event
+                EventChat chat = new EventChat();
+                chat.setUsername(jsonObject.optString("creator", "System"));
+                chat.setMessage(jsonObject.getString("description"));
+                chat.setEventId(jsonObject.getString("id"));
+                chat.setTimestamp(new Date()); // Current time
+
+                // Add to local cache
+                eventChats.add(chat);
+
+                // Notify listener
+                mainHandler.post(() -> {
+                    if (eventsListener != null) {
+                        eventsListener.onChatMessageReceived(chat);
+                    }
+                });
+                return;
+            }
 
             CampusEvent event = new CampusEvent();
             event.setId(jsonObject.getString("id"));
@@ -376,6 +435,9 @@ public class EventWebSocketClient {
             int attendees = jsonObject.getInt("attendees");
             boolean isRsvped = jsonObject.getBoolean("isRsvped");
 
+            Log.d(TAG, "RSVP update received: eventId=" + eventId +
+                    ", attendees=" + attendees + ", isRsvped=" + isRsvped);
+
             // Notify listener on main thread
             mainHandler.post(() -> {
                 if (eventsListener != null) {
@@ -404,10 +466,17 @@ public class EventWebSocketClient {
     public void toggleRsvp(String eventId, boolean isRsvping) {
         if (webSocket != null && isConnected) {
             try {
+                // Create a CampusEvent-like object that the server will recognize
                 JSONObject request = new JSONObject();
-                request.put("action", "toggle_rsvp");
-                request.put("eventId", eventId);
-                request.put("isRsvping", isRsvping);
+                request.put("id", eventId);
+                request.put("title", "RSVP Update");
+                request.put("description", "User RSVP: " + (isRsvping ? "Attending" : "Not Attending"));
+                request.put("location", "RSVP");
+                request.put("category", "RSVP");
+                // Include a special field that backend developers can check
+                request.put("creator", username + " - RSVP: " + (isRsvping ? "YES" : "NO"));
+
+                // Send the message
                 webSocket.send(request.toString());
             } catch (JSONException e) {
                 Log.e(TAG, "Error creating RSVP request", e);

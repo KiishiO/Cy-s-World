@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.own_example.BusActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
 
@@ -17,6 +18,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
     private TextView welcomeText;
     private MaterialCardView friendRequestsCard;
     private MaterialCardView classesCard;
+    private MaterialCardView testingCenterCard;
     private BottomNavigationView bottomNavigationView;
 
     @Override
@@ -31,6 +33,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
             welcomeText = findViewById(R.id.welcome_text);
             friendRequestsCard = findViewById(R.id.friends_request_card);
             classesCard = findViewById(R.id.classes_card);
+            testingCenterCard = findViewById(R.id.testing_center_card);
             bottomNavigationView = findViewById(R.id.bottom_navigation);
 
             // Make sure bottom navigation isn't null before using it
@@ -89,6 +92,18 @@ public class StudentDashboardActivity extends AppCompatActivity {
                 });
             }
 
+            // Set click listener for testing center card
+            if (testingCenterCard != null) {
+                testingCenterCard.setOnClickListener(v -> {
+                    try {
+                        Intent intent = new Intent(StudentDashboardActivity.this, BusActivity.class); //change this to testing center activity once implemented
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error navigating to BusActivity: " + e.getMessage());
+                    }
+                });
+            }
+
             // Set up bottom navigation
             if (bottomNavigationView != null) {
                 bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -98,12 +113,12 @@ public class StudentDashboardActivity extends AppCompatActivity {
                         if (itemId == R.id.nav_home) {
                             // Already on home
                             return true;
-                        } else if (itemId == R.id.nav_friends) {
-                            Intent friendsIntent = new Intent(StudentDashboardActivity.this, FriendsActivity.class);
+                        } else if (itemId == R.id.nav_dining) {
+                            Intent friendsIntent = new Intent(StudentDashboardActivity.this, DiningHallActivity.class);
                             startActivity(friendsIntent);
                             return true;
-                        } else if (itemId == R.id.nav_classes) {
-                            Intent classesIntent = new Intent(StudentDashboardActivity.this, ClassesActivity.class);
+                        } else if (itemId == R.id.nav_buses) {
+                            Intent classesIntent = new Intent(StudentDashboardActivity.this, BusActivity.class);
                             startActivity(classesIntent);
                             return true;
                         }

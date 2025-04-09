@@ -40,8 +40,6 @@ public class TeacherDashboardActivity extends AppCompatActivity {
         // Initialize views
         welcomeText = findViewById(R.id.welcome_text);
         classesManagementCard = findViewById(R.id.classes_management_card);
-        gradingCard = findViewById(R.id.grading_card);
-        attendanceCard = findViewById(R.id.attendance_card);
         officeHoursCard = findViewById(R.id.office_hours_card);
         recentActivityRecycler = findViewById(R.id.recent_activity_recycler);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
@@ -80,24 +78,6 @@ public class TeacherDashboardActivity extends AppCompatActivity {
             }
         });
 
-        gradingCard.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Navigate to grading activity
-                Intent intent = new Intent(TeacherDashboardActivity.this, GradingActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        attendanceCard.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Navigate to attendance activity
-                Intent intent = new Intent(TeacherDashboardActivity.this, AttendanceActivity.class);
-                startActivity(intent);
-            }
-        });
-
         officeHoursCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -118,16 +98,12 @@ public class TeacherDashboardActivity extends AppCompatActivity {
                 if (itemId == R.id.nav_home) {
                     // Already on dashboard, do nothing
                     return true;
-//                } else if (itemId == R.id.nav_profile) {
-//                    Intent intent = new Intent(TeacherDashboardActivity.this, TeacherProfileActivity.class);
-//                    startActivity(intent);
-//                    return true;
-                } else if (itemId == R.id.nav_classes) {
-                    Intent intent = new Intent(TeacherDashboardActivity.this, ClassManagementActivity.class);
+                } else if (itemId == R.id.nav_dining) {
+                    Intent intent = new Intent(TeacherDashboardActivity.this, DiningHallActivity.class);
                     startActivity(intent);
                     return true;
-                } else if (itemId == R.id.nav_grading) {
-                    Intent intent = new Intent(TeacherDashboardActivity.this, GradingActivity.class);
+                } else if (itemId == R.id.nav_buses) {
+                    Intent intent = new Intent(TeacherDashboardActivity.this, BusActivity.class);
                     startActivity(intent);
                     return true;
                 }

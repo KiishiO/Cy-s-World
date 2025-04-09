@@ -10,9 +10,12 @@ import onetoone.Laptops.Laptop;
 import onetoone.Login.Login;
 import onetoone.Signup.Signup;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 
- * @author Vivek Bengre
+ * @author Sonia Patil
  * 
  */
 @Entity
@@ -50,6 +53,14 @@ public class Person {
     @JoinColumn
     private Signup signup;
 
+    @ManyToMany
+    @JoinTable(
+            name = "person_friends",
+            joinColumns = @JoinColumn(name = "person_id"),
+            inverseJoinColumns = @JoinColumn(name = "friend_id")
+    )
+    private List<Person> friends = new ArrayList<>();
+
     // =============================== Constructors ================================== //
 
     public Person() {
@@ -62,7 +73,6 @@ public class Person {
         this.ifActive = true;
         this.roles = roles;
     }
-
 
     // =============================== Getters and Setters for each field ================================== //
 
@@ -126,5 +136,12 @@ public class Person {
     public void setRoles(String roles){
         this.roles = roles;
     }
-    
+
+    public List<Person> getFriends() {
+        return friends;
+    }
+
+    public void setFriends(List<Person> friends) {
+        this.friends = friends;
+    }
 }
