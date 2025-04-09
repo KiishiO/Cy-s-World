@@ -1,6 +1,7 @@
 package onetoone;
 
 import jakarta.transaction.Transactional;
+import onetoone.DiningHall.DiningHall;
 import onetoone.Login.Login;
 import onetoone.Login.LoginRepository;
 import onetoone.Signup.Signup;
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.Bean;
 //import onetoone.Laptops.LaptopRepository;
 import onetoone.Persons.Person;
 import onetoone.Persons.PersonRepository;
+import onetoone.DiningHall.DiningHallRepository;
 import onetoone.Signup.SignupRepository;
 import org.springframework.context.annotation.ComponentScan;
 
@@ -70,7 +72,7 @@ class Main {
 
 
     @Bean
-    CommandLineRunner initData(LoginRepository loginRepository, PersonRepository personRepository, SignupRepository signupRepository) {
+    CommandLineRunner initData(LoginRepository loginRepository, PersonRepository personRepository, SignupRepository signupRepository, DiningHallRepository diningHallRepository) {
         return args -> {
             // Creating Person entities
             Person person1 = new Person("Michael Johnson", "515-789-9852", "Student");
@@ -167,7 +169,11 @@ class Main {
             signupRepository.save(signup4); // Now save signup
 
 //            StudyTable studyTable1 = new StudyTable(1L, person1, person2);
-           
+
+            DiningHall diningHall1 = new DiningHall("UDCC", "central campus");
+            DiningHall diningHall2 = new DiningHall("Windows", "Friley");
+            diningHallRepository.save(diningHall1);
+            diningHallRepository.save(diningHall2);
 
 
             // Logging to console (optional, for verification)
