@@ -48,7 +48,7 @@ public class StudentClassesController {
         return new ResponseEntity<>(studentClass.getStudents(), HttpStatus.OK);
     }
 
-    // GET all classes for a student
+    // GET all classes for a specific student
     @GetMapping("/student/{studentId}")
     public ResponseEntity<?> getClassesForStudent(@PathVariable int studentId) {
         Person student = personRepository.findById(studentId);
@@ -59,7 +59,7 @@ public class StudentClassesController {
         return new ResponseEntity<>(classes, HttpStatus.OK);
     }
 
-    // GET all classes taught by a teacher
+    // GET all classes taught by a specific teacher
     @GetMapping("/teacher/{teacherId}")
     public ResponseEntity<?> getClassesByTeacher(@PathVariable int teacherId) {
         Person teacher = personRepository.findById(teacherId);
@@ -151,6 +151,7 @@ public class StudentClassesController {
         if (studentClass == null || student == null) {
             return new ResponseEntity<>(failure, HttpStatus.NOT_FOUND);
         }
+
 
         studentClass.addStudent(student);
         classesRepository.save(studentClass);
