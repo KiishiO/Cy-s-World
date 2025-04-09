@@ -74,7 +74,7 @@ class Main {
         return args -> {
             // Creating Person entities
             Person person1 = new Person("Michael Johnson", "515-789-9852", "Student");
-            Person person2 = new Person("Sarah Adams", "515-888-3579", "TA");
+            Person person2 = new Person("Sarah Adams", "515-888-3579", "Admin");
             Person person3 = new Person("David Williams", "515-777-0707", "Teacher");
             Person person4 = new Person("Sonia Patil", "515-123-4567", "Student");
 
@@ -97,7 +97,7 @@ class Main {
 
             // Creating Signup entities
             Signup signup1 = new Signup("Michael Johnson", "mjohnson", "mjohnson123@example.com", "MjOhNsOn", "Student");
-            Signup signup2 = new Signup("Sarah Adams", "sarah_a", "sarah123@example.com", "A_HARAS", "TA");
+            Signup signup2 = new Signup("Sarah Adams", "sarah_a", "sarah123@example.com", "A_HARAS", "Admin");
             Signup signup3 = new Signup("David Williams", "dwilliams", "davidw@example.com", "Davidw545", "Teacher");
             Signup signup4 = new Signup("Sonia Patil", "SoniaP", "john@somemail.com", "123456789", "Student");
 
