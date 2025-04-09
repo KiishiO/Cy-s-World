@@ -250,9 +250,9 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Bus Tracker Card -->
+    <!-- Testing Center Card -->
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/bus_tracker_card"
+        android:id="@+id/testing_center_card"
         android:layout_width="match_parent"
         android:layout_height="150dp"
         android:layout_marginStart="16dp"
@@ -271,43 +271,43 @@
             android:layout_height="match_parent">
 
             <ImageView
-                android:id="@+id/bus_icon"
+                android:id="@+id/testing_icon"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
-                android:src="@drawable/ic_busimage"
+                android:src="@drawable/ic_testing"
                 android:layout_margin="16dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" />
 
             <TextView
-                android:id="@+id/bus_tracker_title"
+                android:id="@+id/testing_center_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Cyclone Bus Tracker"
+                android:text="Testing Centers"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@color/cardinal_red"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginTop="16dp"
-                app:layout_constraintStart_toEndOf="@id/bus_icon"
+                app:layout_constraintStart_toEndOf="@id/testing_icon"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/bus_description"
+                android:id="@+id/testing_center_description"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:text="Track campus buses in real-time and get updates on bus locations and arrivals."
+                android:text="Track testing centers across campus and sign up for exams."
                 android:textSize="14sp"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="16dp"
-                app:layout_constraintStart_toEndOf="@id/bus_icon"
+                app:layout_constraintStart_toEndOf="@id/testing_icon"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/bus_tracker_title"
+                app:layout_constraintTop_toBottomOf="@id/testing_center_title"
                 app:layout_constraintBottom_toBottomOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

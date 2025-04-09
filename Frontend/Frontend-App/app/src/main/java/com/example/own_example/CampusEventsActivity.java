@@ -1,6 +1,7 @@
 package com.example.own_example;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -51,7 +52,7 @@ public class CampusEventsActivity extends AppCompatActivity implements
     private String selectedDate;
     private String currentUsername;
 
-    private static final boolean USE_DUMMY_DATA = true; // Set to false when using real backend
+    private static final boolean USE_DUMMY_DATA = false; // Set to false when using real backend
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,13 +64,10 @@ public class CampusEventsActivity extends AppCompatActivity implements
 
             // Initialize user service and get current username
             currentUsername = UserService.getInstance().getCurrentUsername();
-//            if (currentUsername == null || currentUsername.isEmpty()) {
-//                // Redirect to login if not logged in
-//                Toast.makeText(this, "Please log in to view events", Toast.LENGTH_SHORT).show();
-//                // Redirect to login screen
-//                finish();
-//                return;
-//            }
+
+//            // First try user_prefs
+//            SharedPreferences userPrefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+//            currentUsername = userPrefs.getString("username", "");
 
             // Initialize views
             calendarView = findViewById(R.id.calendar_view);
@@ -92,19 +90,19 @@ public class CampusEventsActivity extends AppCompatActivity implements
                 currentUsername = "test_user";
                 loadSimpleDummyEvents();
             } else {
-                if (currentUsername == null || currentUsername.isEmpty()) {
-                // Redirect to login if not logged in
-                Toast.makeText(this, "Please log in to view events", Toast.LENGTH_SHORT).show();
-                // Redirect to login screen
-                finish();
-                return;
-                }
-
-                if (currentUsername == null || currentUsername.isEmpty()) {
-                    Toast.makeText(this, "Please log in to view events", Toast.LENGTH_SHORT).show();
-                    finish();
-                    return;
-                }
+//                if (currentUsername == null || currentUsername.isEmpty()) {
+//                // Redirect to login if not logged in
+//                Toast.makeText(this, "Please log in to view events", Toast.LENGTH_SHORT).show();
+//                // Redirect to login screen
+//                finish();
+//                return;
+//                }
+//
+//                if (currentUsername == null || currentUsername.isEmpty()) {
+//                    Toast.makeText(this, "Please log in to view events", Toast.LENGTH_SHORT).show();
+//                    finish();
+//                    return;
+//                }
                 // Initialize WebSocket client
                 webSocketClient = new EventWebSocketClient(this, currentUsername, this);
             }
