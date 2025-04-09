@@ -145,5 +145,30 @@
             android:label="@string/title_activity_bus"
             tools:node="merge"
             tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <!-- Testing Center Activities -->
+        <activity
+            android:name=".TestingCenterActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".TestingCenterDetailActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".AdminTestingCenterActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".AdminTestingCenterDetailActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
     </application>
 </manifest>

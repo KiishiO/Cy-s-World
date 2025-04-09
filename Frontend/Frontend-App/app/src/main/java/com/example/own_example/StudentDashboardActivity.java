@@ -19,6 +19,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
     private MaterialCardView friendRequestsCard;
     private MaterialCardView classesCard;
     private MaterialCardView busTrackerCard;
+    private MaterialCardView testingCenterCard;
     private BottomNavigationView bottomNavigationView;
 
     @Override
@@ -34,6 +35,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
             friendRequestsCard = findViewById(R.id.friends_request_card);
             classesCard = findViewById(R.id.classes_card);
             busTrackerCard = findViewById(R.id.bus_tracker_card);
+            testingCenterCard = findViewById(R.id.testing_center_card);
             bottomNavigationView = findViewById(R.id.bottom_navigation);
 
             // Make sure bottom navigation isn't null before using it
@@ -100,6 +102,19 @@ public class StudentDashboardActivity extends AppCompatActivity {
                         startActivity(intent);
                     } catch (Exception e) {
                         Log.e(TAG, "Error navigating to BusActivity: " + e.getMessage());
+                    }
+                });
+            }
+
+            // Set click listener for testing center card
+            if (testingCenterCard != null) {
+                testingCenterCard.setOnClickListener(v -> {
+                    try {
+                        Intent intent = new Intent(StudentDashboardActivity.this, TestingCenterActivity.class);
+                        startActivity(intent);
+                        Log.d(TAG, "Navigating to TestingCenterActivity");
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error navigating to TestingCenterActivity: " + e.getMessage());
                     }
                 });
             }
