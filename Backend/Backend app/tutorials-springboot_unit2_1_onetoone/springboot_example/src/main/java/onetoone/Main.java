@@ -1,6 +1,8 @@
 package onetoone;
 
 import jakarta.transaction.Transactional;
+import onetoone.DiningHall.DiningHall;
+import onetoone.DiningHall.DiningHallRepository;
 import onetoone.Login.Login;
 import onetoone.Login.LoginRepository;
 import onetoone.Signup.Signup;
@@ -70,7 +72,7 @@ class Main {
 
 
     @Bean
-    CommandLineRunner initData(LoginRepository loginRepository, PersonRepository personRepository, SignupRepository signupRepository) {
+    CommandLineRunner initData(LoginRepository loginRepository, PersonRepository personRepository, SignupRepository signupRepository, DiningHallRepository diningHallRepository) {
         return args -> {
             // Creating Person entities
             Person person1 = new Person("Michael Johnson", "515-789-9852", "Student");
