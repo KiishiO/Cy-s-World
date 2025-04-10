@@ -121,6 +121,8 @@ public class DiningHallActivity extends AppCompatActivity implements DiningHallS
 
     @Override
     public void onDiningHallsLoaded(List<DiningHall> loadedDiningHalls) {
+        // Clear the list again to be safe, in case it was modified between loadDiningHalls() and here
+        diningHalls.clear();
         diningHalls.addAll(loadedDiningHalls);
         updateUI();
     }
