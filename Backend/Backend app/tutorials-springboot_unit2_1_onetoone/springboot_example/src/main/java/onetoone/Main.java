@@ -6,6 +6,7 @@ import onetoone.Login.LoginRepository;
 import onetoone.Signup.Signup;
 import onetoone.Signup.SignupRepository;
 import onetoone.StudyTable.StudyTable;
+import onetoone.UserRoles.UserRoles;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -73,10 +74,10 @@ class Main {
     CommandLineRunner initData(LoginRepository loginRepository, PersonRepository personRepository, SignupRepository signupRepository) {
         return args -> {
             // Creating Person entities
-            Person person1 = new Person("Michael Johnson", "515-789-9852", "Student");
-            Person person2 = new Person("Sarah Adams", "515-888-3579", "Admin");
-            Person person3 = new Person("David Williams", "515-777-0707", "Teacher");
-            Person person4 = new Person("Sonia Patil", "515-123-4567", "Student");
+            Person person1 = new Person("Michael Johnson", "515-789-9852", UserRoles.ADMIN);
+            Person person2 = new Person("Sarah Adams", "515-888-3579", UserRoles.ADMIN);
+            Person person3 = new Person("David Williams", "515-777-0707", UserRoles.TEACHER);
+            Person person4 = new Person("Sonia Patil", "515-123-4567", UserRoles.STUDENT);
 
 
             // Saving Persons first (ensuring they exist before login is created)
@@ -96,10 +97,10 @@ class Main {
             Login login4 = new Login("SoniaP", "john@somemail.com", "123456789");
 
             // Creating Signup entities
-            Signup signup1 = new Signup("Michael Johnson", "mjohnson", "mjohnson123@example.com", "MjOhNsOn", "Student");
-            Signup signup2 = new Signup("Sarah Adams", "sarah_a", "sarah123@example.com", "A_HARAS", "Admin");
-            Signup signup3 = new Signup("David Williams", "dwilliams", "davidw@example.com", "Davidw545", "Teacher");
-            Signup signup4 = new Signup("Sonia Patil", "SoniaP", "john@somemail.com", "123456789", "Student");
+            Signup signup1 = new Signup("Michael Johnson", "mjohnson", "mjohnson123@example.com", "MjOhNsOn", UserRoles.ADMIN);
+            Signup signup2 = new Signup("Sarah Adams", "sarah_a", "sarah123@example.com", "A_HARAS", UserRoles.ADMIN);
+            Signup signup3 = new Signup("David Williams", "dwilliams", "davidw@example.com", "Davidw545", UserRoles.TEACHER);
+            Signup signup4 = new Signup("Sonia Patil", "SoniaP", "john@somemail.com", "123456789", UserRoles.STUDENT);
 
 
             //Dummy Data 1

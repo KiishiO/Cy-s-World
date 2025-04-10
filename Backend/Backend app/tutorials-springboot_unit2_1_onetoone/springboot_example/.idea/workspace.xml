@@ -6,8 +6,14 @@
   <component name="ChangeListManager">
     <list default="true" id="1aba0881-e0d1-4070-88f5-61f265d2e936" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/StudentClasses/StudentClasses.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/StudentClasses/StudentClasses.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/StudentClasses/StudentClassesController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/StudentClasses/StudentClassesController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/Persons/Person.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/Persons/Person.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/Persons/PersonController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/Persons/PersonController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/Persons/PersonRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/Persons/PersonRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/Signup/Signup.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/Signup/Signup.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/Signup/SignupController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/Signup/SignupController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/onetoone/Persons/Person.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/onetoone/Persons/Person.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/onetoone/Signup/Signup.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/onetoone/Signup/Signup.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -18,6 +24,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Interface" />
+        <option value="Enum" />
         <option value="Class" />
       </list>
     </option>
@@ -143,27 +150,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/onetoone/Persons/PersonController.java</url>
-          <line>35</line>
+          <line>30</line>
           <option name="timeStamp" value="46" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/onetoone/Persons/PersonController.java</url>
-          <line>50</line>
-          <option name="timeStamp" value="47" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/onetoone/Signup/SignupController.java</url>
-          <line>95</line>
-          <option name="timeStamp" value="50" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/onetoone/Signup/SignupController.java</url>
-          <line>58</line>
+          <line>55</line>
           <option name="timeStamp" value="55" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/onetoone/Signup/SignupController.java</url>
-          <line>72</line>
+          <line>85</line>
           <option name="timeStamp" value="56" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -181,6 +178,26 @@
           <line>21</line>
           <option name="timeStamp" value="59" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/onetoone/Signup/Signup.java</url>
+          <line>114</line>
+          <option name="timeStamp" value="66" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/onetoone/Signup/SignupController.java</url>
+          <line>79</line>
+          <option name="timeStamp" value="67" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/onetoone/UserRoles/UserRolesController.java</url>
+          <line>26</line>
+          <option name="timeStamp" value="68" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/onetoone/Persons/Person.java</url>
+          <line>209</line>
+          <option name="timeStamp" value="69" />
+        </line-breakpoint>
         <line-breakpoint enabled="true" type="java-field">
           <url>file://$PROJECT_DIR$/src/main/java/onetoone/Login/Login.java</url>
           <line>44</line>
@@ -189,8 +206,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/onetoone/Signup/Signup.java</url>
-          <line>118</line>
-          <properties class="onetoone.Signup.Signup" method="setRoles">
+          <line>117</line>
+          <properties class="onetoone.Signup.Signup">
             <option name="EMULATED" value="true" />
             <option name="WATCH_EXIT" value="false" />
           </properties>

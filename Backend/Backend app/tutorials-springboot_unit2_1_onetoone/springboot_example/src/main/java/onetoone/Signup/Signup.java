@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 
 import onetoone.Login.Login;
 import onetoone.Persons.Person;
-import onetoone.Persons.PersonRepository;
+import onetoone.UserRoles.UserRoles;
 
 /**
  *
@@ -25,39 +25,36 @@ public class Signup {
     private String email;
     private String password;
     private String firstAndLastName;
-    private String roles;
+
+    @Enumerated(EnumType.STRING)
+    private UserRoles role;
 
     /*
      * @OneToOne creates a relation between the current entity/table(Laptop) with the entity/table defined below it(Person)
      * @JsonIgnore is to assure that there is no infinite loop while returning either Person/laptop objects (laptop->Person->laptop->...)
      */
     @OneToOne(mappedBy = "signup")
-   // @JsonManagedReference
     @JsonIgnore
     private Person person;
 
-
     @OneToOne(mappedBy = "signup")
-    //@JsonManagedReference // Prevents infinite recursion in Signup
     @JsonIgnore
     private Login login;
 
-    public Signup(String firstAndLastName, String username, String email, String password, String roles) {
+    public Signup(String firstAndLastName, String username, String email, String password, UserRoles role) {
         this.username = username;
         this.email = email;
         this.password = password;
         this.firstAndLastName = firstAndLastName;
-        this.roles = roles;
-        //this.person = person;
-        //createNewPerson
-
+        this.role = role;
     }
 
     public Signup() {
+        // Default role is STUDENT
+        this.role = UserRoles.STUDENT;
     }
 
     // =============================== Getters and Setters for each field ================================== //
-
 
     public String getFirstAndLastName() {
         return firstAndLastName;
@@ -110,13 +107,29 @@ public class Signup {
     public Login getLogin() {
         return login;
     }
+
     public void setLogin(Login login) {
         this.login = login;
     }
-    public String getRoles(){
-        return roles;
+
+    public UserRoles getRole() {
+        return role;
     }
-    public void setRoles(String roles){
-        this.roles = roles;
+
+    public void setRole(UserRoles role) {
+        this.role = role;
     }
+
+//    // Helper methods to check role
+//    public boolean isAdmin() {
+//        return this.role == UserRoles.ADMIN;
+//    }
+//
+//    public boolean isTeacher() {
+//        return this.role == UserRoles.TEACHER;
+//    }
+//
+//    public boolean isStudent() {
+//        return this.role == UserRoles.STUDENT;
+//    }
 }
