@@ -9,13 +9,19 @@ import jakarta.persistence.*;
 import onetoone.Laptops.Laptop;
 import onetoone.Login.Login;
 import onetoone.Signup.Signup;
+import onetoone.StudentClasses.StudentClasses;
+import onetoone.UserRoles.UserRoles;
+import org.apache.catalina.User;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 
  * @author Sonia Patil
+ * @author Jayden Sorter
  * 
  */
 @Entity
@@ -31,7 +37,10 @@ public class Person {
     private String name;
     private String phoneNumber;
     private boolean ifActive;
-    private String roles;
+//    private String roles;
+
+    @Enumerated(EnumType.STRING)
+    private UserRoles role;
 
     /*
      * @OneToOne creates a relation between the current entity/table(Laptop) with the entity/table defined below it(Person)
@@ -61,17 +70,33 @@ public class Person {
     )
     private List<Person> friends = new ArrayList<>();
 
+    // For teachers: classes they teach
+    @OneToMany(mappedBy = "teacher")
+    @JsonIgnore
+    private Set<StudentClasses> classesTeaching = new HashSet<>();
+
+    // For students: classes they are enrolled in
+    @ManyToMany
+    @JoinTable(
+            name = "student_classes",
+            joinColumns = @JoinColumn(name = "student_id"),
+            inverseJoinColumns = @JoinColumn(name = "class_id")
+    )
+    @JsonIgnore
+    private Set<StudentClasses> enrolledClasses = new HashSet<>();
+
     // =============================== Constructors ================================== //
 
     public Person() {
         this.ifActive = true;
+        this.role = UserRoles.STUDENT;
     }
 
-    public Person(String name, String phoneNumber, String roles) {
+    public Person(String name, String phoneNumber, UserRoles role) {
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.ifActive = true;
-        this.roles = roles;
+        this.role = role;
     }
 
     // =============================== Getters and Setters for each field ================================== //
@@ -130,11 +155,21 @@ public class Person {
     public void setSignupInfo(Signup signup){
         this.signup = signup;
     }
-    public String getRoles(){
-        return roles;
+
+
+//    public String getRoles(){
+//        return roles;
+//    }
+//    public void setRoles(String roles){
+//        this.roles = roles;
+//    }
+
+    public UserRoles getRole(){
+        return role;
     }
-    public void setRoles(String roles){
-        this.roles = roles;
+
+    public void setRole(UserRoles role) {
+        this.role = role;
     }
 
     public List<Person> getFriends() {
@@ -144,4 +179,37 @@ public class Person {
     public void setFriends(List<Person> friends) {
         this.friends = friends;
     }
+
+    public Set<StudentClasses> getClassesTeaching() {
+        return classesTeaching;
+    }
+
+    public void setClassesTeaching(Set<StudentClasses> classesTeaching) {
+        this.classesTeaching = classesTeaching;
+    }
+
+    public Set<StudentClasses> getEnrolledClasses() {
+        return enrolledClasses;
+    }
+
+    public void setEnrolledClasses(Set<StudentClasses> enrolledClasses) {
+        this.enrolledClasses = enrolledClasses;
+    }
+
+    @JsonIgnore
+    // Helper methods to determine user type
+    public boolean isAdmin() {
+        return this.role == UserRoles.ADMIN;
+    }
+    @JsonIgnore
+    public boolean isTeacher() {
+        return this.role == UserRoles.TEACHER;
+    }
+    @JsonIgnore
+    public boolean isStudent() {
+        return this.role == UserRoles.STUDENT;
+    }
+
+
+
 }
