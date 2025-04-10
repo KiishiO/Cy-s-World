@@ -20,7 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.own_example.adapters.AdminDiningHallAdapter;
 import com.example.own_example.models.DiningHall;
-import com.example.own_example.services.AdminDiningHallService;
+import com.example.own_example.services.DiningHallService;
 import com.example.own_example.services.UserService;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.slider.Slider;
@@ -29,7 +29,7 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AdminDiningHallActivity extends AppCompatActivity implements AdminDiningHallService.AdminDiningHallListener {
+public class AdminDiningHallActivity extends AppCompatActivity implements DiningHallService.DiningHallListener {
 
     private static final String TAG = "AdminDiningHallActivity";
 
@@ -39,7 +39,7 @@ public class AdminDiningHallActivity extends AppCompatActivity implements AdminD
     private TextView connectionStatusText;
     private List<DiningHall> diningHalls = new ArrayList<>();
 
-    private AdminDiningHallService diningHallService;
+    private DiningHallService diningHallService;
     private String adminUsername;
 
     @Override
@@ -77,13 +77,15 @@ public class AdminDiningHallActivity extends AppCompatActivity implements AdminD
         addDiningHallButton.setOnClickListener(v -> showDiningHallDialog(null));
 
         // Initialize dining hall service
-        diningHallService = new AdminDiningHallService(this, adminUsername, this);
+        diningHallService = DiningHallService.getInstance(this);
+        diningHallService.setListener(this);
+        diningHallService.setUsername(adminUsername);
 
         // Set initial connection status
         updateConnectionStatus(false);
 
-        // Load data
-        diningHallService.loadDiningHalls();
+        // Load data and initialize service
+        diningHallService.initialize();
     }
 
     private void showDiningHallDialog(DiningHall diningHallToEdit) {
@@ -205,15 +207,20 @@ public class AdminDiningHallActivity extends AppCompatActivity implements AdminD
         });
     }
 
-    // AdminDiningHallService.AdminDiningHallListener implementation
+    // DiningHallService.DiningHallListener implementation
 
     @Override
-    public void onDiningHallsUpdated(List<DiningHall> updatedDiningHalls) {
+    public void onDiningHallsLoaded(List<DiningHall> loadedDiningHalls) {
         runOnUiThread(() -> {
             diningHalls.clear();
-            diningHalls.addAll(updatedDiningHalls);
+            diningHalls.addAll(loadedDiningHalls);
             diningHallAdapter.notifyDataSetChanged();
         });
+    }
+
+    @Override
+    public void onDiningHallLoaded(DiningHall diningHall) {
+        // Not used in this activity
     }
 
     @Override
@@ -268,8 +275,7 @@ public class AdminDiningHallActivity extends AppCompatActivity implements AdminD
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (diningHallService != null) {
-            diningHallService.disconnect();
-        }
+        diningHallService.disconnect();
     }
+
 }

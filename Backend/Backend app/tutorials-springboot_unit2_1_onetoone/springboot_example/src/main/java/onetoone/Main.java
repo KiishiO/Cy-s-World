@@ -1,11 +1,13 @@
 package onetoone;
 
 import jakarta.transaction.Transactional;
+import onetoone.DiningHall.DiningHall;
 import onetoone.Login.Login;
 import onetoone.Login.LoginRepository;
 import onetoone.Signup.Signup;
 import onetoone.Signup.SignupRepository;
 import onetoone.StudyTable.StudyTable;
+import onetoone.UserRoles.UserRoles;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,6 +17,7 @@ import org.springframework.context.annotation.Bean;
 //import onetoone.Laptops.LaptopRepository;
 import onetoone.Persons.Person;
 import onetoone.Persons.PersonRepository;
+import onetoone.DiningHall.DiningHallRepository;
 import onetoone.Signup.SignupRepository;
 import org.springframework.context.annotation.ComponentScan;
 
@@ -70,13 +73,13 @@ class Main {
 
 
     @Bean
-    CommandLineRunner initData(LoginRepository loginRepository, PersonRepository personRepository, SignupRepository signupRepository) {
+    CommandLineRunner initData(LoginRepository loginRepository, PersonRepository personRepository, SignupRepository signupRepository, DiningHallRepository diningHallRepository) {
         return args -> {
             // Creating Person entities
-            Person person1 = new Person("Michael Johnson", "515-789-9852", "Student");
-            Person person2 = new Person("Sarah Adams", "515-888-3579", "TA");
-            Person person3 = new Person("David Williams", "515-777-0707", "Teacher");
-            Person person4 = new Person("Sonia Patil", "515-123-4567", "Student");
+            Person person1 = new Person("Michael Johnson", "515-789-9852", UserRoles.ADMIN);
+            Person person2 = new Person("Sarah Adams", "515-888-3579", UserRoles.ADMIN);
+            Person person3 = new Person("David Williams", "515-777-0707", UserRoles.TEACHER);
+            Person person4 = new Person("Sonia Patil", "515-123-4567", UserRoles.STUDENT);
 
 
             // Saving Persons first (ensuring they exist before login is created)
@@ -96,10 +99,10 @@ class Main {
             Login login4 = new Login("SoniaP", "john@somemail.com", "123456789");
 
             // Creating Signup entities
-            Signup signup1 = new Signup("Michael Johnson", "mjohnson", "mjohnson123@example.com", "MjOhNsOn", "Student");
-            Signup signup2 = new Signup("Sarah Adams", "sarah_a", "sarah123@example.com", "A_HARAS", "TA");
-            Signup signup3 = new Signup("David Williams", "dwilliams", "davidw@example.com", "Davidw545", "Teacher");
-            Signup signup4 = new Signup("Sonia Patil", "SoniaP", "john@somemail.com", "123456789", "Student");
+            Signup signup1 = new Signup("Michael Johnson", "mjohnson", "mjohnson123@example.com", "MjOhNsOn", UserRoles.ADMIN);
+            Signup signup2 = new Signup("Sarah Adams", "sarah_a", "sarah123@example.com", "A_HARAS", UserRoles.ADMIN);
+            Signup signup3 = new Signup("David Williams", "dwilliams", "davidw@example.com", "Davidw545", UserRoles.TEACHER);
+            Signup signup4 = new Signup("Sonia Patil", "SoniaP", "john@somemail.com", "123456789", UserRoles.STUDENT);
 
 
             //Dummy Data 1
@@ -167,6 +170,11 @@ class Main {
             signupRepository.save(signup4); // Now save signup
 
 //            StudyTable studyTable1 = new StudyTable(1L, person1, person2);
+
+            DiningHall diningHall1 = new DiningHall("UDCC", "central campus");
+            DiningHall diningHall2 = new DiningHall("Windows", "Friley");
+            diningHallRepository.save(diningHall1);
+            diningHallRepository.save(diningHall2);
 
 
             // Logging to console (optional, for verification)

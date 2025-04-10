@@ -140,7 +140,7 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void showRoleSelectionDialog() {
-        final String[] roles = {"Teacher", "Student", "TA"};
+        final String[] roles = {"Teacher", "Student", "Admin"};
 
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Select Your Role")

@@ -1,5 +1,6 @@
 package com.example.own_example;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -43,11 +44,19 @@ public class EventDetailActivity extends AppCompatActivity implements EventWebSo
     private List<EventChat> chatMessages = new ArrayList<>();
     private EventChatAdapter chatAdapter;
     private EventWebSocketClient webSocketClient;
+    private static final Object WEBSOCKET_LOCK = new Object();
+    private static final String RSVP_PREFS = "rsvp_preferences";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_detail);
+
+        // Initialize UserService if needed
+        if (!UserService.getInstance().isInitialized()) {
+            UserService.getInstance().initialize(getApplicationContext());
+            Log.d(TAG, "Initialized UserService in EventDetailActivity");
+        }
 
         // Initialize views
         titleTextView = findViewById(R.id.event_title);
@@ -66,6 +75,9 @@ public class EventDetailActivity extends AppCompatActivity implements EventWebSo
         // Get event data from intent
         event = getEventFromIntent();
 
+        //Load the RSVP state which depends on previous user interaction
+        loadRsvpState();
+
         if (event == null) {
             Toast.makeText(this, "Error loading event details", Toast.LENGTH_SHORT).show();
             finish();
@@ -79,6 +91,28 @@ public class EventDetailActivity extends AppCompatActivity implements EventWebSo
 
         // Display event details
         displayEventDetails();
+
+        // Make sure we have a valid username for WebSocket
+        if (UserService.getInstance().getCurrentUsername() == null) {
+            // Try to get from SharedPreferences
+            SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+            String username = prefs.getString("username", "");
+
+            if (username.isEmpty()) {
+                prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+                username = prefs.getString("username", "");
+            }
+
+            if (!username.isEmpty()) {
+                // Set a temporary user in UserService
+                UserService.getInstance().setUserData(
+                        "temp_id",
+                        username,
+                        UserService.ROLE_STUDENT
+                );
+                Log.d(TAG, "Set temporary username in UserService: " + username);
+            }
+        }
 
         // Set up WebSocket connection
         setupWebSocket();
@@ -148,13 +182,25 @@ public class EventDetailActivity extends AppCompatActivity implements EventWebSo
     }
 
     private void setupWebSocket() {
-        String username = UserService.getInstance().getCurrentUsername();
-        if (username == null || username.isEmpty()) {
-            Log.e(TAG, "Cannot set up WebSocket: username is null or empty");
-            Toast.makeText(this, "Error: User not properly logged in", Toast.LENGTH_SHORT).show();
-            return;
+        synchronized (WEBSOCKET_LOCK) {
+            // Close any existing connection before creating a new one
+            if (webSocketClient != null) {
+                webSocketClient.disconnect();
+                webSocketClient = null;
+            }
+
+            // Get username with proper checks
+            String username = UserService.getInstance().getCurrentUsername();
+
+            // If null, set a fixed username (don't use "null")
+            if (username == null || username.isEmpty() || username.equals("null")) {
+                username = "guest_" + System.currentTimeMillis();
+                Log.d(TAG, "Using generated username: " + username);
+            }
+
+            // Create WebSocket client
+            webSocketClient = new EventWebSocketClient(this, username, this);
         }
-        webSocketClient = new EventWebSocketClient(this, username, this);
     }
 
     private void toggleRsvp() {
@@ -242,8 +288,18 @@ public class EventDetailActivity extends AppCompatActivity implements EventWebSo
             runOnUiThread(() -> {
                 event.setAttendees(attendees);
                 event.setRsvped(isRsvped);
+
+                // Update the attendees text
                 attendeesTextView.setText(attendees + " attending");
+
+                // Update the RSVP button state
                 updateRsvpButtonState();
+
+                //Save RSVP state
+                saveRsvpState(eventId, true);
+
+                // Log the update for debugging
+                Log.d(TAG, "Updated RSVP UI: attendees=" + attendees + ", isRsvped=" + isRsvped);
             });
         }
     }
@@ -252,13 +308,19 @@ public class EventDetailActivity extends AppCompatActivity implements EventWebSo
     public void onChatMessageReceived(EventChat chatMessage) {
         // Check if this chat message is related to this event
         if (event.getId().equals(chatMessage.getEventId()) || chatMessage.getEventId() == null) {
+            Log.d(TAG, "Chat message received for this event: " + chatMessage.getMessage());
             runOnUiThread(() -> {
                 // Add the message to our list
                 chatMessages.add(chatMessage);
-                chatAdapter.notifyItemInserted(chatMessages.size() - 1);
+                int position = chatMessages.size() - 1;
+                Log.d(TAG, "Adding chat message at position " + position);
+                chatAdapter.notifyItemInserted(position);
                 // Scroll to the bottom to show new message
-                chatRecyclerView.smoothScrollToPosition(chatMessages.size() - 1);
+                chatRecyclerView.smoothScrollToPosition(position);
             });
+        } else {
+            Log.d(TAG, "Ignoring chat message for different event: " +
+                    chatMessage.getEventId() + " vs our event: " + event.getId());
         }
     }
 
@@ -286,6 +348,22 @@ public class EventDetailActivity extends AppCompatActivity implements EventWebSo
         runOnUiThread(() -> {
             Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
         });
+    }
+
+    private void saveRsvpState(String eventId, boolean isRsvped) {
+        SharedPreferences prefs = getSharedPreferences(RSVP_PREFS, MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean("rsvp_" + eventId, isRsvped);
+        editor.apply();
+        Log.d(TAG, "Saved RSVP state for event " + eventId + ": " + isRsvped);
+    }
+
+    private void loadRsvpState() {
+        SharedPreferences prefs = getSharedPreferences(RSVP_PREFS, MODE_PRIVATE);
+        boolean isRsvped = prefs.getBoolean("rsvp_" + event.getId(), false);
+        event.setRsvped(isRsvped);
+        updateRsvpButtonState();
+        Log.d(TAG, "Loaded RSVP state for event " + event.getId() + ": " + isRsvped);
     }
 
     private void updateEventDetails(CampusEvent updatedEvent) {

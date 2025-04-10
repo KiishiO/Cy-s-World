@@ -47,20 +47,46 @@ public class UserService {
             return;
         }
 
+        // Try to load from both preference stores
+        // First try "LoginPrefs"
         preferences = context.getApplicationContext()
-                .getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+                .getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
 
-        // Load user data
-        currentUserId = preferences.getString(KEY_USER_ID, null);
-        currentUsername = preferences.getString(KEY_USERNAME, null);
-        userRole = preferences.getString(KEY_USER_ROLE, null);
-        email = preferences.getString(KEY_EMAIL, null);
-        fullName = preferences.getString(KEY_FULL_NAME, null);
+        // Load user data with proper type handling
+        try {
+            // Try to get user_id as a long first (matching how it's stored)
+            long longUserId = preferences.getLong(KEY_USER_ID, 0);
+            if (longUserId > 0) {
+                currentUserId = String.valueOf(longUserId);
+            } else {
+                // Fall back to string if needed
+                currentUserId = preferences.getString(KEY_USER_ID, null);
+            }
+        } catch (ClassCastException e) {
+            // If there's a type mismatch, try the other way
+            try {
+                currentUserId = preferences.getString(KEY_USER_ID, null);
+            } catch (Exception ex) {
+                Log.e(TAG, "Error loading user_id: " + ex.getMessage());
+                currentUserId = null;
+            }
+        }
+
+        // Load other user data
+        try {
+            currentUsername = preferences.getString(KEY_USERNAME, null);
+            userRole = preferences.getString(KEY_USER_ROLE, null);
+            email = preferences.getString(KEY_EMAIL, null);
+            fullName = preferences.getString(KEY_FULL_NAME, null);
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading user data: " + e.getMessage());
+        }
+
 
         isInitialized = true;
 
-        Log.d(TAG, "UserService initialized. User: " +
-                (currentUsername != null ? currentUsername : "not logged in") +
+        Log.d(TAG, "UserService initialized. User ID: " + currentUserId +
+                ", User: " + (currentUsername != null ? currentUsername : "not logged in") +
                 ", Role: " + (userRole != null ? userRole : "none"));
     }
 
