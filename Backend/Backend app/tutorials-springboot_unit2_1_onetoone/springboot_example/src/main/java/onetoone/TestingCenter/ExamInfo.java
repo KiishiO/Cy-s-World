@@ -1,7 +1,11 @@
 package onetoone.TestingCenter;
 
 import jakarta.persistence.*;
+import onetoone.Persons.Person;
 import onetoone.TestingCenter.TestingCenter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Sonia Patil
@@ -18,6 +22,14 @@ public class ExamInfo {
     @ManyToOne
     @JoinColumn(name = "testingCenter_id")
     private TestingCenter testingCenter;
+
+//    @ManyToMany
+//    @JoinTable(
+//            name = "person_exams",
+//            joinColumns = @JoinColumn(name = "exam_id"),
+//            inverseJoinColumns = @JoinColumn(name = "person_id")
+//    )
+//    private List<Person> persons = new ArrayList<>();
 
     public ExamInfo() {}
 

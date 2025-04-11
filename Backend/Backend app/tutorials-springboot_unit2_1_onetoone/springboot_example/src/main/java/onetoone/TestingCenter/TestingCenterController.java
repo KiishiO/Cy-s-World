@@ -1,5 +1,6 @@
 package onetoone.TestingCenter;
 
+import onetoone.Persons.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,9 @@ public class TestingCenterController {
 
     @Autowired
     private TestingCenterRepository testingCenterRepository;
+
+    @Autowired
+    private PersonRepository personRepository;
 
     //get all the testing centers
     @GetMapping
