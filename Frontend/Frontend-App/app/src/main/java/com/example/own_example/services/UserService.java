@@ -9,7 +9,7 @@ import android.util.Log;
  */
 public class UserService {
     private static final String TAG = "UserService";
-    private static final String PREF_NAME = "user_preferences";
+    private static final String PREF_NAME = "user_prefs";
     private static final String KEY_USER_ID = "user_id";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_USER_ROLE = "user_role";
@@ -48,46 +48,33 @@ public class UserService {
         }
 
         // Try to load from both preference stores
-        // First try "LoginPrefs"
         preferences = context.getApplicationContext()
                 .getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
 
-        // Load user data with proper type handling
+        // Load user data
         try {
-            // Try to get user_id as a long first (matching how it's stored)
             long longUserId = preferences.getLong(KEY_USER_ID, 0);
             if (longUserId > 0) {
                 currentUserId = String.valueOf(longUserId);
             } else {
-                // Fall back to string if needed
                 currentUserId = preferences.getString(KEY_USER_ID, null);
             }
-        } catch (ClassCastException e) {
-            // If there's a type mismatch, try the other way
-            try {
-                currentUserId = preferences.getString(KEY_USER_ID, null);
-            } catch (Exception ex) {
-                Log.e(TAG, "Error loading user_id: " + ex.getMessage());
-                currentUserId = null;
-            }
-        }
 
-        // Load other user data
-        try {
             currentUsername = preferences.getString(KEY_USERNAME, null);
             userRole = preferences.getString(KEY_USER_ROLE, null);
+
+            // Debug logging to see what's being loaded
+            Log.d(TAG, "UserService initialized. User ID: " + currentUserId +
+                    ", User: " + currentUsername +
+                    ", Role: " + userRole);
+
             email = preferences.getString(KEY_EMAIL, null);
             fullName = preferences.getString(KEY_FULL_NAME, null);
         } catch (Exception e) {
             Log.e(TAG, "Error loading user data: " + e.getMessage());
         }
 
-
         isInitialized = true;
-
-        Log.d(TAG, "UserService initialized. User ID: " + currentUserId +
-                ", User: " + (currentUsername != null ? currentUsername : "not logged in") +
-                ", Role: " + (userRole != null ? userRole : "none"));
     }
 
     public boolean isInitialized() {
@@ -119,7 +106,18 @@ public class UserService {
     }
 
     public boolean isAdmin() {
-        return ROLE_ADMIN.equals(userRole);
+        if (userRole == null) return false;
+
+        // Check for string-based role
+        if (ROLE_ADMIN.equals(userRole)) return true;
+
+        // Check for enum-based role
+        try {
+            return "ADMIN".equals(userRole) || "ADMIN".equals(userRole.toUpperCase());
+        } catch (Exception e) {
+            Log.e(TAG, "Error checking admin role: " + e.getMessage());
+            return false;
+        }
     }
 
     public boolean isTeacher() {

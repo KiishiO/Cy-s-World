@@ -35,6 +35,37 @@ public class TeacherDashboardActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Check if user has teacher role
+        SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+        String userRoleStr = prefs.getString("user_role", "STUDENT");
+
+        try {
+            UserRoles userRole = UserRoles.valueOf(userRoleStr);
+            if (userRole != UserRoles.TEACHER) {
+                // User is not a teacher, redirect to appropriate dashboard
+                Toast.makeText(this, "You don't have permission to access the teacher dashboard", Toast.LENGTH_SHORT).show();
+                Intent intent;
+
+                if (userRole == UserRoles.ADMIN) {
+                    intent = new Intent(this, AdminDashboardActivity.class);
+                } else {
+                    intent = new Intent(this, StudentDashboardActivity.class);
+                }
+
+                startActivity(intent);
+                finish();
+                return;
+            }
+        } catch (IllegalArgumentException e) {
+            // If role can't be parsed, redirect to login
+            Toast.makeText(this, "Session error. Please login again.", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_teacher_dashboard);
 
         // Initialize views
@@ -61,8 +92,8 @@ public class TeacherDashboardActivity extends AppCompatActivity {
     }
 
     private void setupTeacherName() {
-        SharedPreferences sharedPreferences = getSharedPreferences("TeacherPrefs", MODE_PRIVATE);
-        String teacherName = sharedPreferences.getString("teacherName", "");
+        SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        String teacherName = sharedPreferences.getString("username", "");
         if (!teacherName.isEmpty()) {
             welcomeText.setText("Welcome, Professor " + teacherName);
         }
@@ -73,7 +104,7 @@ public class TeacherDashboardActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Navigate to class management activity
-                Intent intent = new Intent(TeacherDashboardActivity.this, ClassManagementActivity.class);
+                Intent intent = new Intent(TeacherDashboardActivity.this, ClassesActivity.class);
                 startActivity(intent);
             }
         });
@@ -116,9 +147,6 @@ public class TeacherDashboardActivity extends AppCompatActivity {
         // Sample data - just a placeholder for now, this would come from the server database or an API
         recentActivities.add(new RecentActivity("Graded 10 assignments for CS101", "Today, 10:30 AM"));
         recentActivities.add(new RecentActivity("Posted new syllabus for CS205", "Yesterday, 3:45 PM"));
-        recentActivities.add(new RecentActivity("Updated office hours schedule", "Yesterday, 1:15 PM"));
-        recentActivities.add(new RecentActivity("Uploaded lecture notes for CS350", "Mar 4, 2025, 9:20 AM"));
-        recentActivities.add(new RecentActivity("Marked attendance for CS101", "Mar 3, 2025, 11:00 AM"));
     }
 
     private void setupRecentActivitiesRecyclerView() {

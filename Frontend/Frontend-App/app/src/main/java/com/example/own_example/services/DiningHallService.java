@@ -7,7 +7,9 @@ import com.example.own_example.api.RetrofitClient;
 import com.example.own_example.models.DiningHall;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -38,7 +40,7 @@ public class DiningHallService {
         // Admin-specific callbacks
         default void onDiningHallCreated(DiningHall diningHall) {}
         default void onDiningHallUpdated(DiningHall diningHall) {}
-        default void onDiningHallDeleted(long diningHallId) {}
+        default void onDiningHallDeleted(int diningHallId) {}
         default void onConnectionStateChanged(boolean connected) {}
     }
 
@@ -84,19 +86,25 @@ public class DiningHallService {
         RetrofitClient.getInstance().getApiService().getAllDiningHalls().enqueue(new Callback<List<DiningHall>>() {
             @Override
             public void onResponse(Call<List<DiningHall>> call, Response<List<DiningHall>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    setConnected(true);
-
-                    // Process dining halls to add UI-specific properties
-                    List<DiningHall> processedDiningHalls = processDiningHalls(response.body());
-
-                    if (listener != null) {
-                        listener.onDiningHallsLoaded(processedDiningHalls);
+                try {
+                    if (response.isSuccessful() && response.body() != null) {
+                        setConnected(true);
+                        // Process dining halls to add UI-specific properties
+                        List<DiningHall> processedDiningHalls = processDiningHalls(response.body());
+                        if (listener != null) {
+                            listener.onDiningHallsLoaded(processedDiningHalls);
+                        }
+                    } else {
+                        setConnected(false);
+                        if (listener != null) {
+                            listener.onError("Failed to get dining halls: " + response.message());
+                        }
                     }
-                } else {
+                } catch (Exception e) {
+                    Log.e(TAG, "Error processing dining halls", e);
                     setConnected(false);
                     if (listener != null) {
-                        listener.onError("Failed to get dining halls: " + response.message());
+                        listener.onError("Error processing dining halls: " + e.getMessage());
                     }
                 }
             }
@@ -104,6 +112,20 @@ public class DiningHallService {
             @Override
             public void onFailure(Call<List<DiningHall>> call, Throwable t) {
                 Log.e(TAG, "API call failed", t);
+
+                // Additional logging to get more details
+                if (t instanceof com.google.gson.JsonSyntaxException) {
+                    Log.e(TAG, "JSON Syntax Error: " + t.getMessage());
+                    // Extract the response body if possible
+                    try {
+                        // This assumes you have access to the raw response
+                        // If not, you may need to add a custom interceptor to log responses
+                        // See below for an example interceptor
+                    } catch (Exception e) {
+                        Log.e(TAG, "Failed to log response body", e);
+                    }
+                }
+
                 setConnected(false);
                 if (listener != null) {
                     listener.onError("Network error: " + t.getMessage());
@@ -115,34 +137,46 @@ public class DiningHallService {
     /**
      * Get a specific dining hall by ID
      */
-    public void getDiningHallById(long id) {
-        RetrofitClient.getInstance().getApiService().getDiningHallById((int) id).enqueue(new Callback<DiningHall>() {
-            @Override
-            public void onResponse(Call<DiningHall> call, Response<DiningHall> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    setConnected(true);
+    // In DiningHallService.java
+    public void getDiningHallById(int id) {
+        try {
+            RetrofitClient.getInstance().getApiService().getDiningHallById(id)
+                    .enqueue(new Callback<DiningHall>() {
+                        @Override
+                        public void onResponse(Call<DiningHall> call, Response<DiningHall> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                try {
+                                    DiningHall processedDiningHall = processDiningHall(response.body());
+                                    if (listener != null) {
+                                        listener.onDiningHallLoaded(processedDiningHall);
+                                    }
+                                } catch (Exception e) {
+                                    Log.e("DiningHallService", "Error processing dining hall: " + e.getMessage(), e);
+                                    if (listener != null) {
+                                        listener.onError("Error processing dining hall data: " + e.getMessage());
+                                    }
+                                }
+                            } else {
+                                if (listener != null) {
+                                    listener.onError("Failed to get dining hall: " + response.message());
+                                }
+                            }
+                        }
 
-                    // Process dining hall to add UI-specific properties
-                    DiningHall processedDiningHall = processDiningHall(response.body());
-
-                    if (listener != null) {
-                        listener.onDiningHallLoaded(processedDiningHall);
-                    }
-                } else {
-                    if (listener != null) {
-                        listener.onError("Failed to get dining hall: " + response.message());
-                    }
-                }
+                        @Override
+                        public void onFailure(Call<DiningHall> call, Throwable t) {
+                            Log.e("DiningHallService", "API call failed", t);
+                            if (listener != null) {
+                                listener.onError("Network error: " + t.getMessage());
+                            }
+                        }
+                    });
+        } catch (Exception e) {
+            Log.e("DiningHallService", "Error in getDiningHallById: " + e.getMessage(), e);
+            if (listener != null) {
+                listener.onError("Error retrieving dining hall: " + e.getMessage());
             }
-
-            @Override
-            public void onFailure(Call<DiningHall> call, Throwable t) {
-                Log.e(TAG, "API call failed", t);
-                if (listener != null) {
-                    listener.onError("Network error: " + t.getMessage());
-                }
-            }
-        });
+        }
     }
 
     /**
@@ -203,7 +237,7 @@ public class DiningHallService {
     /**
      * Update an existing dining hall (admin only)
      */
-    public void updateDiningHall(long id, String name, String location, boolean isOpen,
+    public void updateDiningHall(int id, String name, String location, boolean isOpen,
                                  String hours, String popularItem, int busynessLevel) {
         if (!isConnected) {
             if (listener != null) {
@@ -283,7 +317,7 @@ public class DiningHallService {
     /**
      * Delete a dining hall (admin only)
      */
-    public void deleteDiningHall(long id) {
+    public void deleteDiningHall(int id) {
         if (!isConnected) {
             if (listener != null) {
                 listener.onError("Not connected to service");
@@ -326,7 +360,7 @@ public class DiningHallService {
     /**
      * Add a menu item to a dining hall (admin only)
      */
-    public void addMenuItem(long diningHallId, String categoryName, String name, String description,
+    public void addMenuItem(int diningHallId, String categoryName, String name, String description,
                             String[] allergens, boolean vegetarian, boolean vegan, boolean glutenFree) {
         if (!isConnected) {
             if (listener != null) {
@@ -336,35 +370,32 @@ public class DiningHallService {
         }
 
         try {
-            // Create the menu item
-            DiningHall.MenuItem menuItem = new DiningHall.MenuItem();
-            menuItem.setName(name);
-            menuItem.setDescription(description);
-            menuItem.setVegetarian(vegetarian);
-            menuItem.setVegan(vegan);
-            menuItem.setGlutenFree(glutenFree);
+            // Create a simple map with just the required fields instead of a full MenuItem object
+            Map<String, Object> menuItemMap = new HashMap<>();
+            menuItemMap.put("name", name);
+            menuItemMap.put("price", 5.99); // Default price required by backend
 
-            // Add allergens
-            if (allergens != null) {
-                for (String allergen : allergens) {
-                    menuItem.addAllergen(allergen);
-                }
-            }
-
-            // Set price (required by backend)
-            menuItem.setPrice(5.99); // Default price
-
-            // Add menu item to the dining hall
-            RetrofitClient.getInstance().getApiService().addMenuItem((int) diningHallId, menuItem)
+            // Add menu item to the dining hall via API
+            RetrofitClient.getInstance().getApiService().addMenuItem(diningHallId, menuItemMap)
                     .enqueue(new Callback<DiningHall.MenuItem>() {
                         @Override
                         public void onResponse(Call<DiningHall.MenuItem> call, Response<DiningHall.MenuItem> response) {
                             if (response.isSuccessful()) {
+                                Log.d(TAG, "Menu item added successfully");
                                 // Refresh dining hall data
                                 getDiningHallById(diningHallId);
                             } else {
+                                String errorMsg = "Failed to add menu item: " + response.message();
+                                try {
+                                    if (response.errorBody() != null) {
+                                        errorMsg += " - " + response.errorBody().string();
+                                    }
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Error reading error body", e);
+                                }
+                                Log.e(TAG, errorMsg);
                                 if (listener != null) {
-                                    listener.onError("Failed to add menu item: " + response.message());
+                                    listener.onError(errorMsg);
                                 }
                             }
                         }
@@ -385,12 +416,14 @@ public class DiningHallService {
         }
     }
 
+
+
     /**
      * Update a menu item
      * Note: This functionality is not directly supported by the backend API
      * We would need to delete and recreate the item or add custom endpoints
      */
-    public void updateMenuItem(long diningHallId, String categoryName, int itemIndex, String name, String description,
+    public void updateMenuItem(int diningHallId, String categoryName, int itemIndex, String name, String description,
                                String[] allergens, boolean vegetarian, boolean vegan, boolean glutenFree) {
         if (!isConnected) {
             if (listener != null) {
@@ -475,7 +508,7 @@ public class DiningHallService {
      * Note: This functionality is not directly supported by the backend API
      * We would need custom endpoints
      */
-    public void deleteMenuItem(long diningHallId, String categoryName, int itemIndex) {
+    public void deleteMenuItem(int diningHallId, String categoryName, int itemIndex) {
         if (!isConnected) {
             if (listener != null) {
                 listener.onError("Not connected to service");
@@ -546,7 +579,7 @@ public class DiningHallService {
      * Note: Categories are not directly supported by the backend model
      * This is handled in the UI layer only
      */
-    public void addMenuCategory(long diningHallId, String categoryName) {
+    public void addMenuCategory(int diningHallId, String categoryName) {
         if (!isConnected) {
             if (listener != null) {
                 listener.onError("Not connected to service");
@@ -614,7 +647,7 @@ public class DiningHallService {
      * Note: Categories are not directly supported by the backend model
      * This is handled in the UI layer only
      */
-    public void deleteMenuCategory(long diningHallId, String categoryName) {
+    public void deleteMenuCategory(int diningHallId, String categoryName) {
         if (!isConnected) {
             if (listener != null) {
                 listener.onError("Not connected to service");
@@ -708,7 +741,18 @@ public class DiningHallService {
         diningHall.setBusynessLevel(50);
 
         // Initialize menu categories based on menu items
-        diningHall.initializeCategories();
+        // Create a default category for all items if none exists
+        List<DiningHall.MenuCategory> categories = new ArrayList<>();
+        DiningHall.MenuCategory defaultCategory = new DiningHall.MenuCategory("Main Menu");
+
+        if (diningHall.getMenuItems() != null) {
+            for (DiningHall.MenuItem item : diningHall.getMenuItems()) {
+                defaultCategory.addItem(item);
+            }
+        }
+
+        categories.add(defaultCategory);
+        diningHall.setMenuCategories(categories);
 
         return diningHall;
     }

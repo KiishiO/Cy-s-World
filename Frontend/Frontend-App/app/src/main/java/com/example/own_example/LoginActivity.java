@@ -51,7 +51,7 @@ public class LoginActivity extends AppCompatActivity {
     private CircularProgressIndicator loadingProgress;
     private MaterialCheckBox rememberMeCheckbox;
     private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu:8080/Logins";
-
+    private UserRoles userRole = UserRoles.STUDENT; // Default value
     private List<JSONObject> usersList = new ArrayList<>();
     private boolean isDataLoaded = false;
 
@@ -233,20 +233,24 @@ public class LoginActivity extends AppCompatActivity {
         boolean loginSuccess = false;
         String fullName = "";
         String userId = "";
-        String userRole = ""; // Add this line to store the user's role
+        UserRoles userRole = UserRoles.STUDENT; // Default role
 
         for (JSONObject user : usersList) {
             try {
+                // Log the entire user object to see what we're working with
+                Log.d(TAG, "Examining user: " + user.toString());
+
                 // Check for matching emailId and password
                 String storedNetId = user.getString("emailId").trim();
                 String storedPassword = user.getString("password");
                 String storedName = user.getString("name").trim();
                 String storedId = user.getString("id");
 
-                // Try to get the role - add this block
-                String storedRole = "Student"; // Default to Student
+                // Extract role directly from the user object
+                String roleString = "STUDENT"; // Default
                 if (user.has("role")) {
-                    storedRole = user.getString("role");
+                    roleString = user.getString("role").trim().toUpperCase();
+                    Log.d(TAG, "Found role in user object: " + roleString);
                 }
 
                 // Try matching by email or name
@@ -258,11 +262,35 @@ public class LoginActivity extends AppCompatActivity {
                 if (credentialsMatch) {
                     loginSuccess = true;
                     userId = storedId;
-                    userRole = storedRole; // Store the role
+
+                    // Convert role string to enum
+                    try {
+                        userRole = UserRoles.valueOf(roleString);
+                        Log.d(TAG, "Successfully converted role to enum: " + userRole);
+                    } catch (IllegalArgumentException e) {
+                        Log.e(TAG, "Invalid role format: " + roleString + ". Using default STUDENT role.");
+                        userRole = UserRoles.STUDENT;
+                    }
+
                     Log.d(TAG, "Login match found for user: " + storedName + " with role: " + userRole);
+
                     if (user.has("person")) {
                         fullName = user.getJSONObject("person").getString("name");
                         Log.d(TAG, "Found person name: " + fullName);
+
+                        // Double-check if role exists in person object
+                        if (user.getJSONObject("person").has("role")) {
+                            String personRole = user.getJSONObject("person").getString("role").trim().toUpperCase();
+                            Log.d(TAG, "Found role in person object: " + personRole);
+
+                            // Use person role if available
+                            try {
+                                userRole = UserRoles.valueOf(personRole);
+                                Log.d(TAG, "Using role from person object: " + userRole);
+                            } catch (IllegalArgumentException e) {
+                                Log.e(TAG, "Invalid person role format: " + personRole + ". Keeping previously found role.");
+                            }
+                        }
                     } else {
                         fullName = storedName;
                     }
@@ -276,7 +304,8 @@ public class LoginActivity extends AppCompatActivity {
         if (loginSuccess) {
             final String welcomeName = fullName.isEmpty() ? username : fullName;
             final String finalUserId = userId;
-            final String finalUserRole = userRole; // Store the role for use in the runnable
+            final UserRoles finalUserRole = userRole;
+
             Log.d(TAG, "Login successful for user: " + welcomeName + " with ID: " + finalUserId + " and role: " + finalUserRole);
             showSuccess("Login successful! Welcome, " + welcomeName);
 
@@ -286,8 +315,8 @@ public class LoginActivity extends AppCompatActivity {
             SharedPreferences.Editor userEditor = userPrefs.edit();
             userEditor.putString("username", welcomeName);
             userEditor.putLong("user_id", Long.parseLong(finalUserId));
+            userEditor.putString("user_role", finalUserRole.toString());
             userEditor.putBoolean("is_logged_in", true);
-            userEditor.putString("user_role", finalUserRole); // Save the role
             userEditor.apply();
 
             // Save to LoginPrefs for other activities
@@ -295,8 +324,8 @@ public class LoginActivity extends AppCompatActivity {
             SharedPreferences.Editor loginEditor = loginPrefs.edit();
             loginEditor.putString("username", welcomeName);
             loginEditor.putLong("user_id", Long.parseLong(finalUserId));
+            loginEditor.putString("user_role", finalUserRole.toString());
             loginEditor.putBoolean("is_logged_in", true);
-            loginEditor.putString("user_role", finalUserRole); // Save the role
 
             // Save the remember me preference if checkbox is checked
             if (rememberMeCheckbox != null && rememberMeCheckbox.isChecked()) {
@@ -310,16 +339,19 @@ public class LoginActivity extends AppCompatActivity {
                 Intent intent;
 
                 // Check role and navigate accordingly
-                switch (finalUserRole.toLowerCase()) {
-                    case "admin":
+                switch (finalUserRole) {
+                    case ADMIN:
                         intent = new Intent(LoginActivity.this, AdminDashboardActivity.class);
+                        Log.d(TAG, "Navigating to Admin Dashboard");
                         break;
-                    case "teacher":
+                    case TEACHER:
                         intent = new Intent(LoginActivity.this, TeacherDashboardActivity.class);
+                        Log.d(TAG, "Navigating to Teacher Dashboard");
                         break;
-                    case "student":
+                    case STUDENT:
                     default:
                         intent = new Intent(LoginActivity.this, StudentDashboardActivity.class);
+                        Log.d(TAG, "Navigating to Student Dashboard");
                         break;
                 }
 
