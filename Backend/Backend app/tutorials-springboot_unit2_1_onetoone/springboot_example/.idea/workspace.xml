@@ -54,9 +54,10 @@
     "Maven.onetoone [package].executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "campusEvents-backend",
+    "git-widget-placeholder": "Bookstore-Backend",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/Users/jrock25/2_swarna_4/Backend/Backend app/tutorials-springboot_unit2_1_onetoone/springboot_example",
+    "node.js.selected.package.tslint": "(autodetect)",
     "project.structure.last.edited": "SDKs",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2"
@@ -176,7 +177,7 @@
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/onetoone/Signup/Signup.java</url>
           <line>118</line>
-          <properties class="onetoone.Signup.Signup" method="setRoles">
+          <properties class="onetoone.Signup.Signup">
             <option name="EMULATED" value="true" />
             <option name="WATCH_EXIT" value="false" />
           </properties>
