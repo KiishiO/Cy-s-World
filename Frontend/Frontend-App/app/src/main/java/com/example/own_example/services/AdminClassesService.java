@@ -5,10 +5,13 @@ import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.own_example.services.AuthService;
+import com.example.own_example.UserRoles;
 import com.example.own_example.models.ClassModel;
 import com.example.own_example.models.Student;
 import com.example.own_example.models.Teacher;
@@ -21,14 +24,22 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Service class for admin class management operations
  */
 public class AdminClassesService {
     private static final String TAG = "AdminClassesService";
-    private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu:8080/classes";
+    // Base URL for the server
+    private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu:8080";
+
+    // Path constants based on the backend code
+    private static final String CLASSES_PATH = "/classes";
+    private static final String PERSONS_PATH = "/persons";
+
     private RequestQueue requestQueue;
     private Context context;
     private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
@@ -36,6 +47,10 @@ public class AdminClassesService {
     public AdminClassesService(Context context) {
         this.context = context;
         this.requestQueue = Volley.newRequestQueue(context);
+
+        // Log the role of the current user for debugging
+        UserRoles role = AuthService.getUserRole(context);
+        Log.d(TAG, "Initialized AdminClassesService with user role: " + role);
     }
 
     /**
@@ -66,15 +81,19 @@ public class AdminClassesService {
      * Get all classes for admin view
      */
     public void getAllClasses(ListCallback<ClassModel> callback) {
-        String url = BASE_URL + "/classes";
+        // Use the correct path based on backend controller mapping
+        String url = AuthService.getAdminAuthUrl(BASE_URL + CLASSES_PATH);
+
+        Log.d(TAG, "Fetching all classes from: " + url);
 
         JsonArrayRequest request = new JsonArrayRequest(
                 Request.Method.GET,
                 url,
                 null,
-                new com.android.volley.Response.Listener<JSONArray>() {
+                new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
+                        Log.d(TAG, "Received classes response: " + response.toString());
                         try {
                             List<ClassModel> classModels = new ArrayList<>();
 
@@ -91,14 +110,29 @@ public class AdminClassesService {
                         }
                     }
                 },
-                new com.android.volley.Response.ErrorListener() {
+                new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.e(TAG, "Error fetching classes: " + error.toString());
+                        if (error.networkResponse != null) {
+                            int statusCode = error.networkResponse.statusCode;
+                            String data = new String(error.networkResponse.data);
+                            Log.e(TAG, "Network error code: " + statusCode);
+                            Log.e(TAG, "Error data: " + data);
+                        }
                         callback.onError("Error fetching classes: " + getErrorMessage(error));
                     }
                 }
-        );
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type", "application/json");
+                // Add Admin-Id header if needed
+                headers.put("Admin-Id", String.valueOf(AuthService.getUserId(context)));
+                return headers;
+            }
+        };
 
         requestQueue.add(request);
     }
@@ -107,13 +141,16 @@ public class AdminClassesService {
      * Get all teachers for class assignment
      */
     public void getAllTeachers(ListCallback<Teacher> callback) {
-        String url = BASE_URL + "/persons/teachers";
+        // Updated URL structure based on PersonController
+        String url = AuthService.getAdminAuthUrl(BASE_URL + PERSONS_PATH + "/by-role/TEACHER");
+
+        Log.d(TAG, "Fetching all teachers from: " + url);
 
         JsonArrayRequest request = new JsonArrayRequest(
                 Request.Method.GET,
                 url,
                 null,
-                new com.android.volley.Response.Listener<JSONArray>() {
+                new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
                         try {
@@ -124,8 +161,8 @@ public class AdminClassesService {
 
                                 int id = teacherObj.getInt("id");
                                 String name = teacherObj.getString("name");
-                                String email = teacherObj.optString("emailId", "");
-                                String department = teacherObj.optString("department", "");
+                                String email = teacherObj.optString("phoneNumber", ""); // Using phoneNumber as email
+                                String department = ""; // Department not available in Person model
 
                                 Teacher teacher = new Teacher(id, name, email, department);
                                 teachers.add(teacher);
@@ -138,14 +175,29 @@ public class AdminClassesService {
                         }
                     }
                 },
-                new com.android.volley.Response.ErrorListener() {
+                new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.e(TAG, "Error fetching teachers: " + error.toString());
+                        if (error.networkResponse != null) {
+                            int statusCode = error.networkResponse.statusCode;
+                            String data = new String(error.networkResponse.data);
+                            Log.e(TAG, "Network error code: " + statusCode);
+                            Log.e(TAG, "Error data: " + data);
+                        }
                         callback.onError("Error fetching teachers: " + getErrorMessage(error));
                     }
                 }
-        );
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type", "application/json");
+                // Add Admin-Id header as required by PersonController
+                headers.put("Admin-Id", String.valueOf(AuthService.getUserId(context)));
+                return headers;
+            }
+        };
 
         requestQueue.add(request);
     }
@@ -154,13 +206,16 @@ public class AdminClassesService {
      * Get all students for class assignment
      */
     public void getAllStudents(ListCallback<Student> callback) {
-        String url = BASE_URL + "/persons/students";
+        // Updated URL structure based on PersonController
+        String url = AuthService.getAdminAuthUrl(BASE_URL + PERSONS_PATH + "/by-role/STUDENT");
+
+        Log.d(TAG, "Fetching all students from: " + url);
 
         JsonArrayRequest request = new JsonArrayRequest(
                 Request.Method.GET,
                 url,
                 null,
-                new com.android.volley.Response.Listener<JSONArray>() {
+                new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
                         try {
@@ -171,7 +226,7 @@ public class AdminClassesService {
 
                                 int id = studentObj.getInt("id");
                                 String name = studentObj.getString("name");
-                                String email = studentObj.optString("emailId", "");
+                                String email = studentObj.optString("phoneNumber", ""); // Using phoneNumber as email
 
                                 Student student = new Student(id, name, email);
                                 students.add(student);
@@ -184,14 +239,29 @@ public class AdminClassesService {
                         }
                     }
                 },
-                new com.android.volley.Response.ErrorListener() {
+                new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.e(TAG, "Error fetching students: " + error.toString());
+                        if (error.networkResponse != null) {
+                            int statusCode = error.networkResponse.statusCode;
+                            String data = new String(error.networkResponse.data);
+                            Log.e(TAG, "Network error code: " + statusCode);
+                            Log.e(TAG, "Error data: " + data);
+                        }
                         callback.onError("Error fetching students: " + getErrorMessage(error));
                     }
                 }
-        );
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type", "application/json");
+                // Add Admin-Id header as required by PersonController
+                headers.put("Admin-Id", String.valueOf(AuthService.getUserId(context)));
+                return headers;
+            }
+        };
 
         requestQueue.add(request);
     }
@@ -200,64 +270,52 @@ public class AdminClassesService {
      * Search for a student by Net-ID or name
      */
     public void searchStudent(String query, ItemCallback<Student> callback) {
-        String url = BASE_URL + "/persons/search?query=" + query;
-
-        JsonArrayRequest request = new JsonArrayRequest(
-                Request.Method.GET,
-                url,
-                null,
-                new com.android.volley.Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        try {
-                            if (response.length() > 0) {
-                                JSONObject studentObj = response.getJSONObject(0);
-
-                                int id = studentObj.getInt("id");
-                                String name = studentObj.getString("name");
-                                String email = studentObj.optString("emailId", "");
-
-                                Student student = new Student(id, name, email);
-                                callback.onSuccess(student);
-                            } else {
-                                callback.onError("No student found with ID: " + query);
-                            }
-                        } catch (JSONException e) {
-                            Log.e(TAG, "Error parsing student search: " + e.getMessage());
-                            callback.onError("Error parsing student data");
-                        }
-                    }
-                },
-                new com.android.volley.Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e(TAG, "Error searching student: " + error.toString());
-                        callback.onError("Error searching student: " + getErrorMessage(error));
+        // Based on the backend, there might not be a direct search endpoint
+        // We'll fetch all students and filter client-side as a workaround
+        getAllStudents(new ListCallback<Student>() {
+            @Override
+            public void onSuccess(List<Student> result) {
+                for (Student student : result) {
+                    if (student.getName().toLowerCase().contains(query.toLowerCase()) ||
+                            student.getEmail().toLowerCase().contains(query.toLowerCase())) {
+                        callback.onSuccess(student);
+                        return;
                     }
                 }
-        );
+                callback.onError("No student found matching: " + query);
+            }
 
-        requestQueue.add(request);
+            @Override
+            public void onError(String errorMessage) {
+                callback.onError("Error searching for student: " + errorMessage);
+            }
+        });
     }
 
     /**
      * Create a new class
      */
     public void createClass(ClassModel classModel, ActionCallback callback) {
-        String url = BASE_URL + "/classes";
+        String url = AuthService.getAdminAuthUrl(BASE_URL + CLASSES_PATH);
+
+        Log.d(TAG, "Creating class at URL: " + url);
 
         try {
             JSONObject classJson = createClassJson(classModel);
+            Log.d(TAG, "Class JSON: " + classJson.toString());
 
             JsonObjectRequest request = new JsonObjectRequest(
                     Request.Method.POST,
                     url,
                     classJson,
-                    new com.android.volley.Response.Listener<JSONObject>() {
+                    new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
                             try {
+                                Log.d(TAG, "Create class response: " + response.toString());
                                 if (response.has("id")) {
+                                    callback.onSuccess("Class created successfully");
+                                } else if (response.has("message") && response.getString("message").equals("success")) {
                                     callback.onSuccess("Class created successfully");
                                 } else {
                                     callback.onError("Class creation failed");
@@ -268,14 +326,29 @@ public class AdminClassesService {
                             }
                         }
                     },
-                    new com.android.volley.Response.ErrorListener() {
+                    new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
                             Log.e(TAG, "Error creating class: " + error.toString());
+                            if (error.networkResponse != null) {
+                                int statusCode = error.networkResponse.statusCode;
+                                String data = new String(error.networkResponse.data);
+                                Log.e(TAG, "Network error code: " + statusCode);
+                                Log.e(TAG, "Error data: " + data);
+                            }
                             callback.onError("Error creating class: " + getErrorMessage(error));
                         }
                     }
-            );
+            ) {
+                @Override
+                public Map<String, String> getHeaders() {
+                    Map<String, String> headers = new HashMap<>();
+                    headers.put("Content-Type", "application/json");
+                    // Add Admin-Id header if needed
+                    headers.put("Admin-Id", String.valueOf(AuthService.getUserId(context)));
+                    return headers;
+                }
+            };
 
             requestQueue.add(request);
         } catch (JSONException e) {
@@ -288,20 +361,26 @@ public class AdminClassesService {
      * Update an existing class
      */
     public void updateClass(ClassModel classModel, ActionCallback callback) {
-        String url = BASE_URL + "/classes/" + classModel.getId();
+        String url = AuthService.getAdminAuthUrl(BASE_URL + CLASSES_PATH + "/" + classModel.getId());
+
+        Log.d(TAG, "Updating class at URL: " + url);
 
         try {
             JSONObject classJson = createClassJson(classModel);
+            Log.d(TAG, "Class JSON: " + classJson.toString());
 
             JsonObjectRequest request = new JsonObjectRequest(
                     Request.Method.PUT,
                     url,
                     classJson,
-                    new com.android.volley.Response.Listener<JSONObject>() {
+                    new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
                             try {
+                                Log.d(TAG, "Update class response: " + response.toString());
                                 if (response.has("id")) {
+                                    callback.onSuccess("Class updated successfully");
+                                } else if (response.has("message") && response.getString("message").equals("success")) {
                                     callback.onSuccess("Class updated successfully");
                                 } else {
                                     callback.onError("Class update failed");
@@ -312,14 +391,29 @@ public class AdminClassesService {
                             }
                         }
                     },
-                    new com.android.volley.Response.ErrorListener() {
+                    new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
                             Log.e(TAG, "Error updating class: " + error.toString());
+                            if (error.networkResponse != null) {
+                                int statusCode = error.networkResponse.statusCode;
+                                String data = new String(error.networkResponse.data);
+                                Log.e(TAG, "Network error code: " + statusCode);
+                                Log.e(TAG, "Error data: " + data);
+                            }
                             callback.onError("Error updating class: " + getErrorMessage(error));
                         }
                     }
-            );
+            ) {
+                @Override
+                public Map<String, String> getHeaders() {
+                    Map<String, String> headers = new HashMap<>();
+                    headers.put("Content-Type", "application/json");
+                    // Add Admin-Id header if needed
+                    headers.put("Admin-Id", String.valueOf(AuthService.getUserId(context)));
+                    return headers;
+                }
+            };
 
             requestQueue.add(request);
         } catch (JSONException e) {
@@ -332,18 +426,20 @@ public class AdminClassesService {
      * Delete a class
      */
     public void deleteClass(int classId, ActionCallback callback) {
-        String url = BASE_URL + "/classes/" + classId;
+        String url = AuthService.getAdminAuthUrl(BASE_URL + CLASSES_PATH + "/" + classId);
+
+        Log.d(TAG, "Deleting class at URL: " + url);
 
         JsonObjectRequest request = new JsonObjectRequest(
                 Request.Method.DELETE,
                 url,
                 null,
-                new com.android.volley.Response.Listener<JSONObject>() {
+                new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            String message = response.getString("message");
-                            if (message.equals("success")) {
+                            Log.d(TAG, "Delete class response: " + response.toString());
+                            if (response.has("message") && response.getString("message").equals("success")) {
                                 callback.onSuccess("Class deleted successfully");
                             } else {
                                 callback.onError("Failed to delete class");
@@ -354,14 +450,29 @@ public class AdminClassesService {
                         }
                     }
                 },
-                new com.android.volley.Response.ErrorListener() {
+                new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.e(TAG, "Error deleting class: " + error.toString());
+                        if (error.networkResponse != null) {
+                            int statusCode = error.networkResponse.statusCode;
+                            String data = new String(error.networkResponse.data);
+                            Log.e(TAG, "Network error code: " + statusCode);
+                            Log.e(TAG, "Error data: " + data);
+                        }
                         callback.onError("Error deleting class: " + getErrorMessage(error));
                     }
                 }
-        );
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type", "application/json");
+                // Add Admin-Id header if needed
+                headers.put("Admin-Id", String.valueOf(AuthService.getUserId(context)));
+                return headers;
+            }
+        };
 
         requestQueue.add(request);
     }
@@ -370,18 +481,21 @@ public class AdminClassesService {
      * Add a student to a class
      */
     public void addStudentToClass(int classId, int studentId, ActionCallback callback) {
-        String url = BASE_URL + "/classes/" + classId + "/students/" + studentId;
+        // Based on backend code, the URL would be something like:
+        String url = AuthService.getAdminAuthUrl(BASE_URL + CLASSES_PATH + "/" + classId + "/student/" + studentId);
+
+        Log.d(TAG, "Adding student to class at URL: " + url);
 
         JsonObjectRequest request = new JsonObjectRequest(
                 Request.Method.POST,
                 url,
                 null,
-                new com.android.volley.Response.Listener<JSONObject>() {
+                new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            String message = response.getString("message");
-                            if (message.equals("success")) {
+                            Log.d(TAG, "Add student response: " + response.toString());
+                            if (response.has("message") && response.getString("message").equals("success")) {
                                 callback.onSuccess("Student added to class successfully");
                             } else {
                                 callback.onError("Failed to add student to class");
@@ -392,14 +506,29 @@ public class AdminClassesService {
                         }
                     }
                 },
-                new com.android.volley.Response.ErrorListener() {
+                new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.e(TAG, "Error adding student: " + error.toString());
+                        if (error.networkResponse != null) {
+                            int statusCode = error.networkResponse.statusCode;
+                            String data = new String(error.networkResponse.data);
+                            Log.e(TAG, "Network error code: " + statusCode);
+                            Log.e(TAG, "Error data: " + data);
+                        }
                         callback.onError("Error adding student: " + getErrorMessage(error));
                     }
                 }
-        );
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type", "application/json");
+                // Add Admin-Id header if needed
+                headers.put("Admin-Id", String.valueOf(AuthService.getUserId(context)));
+                return headers;
+            }
+        };
 
         requestQueue.add(request);
     }
@@ -408,18 +537,21 @@ public class AdminClassesService {
      * Remove a student from a class
      */
     public void removeStudentFromClass(int classId, int studentId, ActionCallback callback) {
-        String url = BASE_URL + "/classes/" + classId + "/students/" + studentId;
+        // Based on backend code, the URL would be something like:
+        String url = AuthService.getAdminAuthUrl(BASE_URL + CLASSES_PATH + "/" + classId + "/student/" + studentId);
+
+        Log.d(TAG, "Removing student from class at URL: " + url);
 
         JsonObjectRequest request = new JsonObjectRequest(
                 Request.Method.DELETE,
                 url,
                 null,
-                new com.android.volley.Response.Listener<JSONObject>() {
+                new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            String message = response.getString("message");
-                            if (message.equals("success")) {
+                            Log.d(TAG, "Remove student response: " + response.toString());
+                            if (response.has("message") && response.getString("message").equals("success")) {
                                 callback.onSuccess("Student removed from class successfully");
                             } else {
                                 callback.onError("Failed to remove student from class");
@@ -430,14 +562,29 @@ public class AdminClassesService {
                         }
                     }
                 },
-                new com.android.volley.Response.ErrorListener() {
+                new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.e(TAG, "Error removing student: " + error.toString());
+                        if (error.networkResponse != null) {
+                            int statusCode = error.networkResponse.statusCode;
+                            String data = new String(error.networkResponse.data);
+                            Log.e(TAG, "Network error code: " + statusCode);
+                            Log.e(TAG, "Error data: " + data);
+                        }
                         callback.onError("Error removing student: " + getErrorMessage(error));
                     }
                 }
-        );
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type", "application/json");
+                // Add Admin-Id header if needed
+                headers.put("Admin-Id", String.valueOf(AuthService.getUserId(context)));
+                return headers;
+            }
+        };
 
         requestQueue.add(request);
     }
@@ -531,12 +678,38 @@ public class AdminClassesService {
      * Get a more useful error message from Volley error
      */
     private String getErrorMessage(VolleyError error) {
+        StringBuilder errorMsg = new StringBuilder();
+
         if (error.networkResponse != null) {
-            return "Error code: " + error.networkResponse.statusCode;
+            int statusCode = error.networkResponse.statusCode;
+            errorMsg.append("Error code: ").append(statusCode);
+
+            // Add special handling for auth errors
+            if (statusCode == 401 || statusCode == 403) {
+                errorMsg.append(" - Authentication failed. Please check your credentials and permissions.");
+            } else if (statusCode == 400) {
+                errorMsg.append(" - Bad request. Check the API endpoint and parameters.");
+            } else if (statusCode == 404) {
+                errorMsg.append(" - Resource not found. Check the API endpoint.");
+            } else if (statusCode == 500) {
+                errorMsg.append(" - Server error. Please try again later.");
+            }
+
+            // Try to extract response body if available
+            try {
+                String responseBody = new String(error.networkResponse.data);
+                if (responseBody != null && !responseBody.isEmpty()) {
+                    errorMsg.append(" Response: ").append(responseBody);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error parsing error response", e);
+            }
         } else if (error.getMessage() != null) {
-            return error.getMessage();
+            errorMsg.append(error.getMessage());
         } else {
-            return "Network error";
+            errorMsg.append("Network error");
         }
+
+        return errorMsg.toString();
     }
 }

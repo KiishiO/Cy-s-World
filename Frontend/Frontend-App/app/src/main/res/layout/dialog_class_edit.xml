@@ -62,13 +62,21 @@
             android:textStyle="bold"
             android:layout_marginBottom="8dp" />
 
-        <Spinner
-            android:id="@+id/teacher_spinner"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/teacher_spinner_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="48dp"
-            android:background="@drawable/spinner_background"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="16dp"
+            android:hint="Select Teacher">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/teacher_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:focusable="false" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Schedule Section -->
         <TextView

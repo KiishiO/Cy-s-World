@@ -5,10 +5,10 @@ import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -26,7 +26,9 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -66,7 +68,7 @@ public class AdminClassesActivity extends AppCompatActivity implements
     private AlertDialog editDialog;
     private TextInputEditText classNameInput;
     private TextInputEditText locationInput;
-    private Spinner teacherSpinner;
+    private MaterialAutoCompleteTextView teacherSpinner;
     private ChipGroup dayChipGroup;
     private TextInputEditText startTimeInput;
     private TextInputEditText endTimeInput;
@@ -75,6 +77,7 @@ public class AdminClassesActivity extends AppCompatActivity implements
     private TextView selectedStudentsLabel;
     private SelectedStudentsAdapter selectedStudentsAdapter;
     private List<Student> selectedStudents = new ArrayList<>();
+    private Teacher selectedTeacher; // Store the selected teacher
 
     // Time formatting
     private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mm a");
@@ -245,6 +248,7 @@ public class AdminClassesActivity extends AppCompatActivity implements
         TextView dialogTitle = dialogView.findViewById(R.id.dialog_title);
         classNameInput = dialogView.findViewById(R.id.class_name_input);
         locationInput = dialogView.findViewById(R.id.location_input);
+        TextInputLayout teacherSpinnerLayout = dialogView.findViewById(R.id.teacher_spinner_layout);
         teacherSpinner = dialogView.findViewById(R.id.teacher_spinner);
         dayChipGroup = dialogView.findViewById(R.id.day_chip_group);
         startTimeInput = dialogView.findViewById(R.id.start_time_input);
@@ -297,10 +301,28 @@ public class AdminClassesActivity extends AppCompatActivity implements
      * Setup the teacher spinner with teacher data
      */
     private void setupTeacherSpinner() {
-        ArrayAdapter<Teacher> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, teachersList);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Create an array of teacher names for display
+        String[] teacherNames = new String[teachersList.size()];
+        for (int i = 0; i < teachersList.size(); i++) {
+            teacherNames[i] = teachersList.get(i).getName();
+        }
+
+        // Set up adapter for MaterialAutoCompleteTextView
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_dropdown_item_1line, teacherNames);
         teacherSpinner.setAdapter(adapter);
+
+        // Handle teacher selection
+        teacherSpinner.setOnItemClickListener((parent, view, position, id) -> {
+            String selectedTeacherName = teacherNames[position];
+            // Find the matching teacher in the list
+            for (Teacher teacher : teachersList) {
+                if (teacher.getName().equals(selectedTeacherName)) {
+                    selectedTeacher = teacher;
+                    break;
+                }
+            }
+        });
     }
 
     /**
@@ -350,9 +372,10 @@ public class AdminClassesActivity extends AppCompatActivity implements
 
         // Set teacher selection
         if (classModel.getTeacherId() > 0) {
-            for (int i = 0; i < teachersList.size(); i++) {
-                if (teachersList.get(i).getId() == classModel.getTeacherId()) {
-                    teacherSpinner.setSelection(i);
+            for (Teacher teacher : teachersList) {
+                if (teacher.getId() == classModel.getTeacherId()) {
+                    teacherSpinner.setText(teacher.getName());
+                    selectedTeacher = teacher;
                     break;
                 }
             }
@@ -458,6 +481,7 @@ public class AdminClassesActivity extends AppCompatActivity implements
         String location = locationInput.getText().toString().trim();
         String startTime = startTimeInput.getText().toString().trim();
         String endTime = endTimeInput.getText().toString().trim();
+        String teacherName = teacherSpinner.getText().toString().trim();
 
         // Check for required fields
         if (className.isEmpty()) {
@@ -470,7 +494,7 @@ public class AdminClassesActivity extends AppCompatActivity implements
             return false;
         }
 
-        if (teacherSpinner.getSelectedItem() == null) {
+        if (teacherName.isEmpty() || selectedTeacher == null) {
             showSnackbar("Please select a teacher");
             return false;
         }
@@ -511,7 +535,6 @@ public class AdminClassesActivity extends AppCompatActivity implements
         // Get form data
         String className = classNameInput.getText().toString().trim();
         String location = locationInput.getText().toString().trim();
-        Teacher selectedTeacher = (Teacher) teacherSpinner.getSelectedItem();
 
         // Parse times
         LocalTime startTime = LocalTime.parse(startTimeInput.getText().toString(), timeFormatter);

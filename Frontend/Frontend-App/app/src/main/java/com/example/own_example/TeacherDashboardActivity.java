@@ -92,8 +92,8 @@ public class TeacherDashboardActivity extends AppCompatActivity {
     }
 
     private void setupTeacherName() {
-        SharedPreferences sharedPreferences = getSharedPreferences("TeacherPrefs", MODE_PRIVATE);
-        String teacherName = sharedPreferences.getString("teacherName", "");
+        SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        String teacherName = sharedPreferences.getString("username", "");
         if (!teacherName.isEmpty()) {
             welcomeText.setText("Welcome, Professor " + teacherName);
         }
@@ -104,7 +104,7 @@ public class TeacherDashboardActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Navigate to class management activity
-                Intent intent = new Intent(TeacherDashboardActivity.this, ClassManagementActivity.class);
+                Intent intent = new Intent(TeacherDashboardActivity.this, ClassesActivity.class);
                 startActivity(intent);
             }
         });
@@ -147,9 +147,6 @@ public class TeacherDashboardActivity extends AppCompatActivity {
         // Sample data - just a placeholder for now, this would come from the server database or an API
         recentActivities.add(new RecentActivity("Graded 10 assignments for CS101", "Today, 10:30 AM"));
         recentActivities.add(new RecentActivity("Posted new syllabus for CS205", "Yesterday, 3:45 PM"));
-        recentActivities.add(new RecentActivity("Updated office hours schedule", "Yesterday, 1:15 PM"));
-        recentActivities.add(new RecentActivity("Uploaded lecture notes for CS350", "Mar 4, 2025, 9:20 AM"));
-        recentActivities.add(new RecentActivity("Marked attendance for CS101", "Mar 3, 2025, 11:00 AM"));
     }
 
     private void setupRecentActivitiesRecyclerView() {

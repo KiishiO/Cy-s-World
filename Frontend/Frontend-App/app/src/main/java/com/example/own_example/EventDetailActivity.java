@@ -108,7 +108,7 @@ public class EventDetailActivity extends AppCompatActivity implements EventWebSo
                 UserService.getInstance().setUserData(
                         "temp_id",
                         username,
-                        UserService.ROLE_STUDENT
+                        UserRoles.STUDENT
                 );
                 Log.d(TAG, "Set temporary username in UserService: " + username);
             }

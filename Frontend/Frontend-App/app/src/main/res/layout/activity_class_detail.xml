@@ -39,8 +39,8 @@
                 android:id="@+id/class_icon"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
-                android:src="@drawable/ic_school"
-                android:tint="@color/cardinal_red"
+                android:src="@drawable/ic_grad"
+                app:tint="@color/cardinal_red"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />

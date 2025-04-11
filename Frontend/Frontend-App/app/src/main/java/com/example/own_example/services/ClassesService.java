@@ -51,16 +51,26 @@ public class ClassesService {
      * Get all classes for the current student
      */
     public void getStudentClasses(ApiCallback<List<ClassModel>> callback) {
-        // Get the student ID from shared preferences
-        SharedPreferences prefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
-        long studentId = prefs.getLong("user_id", -1);
+        long userId = AuthService.getUserId(context);
 
-        if (studentId == -1) {
+        if (userId == -1) {
             callback.onError("User ID not found. Please log in again.");
             return;
         }
 
-        String url = BASE_URL + "/classes/student/" + studentId;
+        String url;
+
+        // Select endpoint based on user role
+        if (AuthService.isAdmin(context)) {
+            // Admin sees all classes
+            url = AuthService.appendAuthCode(context, BASE_URL + "/classes/classes");
+        } else if (AuthService.isTeacher(context)) {
+            // Teacher sees their classes
+            url = BASE_URL + "/classes/teacher/" + userId;
+        } else {
+            // Student sees their enrolled classes
+            url = BASE_URL + "/classes/student/" + userId;
+        }
 
         JsonArrayRequest request = new JsonArrayRequest(
                 Request.Method.GET,
@@ -101,16 +111,26 @@ public class ClassesService {
      * Get all classes for the current teacher
      */
     public void getTeacherClasses(ApiCallback<List<ClassModel>> callback) {
-        // Get the teacher ID from shared preferences
-        SharedPreferences prefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
-        int teacherId = prefs.getInt("user_id", -1);
+        long userId = AuthService.getUserId(context);
 
-        if (teacherId == -1) {
+        if (userId == -1) {
             callback.onError("User ID not found. Please log in again.");
             return;
         }
 
-        String url = BASE_URL + "/classes/teacher/" + teacherId;
+        String url;
+
+        // Select endpoint based on user role
+        if (AuthService.isAdmin(context)) {
+            // Admin sees all classes
+            url = AuthService.appendAuthCode(context, BASE_URL + "/classes/classes");
+        } else if (AuthService.isTeacher(context)) {
+            // Teacher sees their classes
+            url = BASE_URL + "/classes/teacher/" + userId;
+        } else {
+            // Student sees their enrolled classes
+            url = BASE_URL + "/classes/student/" + userId;
+        }
 
         JsonArrayRequest request = new JsonArrayRequest(
                 Request.Method.GET,
