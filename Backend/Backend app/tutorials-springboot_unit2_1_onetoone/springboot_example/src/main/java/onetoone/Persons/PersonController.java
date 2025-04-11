@@ -1,11 +1,12 @@
 package onetoone.Persons;
 
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 
 import jakarta.transaction.Transactional;
 import onetoone.Login.Login;
+import onetoone.TestingCenter.ExamInfoRepository;
+import onetoone.TestingCenter.TestingCenter;
+import onetoone.TestingCenter.TestingCenterRepository;
 import onetoone.UserRoles.UserRoles;
 import onetoone.StudentClasses.StudentClasses;
 import onetoone.StudentClasses.StudentClassesRepository;
@@ -24,6 +25,12 @@ public class PersonController {
 
     @Autowired
     StudentClassesRepository classesRepository;
+
+    @Autowired
+    ExamInfoRepository examRepository;
+
+    @Autowired
+    TestingCenterRepository testingCenterRepository;
 
     private String success = "{\"message\":\"success\"}";
     private String failure = "{\"message\":\"failure\"}";
@@ -218,4 +225,8 @@ public class PersonController {
 
         return ResponseEntity.ok(dashboard);
     }
+
+    //sign up for a new exam at a testing center
+
+
 }

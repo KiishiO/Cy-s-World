@@ -1,17 +1,15 @@
 package onetoone.Persons;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import onetoone.Laptops.Laptop;
 import onetoone.Login.Login;
 import onetoone.Signup.Signup;
 import onetoone.StudentClasses.StudentClasses;
+import onetoone.TestingCenter.ExamInfo;
 import onetoone.UserRoles.UserRoles;
-import org.apache.catalina.User;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -84,6 +82,10 @@ public class Person {
     )
     @JsonIgnore
     private Set<StudentClasses> enrolledClasses = new HashSet<>();
+
+    @ManyToMany(mappedBy = "persons")  // This is the inverse side of the relationship
+    private List<ExamInfo> examInfos = new ArrayList<>();
+
 
     // =============================== Constructors ================================== //
 
@@ -209,7 +211,5 @@ public class Person {
     public boolean isStudent() {
         return this.role == UserRoles.STUDENT;
     }
-
-
 
 }
