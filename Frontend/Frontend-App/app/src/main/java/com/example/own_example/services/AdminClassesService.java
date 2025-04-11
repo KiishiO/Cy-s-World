@@ -314,9 +314,13 @@ public class AdminClassesService {
                             try {
                                 Log.d(TAG, "Create class response: " + response.toString());
                                 if (response.has("id")) {
+                                    // Extract the ID and update the class model
+                                    int newClassId = response.getInt("id");
+                                    classModel.setId(newClassId);
                                     callback.onSuccess("Class created successfully");
                                 } else if (response.has("message") && response.getString("message").equals("success")) {
-                                    callback.onSuccess("Class created successfully");
+                                    // This doesn't give us the ID!
+                                    callback.onError("Class created but couldn't get ID");
                                 } else {
                                     callback.onError("Class creation failed");
                                 }
@@ -484,7 +488,7 @@ public class AdminClassesService {
         // Based on backend code, the URL would be something like:
         String url = AuthService.getAdminAuthUrl(BASE_URL + CLASSES_PATH + "/" + classId + "/student/" + studentId);
 
-        Log.d(TAG, "Adding student to class at URL: " + url);
+        Log.d(TAG, "Adding student " + studentId + " to class " + classId + " with URL: " + url);
 
         JsonObjectRequest request = new JsonObjectRequest(
                 Request.Method.POST,

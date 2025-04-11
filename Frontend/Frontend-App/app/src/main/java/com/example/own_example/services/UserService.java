@@ -3,26 +3,29 @@ package com.example.own_example.services;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
-import com.example.own_example.services.AuthService;
-import com.example.own_example.UserRoles;
 
 /**
  * Singleton service to handle user information, authentication and roles
  */
 public class UserService {
     private static final String TAG = "UserService";
-    private static final String PREF_NAME = "user_preferences";
+    private static final String PREF_NAME = "user_prefs";
     private static final String KEY_USER_ID = "user_id";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_USER_ROLE = "user_role";
     private static final String KEY_EMAIL = "email";
     private static final String KEY_FULL_NAME = "full_name";
 
+    // User roles
+    public static final String ROLE_STUDENT = "student";
+    public static final String ROLE_TEACHER = "teacher";
+    public static final String ROLE_ADMIN = "administrator";
+
     private static UserService instance;
     private SharedPreferences preferences;
     private String currentUserId;
     private String currentUsername;
-    private UserRoles userRole;
+    private String userRole;
     private String email;
     private String fullName;
     private boolean isInitialized = false;
@@ -45,57 +48,33 @@ public class UserService {
         }
 
         // Try to load from both preference stores
-        // First try "LoginPrefs"
         preferences = context.getApplicationContext()
                 .getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
 
-        // Load user data with proper type handling
+        // Load user data
         try {
-            // Try to get user_id as a long first (matching how it's stored)
             long longUserId = preferences.getLong(KEY_USER_ID, 0);
             if (longUserId > 0) {
                 currentUserId = String.valueOf(longUserId);
             } else {
-                // Fall back to string if needed
                 currentUserId = preferences.getString(KEY_USER_ID, null);
             }
-        } catch (ClassCastException e) {
-            // If there's a type mismatch, try the other way
-            try {
-                currentUserId = preferences.getString(KEY_USER_ID, null);
-            } catch (Exception ex) {
-                Log.e(TAG, "Error loading user_id: " + ex.getMessage());
-                currentUserId = null;
-            }
-        }
 
-        // Load other user data
-        try {
             currentUsername = preferences.getString(KEY_USERNAME, null);
-            String roleString = preferences.getString(KEY_USER_ROLE, null);
+            userRole = preferences.getString(KEY_USER_ROLE, null);
+
+            // Debug logging to see what's being loaded
+            Log.d(TAG, "UserService initialized. User ID: " + currentUserId +
+                    ", User: " + currentUsername +
+                    ", Role: " + userRole);
+
             email = preferences.getString(KEY_EMAIL, null);
             fullName = preferences.getString(KEY_FULL_NAME, null);
-
-            // Convert string role to enum
-            if (roleString != null) {
-                try {
-                    userRole = UserRoles.valueOf(roleString);
-                } catch (IllegalArgumentException ex) {
-                    Log.e(TAG, "Invalid role format: " + roleString);
-                    userRole = UserRoles.STUDENT; // Default to STUDENT
-                }
-            } else {
-                userRole = UserRoles.STUDENT; // Default role
-            }
         } catch (Exception e) {
             Log.e(TAG, "Error loading user data: " + e.getMessage());
         }
 
         isInitialized = true;
-
-        Log.d(TAG, "UserService initialized. User ID: " + currentUserId +
-                ", User: " + (currentUsername != null ? currentUsername : "not logged in") +
-                ", Role: " + (userRole != null ? userRole.toString() : "none"));
     }
 
     public boolean isInitialized() {
@@ -110,7 +89,7 @@ public class UserService {
         return currentUsername;
     }
 
-    public UserRoles getUserRole() {
+    public String getUserRole() {
         return userRole;
     }
 
@@ -127,38 +106,26 @@ public class UserService {
     }
 
     public boolean isAdmin() {
-        return userRole == UserRoles.ADMIN;
+        if (userRole == null) return false;
+
+        // Check for string-based role
+        if (ROLE_ADMIN.equals(userRole)) return true;
+
+        // Check for enum-based role
+        try {
+            return "ADMIN".equals(userRole) || "ADMIN".equals(userRole.toUpperCase());
+        } catch (Exception e) {
+            Log.e(TAG, "Error checking admin role: " + e.getMessage());
+            return false;
+        }
     }
 
     public boolean isTeacher() {
-        return userRole == UserRoles.TEACHER;
+        return ROLE_TEACHER.equals(userRole);
     }
 
     public boolean isStudent() {
-        return userRole == UserRoles.STUDENT;
-    }
-
-    /**
-     * Get authentication code for current user role
-     */
-    public String getAuthCode() {
-        if (userRole == UserRoles.ADMIN) {
-            return AuthService.ADMIN_AUTH_CODE;
-        } else if (userRole == UserRoles.TEACHER) {
-            return AuthService.TEACHER_AUTH_CODE;
-        }
-        return null;
-    }
-
-    /**
-     * Append auth code to URL if needed for current user role
-     */
-    public String appendAuthCode(String baseUrl) {
-        String authCode = getAuthCode();
-        if (authCode != null) {
-            return baseUrl + (baseUrl.contains("?") ? "&" : "?") + "authCode=" + authCode;
-        }
-        return baseUrl;
+        return ROLE_STUDENT.equals(userRole);
     }
 
     /**
@@ -166,11 +133,11 @@ public class UserService {
      *
      * @param userId The user's unique identifier
      * @param username The user's username for display and communication
-     * @param role The user's role (STUDENT, TEACHER, or ADMIN)
+     * @param role The user's role (student, teacher, or administrator)
      * @param userEmail The user's email address
      * @param name The user's full name
      */
-    public void setUserData(String userId, String username, UserRoles role, String userEmail, String name) {
+    public void setUserData(String userId, String username, String role, String userEmail, String name) {
         if (!isInitialized) {
             Log.e(TAG, "Cannot set user data: UserService not initialized");
             return;
@@ -183,16 +150,9 @@ public class UserService {
         this.fullName = name;
 
         SharedPreferences.Editor editor = preferences.edit();
-
-        // Try to store as long if possible
-        try {
-            editor.putLong(KEY_USER_ID, Long.parseLong(userId));
-        } catch (NumberFormatException e) {
-            editor.putString(KEY_USER_ID, userId);
-        }
-
+        editor.putString(KEY_USER_ID, userId);
         editor.putString(KEY_USERNAME, username);
-        editor.putString(KEY_USER_ROLE, role.toString());
+        editor.putString(KEY_USER_ROLE, role);
         editor.putString(KEY_EMAIL, userEmail);
         editor.putString(KEY_FULL_NAME, name);
         editor.apply();
@@ -207,7 +167,7 @@ public class UserService {
      * @param username The user's username
      * @param role The user's role
      */
-    public void setUserData(String userId, String username, UserRoles role) {
+    public void setUserData(String userId, String username, String role) {
         setUserData(userId, username, role, null, null);
     }
 

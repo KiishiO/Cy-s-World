@@ -25,7 +25,7 @@ public class DiningHallDetailActivity extends AppCompatActivity implements Dinin
 
     private static final String TAG = "DiningHallDetailActivity";
 
-    private long diningHallId;
+    private int diningHallId;
     private DiningHall currentDiningHall;
 
     private ImageButton backButton;
@@ -49,7 +49,7 @@ public class DiningHallDetailActivity extends AppCompatActivity implements Dinin
         Log.d(TAG, "DiningHallDetailActivity onCreate");
 
         // Get dining hall ID from intent
-        diningHallId = getIntent().getLongExtra("dining_hall_id", -1);
+        diningHallId = getIntent().getIntExtra("dining_hall_id", -1);
         if (diningHallId == -1) {
             Toast.makeText(this, "Invalid dining hall", Toast.LENGTH_SHORT).show();
             finish();

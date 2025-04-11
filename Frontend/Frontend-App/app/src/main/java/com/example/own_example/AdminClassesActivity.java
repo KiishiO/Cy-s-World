@@ -46,6 +46,9 @@ public class AdminClassesActivity extends AppCompatActivity implements
         SelectedStudentsAdapter.OnStudentRemovedListener {
 
     private static final String TAG = "AdminClassesActivity";
+    // Add these as class fields
+    private final int[] pendingOperations = {0};
+    private final boolean[] hasErrors = {false};
 
     // UI components for main screen
     private RecyclerView classesRecyclerView;
@@ -553,9 +556,40 @@ public class AdminClassesActivity extends AppCompatActivity implements
             // Clear existing schedules
             classModel.setSchedules(new ArrayList<>());
         } else {
-            // Create new class
-            classModel = new ClassModel(0, className, selectedTeacher.getId(), selectedTeacher.getName(), location);
-            classModel.setSchedules(new ArrayList<>()); // Initialize schedules list
+            {
+                // Create new class - ensure the new object is properly initialized
+                classModel = new ClassModel(0, className, selectedTeacher.getId(), selectedTeacher.getName(), location);
+                classModel.setSchedules(new ArrayList<>()); // Initialize schedules list
+            }
+
+            // Null check before proceeding
+            if (classModel == null) {
+                showSnackbar("Error: Failed to create class model");
+                return;
+            }
+
+            classesService.createClass(classModel, new AdminClassesService.ActionCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    // Check if the class model has an ID now
+                    if (classModel.getId() > 0) {
+                        // Add students to the newly created class
+                        updateClassStudents(classModel);
+                    } else {
+                        // No ID received, show error
+                        showLoading(false);
+                        editDialog.dismiss();
+                        showSnackbar("Class created but couldn't add students (no ID returned)");
+                        loadClasses();
+                    }
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    showLoading(false);
+                    showSnackbar("Error creating class: " + errorMessage);
+                }
+            });
         }
 
         // Add schedules based on selected days
@@ -579,11 +613,12 @@ public class AdminClassesActivity extends AppCompatActivity implements
 
         if (currentEditClass != null) {
             // Update existing class
+            ClassModel finalClassModel1 = classModel;
             classesService.updateClass(classModel, new AdminClassesService.ActionCallback() {
                 @Override
                 public void onSuccess(String message) {
                     // Now add/update students
-                    updateClassStudents(classModel);
+                    updateClassStudents(finalClassModel1);
                 }
 
                 @Override
@@ -593,21 +628,34 @@ public class AdminClassesActivity extends AppCompatActivity implements
                 }
             });
         } else {
-            // Create new class
-            classesService.createClass(classModel, new AdminClassesService.ActionCallback() {
+            // We need to get the newly created class ID
+            ClassModel finalClassModel2 = classModel;
+            classesService.getAllClasses(new AdminClassesService.ListCallback<ClassModel>() {
                 @Override
-                public void onSuccess(String message) {
-                    // Reload classes to get the new class ID
-                    loadClasses();
+                public void onSuccess(List<ClassModel> result) {
+                    // Find the newly created class by name and location
+                    for (ClassModel newClass : result) {
+                        if (newClass.getClassName().equals(finalClassModel2.getClassName()) &&
+                                newClass.getLocation().equals(finalClassModel2.getLocation())) {
+                            // Update the class model with the new ID
+                            finalClassModel2.setId(newClass.getId());
+                            // Now add students to the class
+                            updateClassStudents(finalClassModel2);
+                            return;
+                        }
+                    }
+                    // If we can't find the class, show a message and reload
                     showLoading(false);
                     editDialog.dismiss();
-                    showSnackbar("Class created successfully");
+                    showSnackbar("Class created successfully but couldn't add students");
+                    loadClasses();
                 }
 
                 @Override
                 public void onError(String errorMessage) {
                     showLoading(false);
-                    showSnackbar("Error creating class: " + errorMessage);
+                    showSnackbar("Class created but error retrieving class ID: " + errorMessage);
+                    loadClasses();
                 }
             });
         }
@@ -617,27 +665,45 @@ public class AdminClassesActivity extends AppCompatActivity implements
      * Update students assigned to a class
      */
     private void updateClassStudents(ClassModel classModel) {
+        // First verify we have a valid class ID
+        if (classModel.getId() <= 0) {
+            Log.e(TAG, "Cannot update students: Invalid class ID");
+            finishOperation(true); // Indicate an error
+            return;
+        }
+
         // Get selected students from adapter
         List<Student> students = selectedStudentsAdapter.getStudents();
 
-        // For each student, add to class if not already in class
+        // Log for debugging
+        Log.d(TAG, "Updating class " + classModel.getId() + " with " + students.size() + " students");
+
+        // Track operations to know when all are completed
+        pendingOperations[0] = 0;
+        hasErrors[0] = false;
+
+        // Add new students
         for (Student student : students) {
             if (!classModel.getStudentIds().contains(student.getId())) {
-                classesService.addStudentToClass(classModel.getId(), student.getId(), new AdminClassesService.ActionCallback() {
+                pendingOperations[0]++;
+                classesService.removeStudentFromClass(classModel.getId(), student.getId(), new AdminClassesService.ActionCallback() {
                     @Override
                     public void onSuccess(String message) {
                         Log.d(TAG, "Added student " + student.getId() + " to class " + classModel.getId());
+                        checkCompletion();
                     }
 
                     @Override
                     public void onError(String errorMessage) {
                         Log.e(TAG, "Error adding student: " + errorMessage);
+                        hasErrors[0] = true;
+                        checkCompletion();
                     }
                 });
             }
         }
 
-        // For each student in class, remove if not in selected students
+        // Remove students no longer in selection
         for (Integer studentId : classModel.getStudentIds()) {
             boolean found = false;
             for (Student student : students) {
@@ -648,25 +714,49 @@ public class AdminClassesActivity extends AppCompatActivity implements
             }
 
             if (!found) {
+                pendingOperations[0]++;
                 classesService.removeStudentFromClass(classModel.getId(), studentId, new AdminClassesService.ActionCallback() {
                     @Override
                     public void onSuccess(String message) {
                         Log.d(TAG, "Removed student " + studentId + " from class " + classModel.getId());
+                        checkCompletion();
                     }
 
                     @Override
                     public void onError(String errorMessage) {
                         Log.e(TAG, "Error removing student: " + errorMessage);
+                        hasErrors[0] = true;
+                        checkCompletion();
                     }
                 });
             }
         }
 
+        // If no operations are pending, complete now
+        if (pendingOperations[0] == 0) {
+            finishOperation(false);
+        }
+    }
+
+    // Helper method to check if all operations are done
+    private void checkCompletion() {
+        pendingOperations[0]--;
+        if (pendingOperations[0] <= 0) {
+            finishOperation(hasErrors[0]);
+        }
+    }
+
+    // Helper method to finish
+    private void finishOperation(boolean hasErrors) {
         // Reload classes to get updated data
         loadClasses();
         showLoading(false);
         editDialog.dismiss();
-        showSnackbar("Class updated successfully");
+        if (hasErrors) {
+            showSnackbar("Class updated but some student updates failed");
+        } else {
+            showSnackbar("Class updated successfully");
+        }
     }
 
     /**
