@@ -18,6 +18,9 @@ public class DiningHallController {
     @Autowired
     private DiningHallRepository diningHallRepository;
 
+    @Autowired
+    private MenuItemsRepository menuItemsRepository;
+
     // Get all dining halls
     @GetMapping
     public List<DiningHall> getAllDiningHalls() {
@@ -81,11 +84,11 @@ public class DiningHallController {
         return diningHallRepository.findByMenuItemsNameContainingIgnoreCase(itemName);
     }
 
-    // Search dining halls with items below a certain price
-    @GetMapping("/search/price")
-    public List<DiningHall> searchDiningHallsByMaxPrice(@RequestParam double maxPrice) {
-        return diningHallRepository.findDistinctByMenuItemsPriceLessThanEqual(maxPrice);
-    }
+//    // Search dining halls with items below a certain price
+//    @GetMapping("/search/price")
+//    public List<DiningHall> searchDiningHallsByMaxPrice(@RequestParam double maxPrice) {
+//        return diningHallRepository.findDistinctByMenuItemsPriceLessThanEqual(maxPrice);
+//    }
 
     // Add a menu item to a dining hall
     @PostMapping("/{id}/menuitems")

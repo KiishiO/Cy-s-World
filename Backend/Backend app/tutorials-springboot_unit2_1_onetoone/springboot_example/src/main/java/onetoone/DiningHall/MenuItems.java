@@ -2,6 +2,7 @@ package onetoone.DiningHall;
 import java.util.List;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 /**
@@ -14,20 +15,23 @@ public class MenuItems {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String name;
-    private double price;
+    private String description;
+    private String menuType;
 
     @ManyToOne
     @JoinColumn(name = "dininghall_id")
+    @JsonIgnore
     private DiningHall diningHall;
 
     public MenuItems() {
 
     }
 
-    public MenuItems(String name, double price, DiningHall diningHall) {
+    public MenuItems(String name, double price, String menuType) {
         this.name = name;
-        this.price = price;
+        this.description = description;
         this.diningHall = diningHall;
+        this.menuType = menuType;
     }
 
     public int getId() {
@@ -46,12 +50,12 @@ public class MenuItems {
         this.name = name;
     }
 
-    public double getPrice() {
-        return price;
+    public String getDescription() {
+        return description;
     }
 
-    public void setPrice(double price) {
-        this.price = price;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public DiningHall getDiningHall() {
@@ -60,5 +64,13 @@ public class MenuItems {
 
     public void setDiningHall(DiningHall diningHall) {
         this.diningHall = diningHall;
+    }
+
+    public String getMenuType() {
+        return menuType;
+    }
+
+    public void setMenuType(String menuType) {
+        this.menuType = menuType;
     }
 }
