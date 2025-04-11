@@ -81,6 +81,24 @@ public class StudentClassesController {
                     return new ResponseEntity<>("{\"message\":\"Teacher not found\"}", HttpStatus.BAD_REQUEST);
                 }
                 studentClass.setTeacher(teacher);
+
+                // Check if class with same name and teacher already exists
+                StudentClasses existingClass = classesRepository.findByClassNameAndTeacherId(
+                        studentClass.getClassName(), teacher.getId());
+
+                if (existingClass != null) {
+                    return new ResponseEntity<>("{\"message\":\"A class with this name and teacher already exists\"}",
+                            HttpStatus.CONFLICT);
+                }
+
+                StudentClasses existingClassName = classesRepository.findByClassName(
+                        studentClass.getClassName());
+
+                if(existingClassName != null){
+                    return new ResponseEntity<>("{\"message\":\"This class name is already taken\"}",
+                            HttpStatus.CONFLICT);
+                }
+
             }
 
             classesRepository.save(studentClass);

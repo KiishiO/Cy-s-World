@@ -27,10 +27,10 @@ public class MenuItems {
 
     }
 
-    public MenuItems(String name, double price, String menuType) {
+    public MenuItems(String name, String description, String menuType) {
         this.name = name;
         this.description = description;
-        this.diningHall = diningHall;
+        //this.diningHall = diningHall;
         this.menuType = menuType;
     }
 

@@ -34,6 +34,37 @@ public class AdminDashboardActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Check if user has admin role
+        SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+        String userRoleStr = prefs.getString("user_role", "STUDENT");
+
+        try {
+            UserRoles userRole = UserRoles.valueOf(userRoleStr);
+            if (userRole != UserRoles.ADMIN) {
+                // User is not an admin, redirect to appropriate dashboard
+                Toast.makeText(this, "You don't have permission to access the admin dashboard", Toast.LENGTH_SHORT).show();
+                Intent intent;
+
+                if (userRole == UserRoles.TEACHER) {
+                    intent = new Intent(this, TeacherDashboardActivity.class);
+                } else {
+                    intent = new Intent(this, StudentDashboardActivity.class);
+                }
+
+                startActivity(intent);
+                finish();
+                return; // Important to return here to prevent loading the admin layout
+            }
+        } catch (IllegalArgumentException e) {
+            // If role can't be parsed, default to student dashboard
+            Toast.makeText(this, "Session error. Please login again.", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_admin_dashboard);
 
         // Initialize views
@@ -60,7 +91,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Navigate to class management activity
-                Intent intent = new Intent(AdminDashboardActivity.this, ClassManagementActivity.class); //need to change this to map to class management on the admin side
+                Intent intent = new Intent(AdminDashboardActivity.this, AdminClassesActivity.class);
                 startActivity(intent);
             }
         });
@@ -95,11 +126,8 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
     private void populateRecentActivities() {
         // Sample data - just a placeholder for now, this would come from the server database or an API
-        recentActivities.add(new RecentActivity("Graded 10 assignments for CS101", "Today, 10:30 AM"));
-        recentActivities.add(new RecentActivity("Posted new syllabus for CS205", "Yesterday, 3:45 PM"));
-        recentActivities.add(new RecentActivity("Updated office hours schedule", "Yesterday, 1:15 PM"));
-        recentActivities.add(new RecentActivity("Uploaded lecture notes for CS350", "Mar 4, 2025, 9:20 AM"));
-        recentActivities.add(new RecentActivity("Marked attendance for CS101", "Mar 3, 2025, 11:00 AM"));
+        recentActivities.add(new RecentActivity("Created new Campus Event: Cyclone Cinema - Dune", "Today, 10:30 AM"));
+        recentActivities.add(new RecentActivity("Created new class: COM S 288", "Yesterday, 3:45 PM"));
     }
 
     private void setupRecentActivitiesRecyclerView() {

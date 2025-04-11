@@ -52,6 +52,23 @@ public class UnifiedController {
         return new ResponseEntity<>(examInfoRepo.save(examInfo), HttpStatus.CREATED);
     }
 
+    @PostMapping("/examsinfo")
+    public ResponseEntity<ExamInfo> createExam2(@RequestBody ExamInfo examInfo) {
+        try {
+            // Validate the examInfo object
+            if (examInfo.getExamName() == null || examInfo.getExamName().trim().isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+
+            // Save the examInfo object
+            ExamInfo savedExamInfo = examInfoRepo.save(examInfo);
+            return new ResponseEntity<>(savedExamInfo, HttpStatus.CREATED);
+        } catch (Exception e) {
+            // Log the error
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @PostMapping("/exams/{examId}/add-testing-centers")
     public ResponseEntity<ExamInfo> addTestingCentersToExam(@PathVariable int examId, @RequestBody List<Integer> testingCenterIds) {
         ExamInfo examInfo = examInfoRepo.findById(examId)

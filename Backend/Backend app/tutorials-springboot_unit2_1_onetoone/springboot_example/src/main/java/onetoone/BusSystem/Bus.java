@@ -1,6 +1,8 @@
 package onetoone.BusSystem;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "bus_system")
@@ -9,11 +11,16 @@ public class Bus {
     @Column(nullable = false)
     private String busName;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private int busNum;
 
+    @ElementCollection
+    @CollectionTable(name = "bus_stop_locations", joinColumns = @JoinColumn(name = "bus_id"))
+    @Column(name = "stop_location")
+    private List<String> stopLocations = new ArrayList<>();
+
     @Column
-    private String stopLocation;
+    private String currentStopLocation;
 
     @Column
     private char busRating;
@@ -25,10 +32,9 @@ public class Bus {
     public Bus() {
     }
 
-    public Bus(int busNum, String busName, String stopLocation, char busRating) {
+    public Bus(int busNum, String busName, char busRating) {
         this.busNum = busNum;
         this.busName = busName;
-        this.stopLocation = stopLocation;
         this.busRating = busRating;
         this.lastReportTime = LocalDateTime.now();
     }
@@ -42,7 +48,7 @@ public class Bus {
     }
 
     public void updateStopLocation(String newStopLocation) {
-        this.stopLocation = newStopLocation;
+        this.currentStopLocation = newStopLocation;
         this.lastReportTime = LocalDateTime.now(); // Update time when stop location changes
     }
 
@@ -62,12 +68,28 @@ public class Bus {
         this.busName = busName;
     }
 
-    public String getStopLocation(){
-        return this.stopLocation;
+    public String getCurrentStopLocation(){
+        return this.currentStopLocation;
     }
 
     public void setStopLocation(String stopLocation){
-        this.stopLocation = stopLocation;
+        this.currentStopLocation = stopLocation;
+    }
+
+    public List<String> getStopLocations() {
+        return stopLocations;
+    }
+
+    public void setStopLocations(List<String> stopLocations) {
+        this.stopLocations = stopLocations;
+    }
+
+    public void addStopLocation(String stopLocation) {
+        this.stopLocations.add(stopLocation);
+    }
+
+    public void removeStopLocation(String stopLocation) {
+        this.stopLocations.remove(stopLocation);
     }
 
     public int getBusNum(){
@@ -83,7 +105,8 @@ public class Bus {
         return "Bus{" +
                 "busName='" + busName + '\'' +
                 ", busNum=" + busNum +
-                ", stopLocation='" + stopLocation + '\'' +
+                ", stopLocations=" + stopLocations +
+                ", currentStopLocation='" + currentStopLocation + '\'' +
                 ", busRating=" + busRating +
                 ", lastReportTime=" + lastReportTime +
                 '}';
