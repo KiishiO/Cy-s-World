@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.own_example"
-        minSdk 25
+        minSdk 26
         targetSdk 34
         versionCode 1
         versionName "1.0"
@@ -45,6 +45,7 @@ dependencies {
 
     // SwipeRefreshLayout for pull-to-refresh functionality
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
 
     // OkHttp for WebSocket support
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'

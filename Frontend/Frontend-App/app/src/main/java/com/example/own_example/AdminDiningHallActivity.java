@@ -1,6 +1,7 @@
 package com.example.own_example;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -47,10 +48,32 @@ public class AdminDiningHallActivity extends AppCompatActivity implements Dining
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_dining_hall);
 
+//        // Get admin username
+//        adminUsername = UserService.getInstance().getCurrentUsername();
+//        if (adminUsername == null || adminUsername.isEmpty() || !UserService.getInstance().isAdmin()) {
+//            Toast.makeText(this, "Administrator access required", Toast.LENGTH_SHORT).show();
+//            finish();
+//            return;
+//        }
+
         // Get admin username
         adminUsername = UserService.getInstance().getCurrentUsername();
-        if (adminUsername == null || adminUsername.isEmpty() || !UserService.getInstance().isAdmin()) {
-            Toast.makeText(this, "Administrator access required", Toast.LENGTH_SHORT).show();
+
+        // Check role using the same method as AdminDashboardActivity
+        SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+        String userRoleStr = prefs.getString("user_role", "STUDENT");
+
+        try {
+            UserRoles userRole = UserRoles.valueOf(userRoleStr);
+            if (userRole != UserRoles.ADMIN) {
+                Toast.makeText(this, "You don't have permission to access this feature", Toast.LENGTH_SHORT).show();
+                finish();
+                return;
+            }
+        } catch (IllegalArgumentException e) {
+            Toast.makeText(this, "Session error. Please login again.", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
             finish();
             return;
         }
@@ -185,11 +208,21 @@ public class AdminDiningHallActivity extends AppCompatActivity implements Dining
     }
 
     private void onManageMenu(DiningHall diningHall) {
-        // Start the menu management activity
-        Intent intent = new Intent(this, AdminDiningMenuActivity.class);
-        intent.putExtra("dining_hall_id", diningHall.getId());
-        intent.putExtra("dining_hall_name", diningHall.getName());
-        startActivity(intent);
+        try {
+            int id = diningHall.getId();
+            String name = diningHall.getName();
+
+            // Log the values to debug
+            Log.d("AdminDiningHall", "Managing menu for ID: " + id + ", Name: " + name);
+
+            Intent intent = new Intent(this, AdminDiningMenuActivity.class);
+            intent.putExtra("dining_hall_id", id);
+            intent.putExtra("dining_hall_name", name);
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e("AdminDiningHall", "Error launching menu activity: " + e.getMessage());
+            Toast.makeText(this, "Error opening menu: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void updateConnectionStatus(boolean connected) {
@@ -247,7 +280,7 @@ public class AdminDiningHallActivity extends AppCompatActivity implements Dining
     }
 
     @Override
-    public void onDiningHallDeleted(long diningHallId) {
+    public void onDiningHallDeleted(int diningHallId) {
         runOnUiThread(() -> {
             for (int i = 0; i < diningHalls.size(); i++) {
                 if (diningHalls.get(i).getId() == diningHallId) {

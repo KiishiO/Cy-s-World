@@ -9,6 +9,8 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
+import android.content.Intent;
+import android.content.SharedPreferences;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,7 +34,7 @@ public class AdminDiningMenuActivity extends AppCompatActivity implements Dining
 
     private static final String TAG = "AdminDiningMenuActivity";
 
-    private long diningHallId;
+    private int diningHallId;
     private String diningHallName;
     private DiningHall currentDiningHall;
 
@@ -50,15 +52,29 @@ public class AdminDiningMenuActivity extends AppCompatActivity implements Dining
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_dining_menu);
 
-        // Check if the user is an admin
-        if (!UserService.getInstance().isAdmin()) {
-            Toast.makeText(this, "Administrator access required", Toast.LENGTH_SHORT).show();
+        // Check if the user is an admin using SharedPreferences directly
+        // (This is the approach that's working in your other admin activities)
+        SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+        String userRoleStr = prefs.getString("user_role", "STUDENT");
+
+        try {
+            UserRoles userRole = UserRoles.valueOf(userRoleStr);
+            if (userRole != UserRoles.ADMIN) {
+                Toast.makeText(this, "You don't have permission to access this feature", Toast.LENGTH_SHORT).show();
+                finish();
+                return;
+            }
+        } catch (IllegalArgumentException e) {
+            Toast.makeText(this, "Session error. Please login again.", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
             finish();
             return;
         }
 
+
         // Get dining hall ID from intent
-        diningHallId = getIntent().getLongExtra("dining_hall_id", -1);
+        diningHallId = getIntent().getIntExtra("dining_hall_id", -1);
         diningHallName = getIntent().getStringExtra("dining_hall_name");
 
         if (diningHallId == -1) {

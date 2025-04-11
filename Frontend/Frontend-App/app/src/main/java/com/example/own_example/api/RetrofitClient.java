@@ -1,5 +1,14 @@
 package com.example.own_example.api;
 
+import com.example.own_example.models.DiningHall;
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -18,10 +27,40 @@ public class RetrofitClient {
 
     // Private constructor for singleton
     private RetrofitClient() {
-        // Initialize Retrofit
+        // Create OkHttpClient with longer timeouts
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .connectTimeout(60, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
+                .build();
+
+        // Create a custom Gson instance with proper type adapters
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .setExclusionStrategies(new ExclusionStrategy() {
+                    @Override
+                    public boolean shouldSkipField(FieldAttributes f) {
+                        // Skip DiningHall reference in MenuItem to prevent circular references
+                        return (f.getDeclaringClass() == DiningHall.MenuItem.class &&
+                                f.getName().equals("diningHall")) ||
+                                // Also handle any other potential circular references
+                                (f.getDeclaringClass() == DiningHall.class &&
+                                        f.getName().equals("menuItems"));
+                    }
+
+                    @Override
+                    public boolean shouldSkipClass(Class<?> clazz) {
+                        return false;
+                    }
+                })
+                .serializeNulls() // Handle null values properly
+                .create();
+
+        // Initialize Retrofit with our custom OkHttpClient and Gson
         retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
+                .client(okHttpClient)
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
 
         // Create API service
