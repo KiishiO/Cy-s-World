@@ -11,6 +11,11 @@ public interface StudentClassesRepository extends JpaRepository<StudentClasses, 
 
     StudentClasses findById(int id);
 
+    StudentClasses findByClassNameAndTeacherId(String className, int teacherId);
+
+    StudentClasses findByClassName(String className);
+
+
     void deleteById(int id);
 
     List<StudentClasses> findByTeacher(Person teacher);
