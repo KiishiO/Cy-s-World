@@ -1,5 +1,6 @@
 package onetoone.TestingCenter;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import onetoone.Persons.Person;
 import onetoone.TestingCenter.TestingCenter;
@@ -30,6 +31,7 @@ public class ExamInfo {
             joinColumns = @JoinColumn(name = "exam_id"),  // ExamInfo as the owner
             inverseJoinColumns = @JoinColumn(name = "testing_center_id")  // TestingCenter as the other entity
     )
+    @JsonManagedReference
     private List<TestingCenter> testingCenters = new ArrayList<>();
 
     @ManyToMany

@@ -1,4 +1,5 @@
 package onetoone.TestingCenter;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -19,12 +20,13 @@ public class TestingCenter {
     private String location;
     private String centerDescription;
 
-    //list to hold the exams at a testing center
-    @OneToMany(mappedBy = "testingCenter", cascade = CascadeType.ALL)
-    private List<ExamInfo> examInfo;
+//    //list to hold the exams at a testing center
+//    @OneToMany(mappedBy = "testingCenter", cascade = CascadeType.ALL)
+//    private List<ExamInfo> examInfo;
 
     // Many-to-many relationship with ExamInfo
     @ManyToMany(mappedBy = "testingCenters")
+    @JsonBackReference
     private List<ExamInfo> examInfo2 = new ArrayList<>();
 
 
@@ -69,13 +71,6 @@ public class TestingCenter {
         this.centerDescription = centerDescription;
     }
 
-    public List<ExamInfo> getExamInfo() {
-        return examInfo;
-    }
-
-    public void setExamInfo(List<ExamInfo> examInfo) {
-        this.examInfo = examInfo;
-    }
 
     public List<ExamInfo> getExamInfo2() {
         return examInfo2;
