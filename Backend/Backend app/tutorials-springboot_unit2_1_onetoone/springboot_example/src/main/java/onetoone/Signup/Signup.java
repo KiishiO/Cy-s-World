@@ -111,11 +111,11 @@ public class Signup {
     public void setLogin(Login login) {
         this.login = login;
     }
-
+    @JsonIgnore
     public UserRoles getRole() {
         return role;
     }
-
+    @JsonIgnore
     public void setRole(UserRoles role) {
         this.role = role;
     }
