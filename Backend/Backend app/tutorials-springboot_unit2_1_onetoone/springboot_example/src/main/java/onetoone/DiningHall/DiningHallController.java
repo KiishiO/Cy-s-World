@@ -103,6 +103,26 @@ public class DiningHallController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    // Delete a menu item
+    @DeleteMapping("/menuitems/{id}")
+    public ResponseEntity<Void> deleteMenuItem(@PathVariable int id) {
+        return menuItemsRepository.findById(id)
+                .map(menuItem -> {
+                    // Get the dining hall associated with this menu item
+                    DiningHall diningHall = menuItem.getDiningHall();
+                    if (diningHall != null) {
+                        // Remove the menu item from the dining hall's collection
+                        diningHall.getMenuItems().remove(menuItem);
+                        diningHallRepository.save(diningHall);
+                    }
+
+                    // Delete the menu item
+                    menuItemsRepository.delete(menuItem);
+                    return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     // Get all menu items for a dining hall
     @GetMapping("/{id}/menuitems")
     public ResponseEntity<List<MenuItems>> getMenuItems(@PathVariable int id) {
