@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp"
+    app:cardBackgroundColor="#F5F5F5">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/class_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Class Name"
+            android:textColor="@color/cardinal_red"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/edit_class_button" />
+
+        <TextView
+            android:id="@+id/class_teacher"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Teacher: Dr. Smith"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/class_name"
+            app:layout_constraintEnd_toStartOf="@id/edit_class_button" />
+
+        <TextView
+            android:id="@+id/class_schedule"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Schedule: Mon, Wed 10:00 AM - 11:50 AM"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/class_teacher"
+            app:layout_constraintEnd_toStartOf="@id/edit_class_button" />
+
+        <TextView
+            android:id="@+id/class_location"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Location: Building 101, Room 203"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/class_schedule"
+            app:layout_constraintEnd_toStartOf="@id/edit_class_button" />
+
+        <TextView
+            android:id="@+id/students_count"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Students: 25"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/class_location"
+            app:layout_constraintEnd_toStartOf="@id/edit_class_button" />
+
+        <ImageButton
+            android:id="@+id/edit_class_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_edit"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Edit Class"
+            app:tint="@color/cardinal_red"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/delete_class_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_delete"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Delete Class"
+            app:tint="@color/cardinal_red"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/edit_class_button"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

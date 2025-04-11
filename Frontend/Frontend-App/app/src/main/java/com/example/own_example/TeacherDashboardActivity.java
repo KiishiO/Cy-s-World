@@ -35,6 +35,37 @@ public class TeacherDashboardActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Check if user has teacher role
+        SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+        String userRoleStr = prefs.getString("user_role", "STUDENT");
+
+        try {
+            UserRoles userRole = UserRoles.valueOf(userRoleStr);
+            if (userRole != UserRoles.TEACHER) {
+                // User is not a teacher, redirect to appropriate dashboard
+                Toast.makeText(this, "You don't have permission to access the teacher dashboard", Toast.LENGTH_SHORT).show();
+                Intent intent;
+
+                if (userRole == UserRoles.ADMIN) {
+                    intent = new Intent(this, AdminDashboardActivity.class);
+                } else {
+                    intent = new Intent(this, StudentDashboardActivity.class);
+                }
+
+                startActivity(intent);
+                finish();
+                return;
+            }
+        } catch (IllegalArgumentException e) {
+            // If role can't be parsed, redirect to login
+            Toast.makeText(this, "Session error. Please login again.", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_teacher_dashboard);
 
         // Initialize views

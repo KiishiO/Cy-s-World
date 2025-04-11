@@ -34,6 +34,37 @@ public class AdminDashboardActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Check if user has admin role
+        SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+        String userRoleStr = prefs.getString("user_role", "STUDENT");
+
+        try {
+            UserRoles userRole = UserRoles.valueOf(userRoleStr);
+            if (userRole != UserRoles.ADMIN) {
+                // User is not an admin, redirect to appropriate dashboard
+                Toast.makeText(this, "You don't have permission to access the admin dashboard", Toast.LENGTH_SHORT).show();
+                Intent intent;
+
+                if (userRole == UserRoles.TEACHER) {
+                    intent = new Intent(this, TeacherDashboardActivity.class);
+                } else {
+                    intent = new Intent(this, StudentDashboardActivity.class);
+                }
+
+                startActivity(intent);
+                finish();
+                return; // Important to return here to prevent loading the admin layout
+            }
+        } catch (IllegalArgumentException e) {
+            // If role can't be parsed, default to student dashboard
+            Toast.makeText(this, "Session error. Please login again.", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_admin_dashboard);
 
         // Initialize views

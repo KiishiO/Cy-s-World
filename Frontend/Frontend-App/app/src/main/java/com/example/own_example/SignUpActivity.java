@@ -43,7 +43,7 @@ public class SignUpActivity extends AppCompatActivity {
     private CircularProgressIndicator loadingProgress;
     private MaterialButton btnNext;
     private MaterialButton btnRoleSelection;
-    private String selectedRole = "";
+    private UserRoles selectedRole = null;
 
     // Let's try the Login endpoint as a last resort
     private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu:8080/Logins/new";
@@ -120,7 +120,7 @@ public class SignUpActivity extends AppCompatActivity {
             if (username.isEmpty() || password.isEmpty() || email.isEmpty() || passwordConfirmed.isEmpty()) {
                 showError("Please fill in all fields");
                 shakeView(username.isEmpty() ? etUsername : etPassword);
-            } else if (selectedRole.isEmpty()) {
+            } else if (selectedRole == null) {
                 showError("Please select a role");
                 shakeView(btnRoleSelection);
             } else if (!isPasswordMatch(password, passwordConfirmed)) {
@@ -140,14 +140,15 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void showRoleSelectionDialog() {
-        final String[] roles = {"Teacher", "Student", "Admin"};
+        final String[] roleNames = {"Teacher", "Student", "Admin"};
+        final UserRoles[] roleValues = {UserRoles.TEACHER, UserRoles.STUDENT, UserRoles.ADMIN};
 
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Select Your Role")
                 .setBackground(getDrawable(R.drawable.dialog_background))
-                .setItems(roles, (dialog, which) -> {
-                    selectedRole = roles[which];
-                    btnRoleSelection.setText(selectedRole);
+                .setItems(roleNames, (dialog, which) -> {
+                    selectedRole = roleValues[which];
+                    btnRoleSelection.setText(roleNames[which]);
                     btnRoleSelection.setIcon(null);
                 })
                 .show();
@@ -181,7 +182,7 @@ public class SignUpActivity extends AppCompatActivity {
         return password.equals(confirm);
     }
 
-    private void performSignUp(String username, String password, String email, String role) {
+    private void performSignUp(String username, String password, String email, UserRoles role) {
         // Use a background thread for network operations
         new Thread(() -> {
             HttpURLConnection urlConnection = null;
@@ -191,8 +192,8 @@ public class SignUpActivity extends AppCompatActivity {
                 jsonBody.put("name", username);
                 jsonBody.put("password", password);
                 jsonBody.put("emailId", email);
-                // Add role field
-                jsonBody.put("role", role);
+                // Add role field - convert enum to string for JSON
+                jsonBody.put("role", role.toString());
                 // Add ifActive field which may be required
                 jsonBody.put("ifActive", true);
 
