@@ -4,12 +4,9 @@ import java.util.*;
 
 import jakarta.transaction.Transactional;
 import onetoone.Login.Login;
+import onetoone.TestingCenter.ExamInfoRepository;
 import onetoone.TestingCenter.TestingCenter;
 import onetoone.TestingCenter.TestingCenterRepository;
-import onetoone.TestingSystem.Exam;
-import onetoone.TestingSystem.ExamRepository;
-import onetoone.TestingSystem.TestingSystem;
-import onetoone.TestingSystem.TestingSystemRepository;
 import onetoone.UserRoles.UserRoles;
 import onetoone.StudentClasses.StudentClasses;
 import onetoone.StudentClasses.StudentClassesRepository;
@@ -30,10 +27,10 @@ public class PersonController {
     StudentClassesRepository classesRepository;
 
     @Autowired
-    ExamRepository examRepository;
+    ExamInfoRepository examRepository;
 
     @Autowired
-    TestingSystemRepository testingSystemRepository;
+    TestingCenterRepository testingCenterRepository;
 
     private String success = "{\"message\":\"success\"}";
     private String failure = "{\"message\":\"failure\"}";
@@ -230,29 +227,6 @@ public class PersonController {
     }
 
     //sign up for a new exam at a testing center
-    @PostMapping("/persons/{id}/newexam")
-    public ResponseEntity<?> addNewExam(@RequestParam int examId, @PathVariable int personId, @RequestParam int centerId) {
-        Person person = personRepository.findById(personId);
-        Exam exam = examRepository.findById(examId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        TestingSystem center = testingSystemRepository.findById(centerId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        if(!exam.getTestingSystem().contains(center)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"message\":\"This exam does not exist\"}");
-        }
-
-        if(person.getExams() == null) {
-            person.setExams(new HashSet<>());
-        }
-
-        if(person.getExams().contains(exam)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"message\":\"You have already signed up for this exam.\"}");
-        }
-
-        person.getExams().add(exam);
-        personRepository.save(person);
-
-        return ResponseEntity.ok("Signed up successfuly for exam " + exam.getSubject() + "at center " + center.getLocation());
-
-    }
 
 }

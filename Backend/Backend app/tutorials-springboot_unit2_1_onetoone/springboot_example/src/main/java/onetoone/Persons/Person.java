@@ -8,7 +8,7 @@ import onetoone.Laptops.Laptop;
 import onetoone.Login.Login;
 import onetoone.Signup.Signup;
 import onetoone.StudentClasses.StudentClasses;
-import onetoone.TestingSystem.Exam;
+import onetoone.TestingCenter.ExamInfo;
 import onetoone.UserRoles.UserRoles;
 
 import java.util.ArrayList;
@@ -83,39 +83,9 @@ public class Person {
     @JsonIgnore
     private Set<StudentClasses> enrolledClasses = new HashSet<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "person_exam",
-            joinColumns = @JoinColumn(name = "person_id"),
-            inverseJoinColumns = @JoinColumn(name = "exam_id")
-    )
-    @JsonManagedReference(value = "person-exams")
-    private Set<Exam> exams = new HashSet<>();
+    @ManyToMany(mappedBy = "persons")  // This is the inverse side of the relationship
+    private List<ExamInfo> examInfos = new ArrayList<>();
 
-//    @JoinTable (
-//            name = "person_exams",
-//            joinColumns = @JoinColumn(name = "person_id"),
-//            inverseJoinColumns = @JoinColumn(name = "exam_id")
-//    )
-//    private List<Person> exams = new ArrayList<>();
-
-//    // Many-to-many relationship with Exam
-//    @ManyToMany
-//    @JoinTable(
-//            name = "person_exam",
-//            joinColumns = @JoinColumn(name = "person_id"),
-//            inverseJoinColumns = @JoinColumn(name = "exam_id")
-//    )
-//    private List<Exams> exams = new ArrayList<>();
-//
-//    // Many-to-many relationship with TestingCenter
-//    @ManyToMany
-//    @JoinTable(
-//            name = "person_testing_center",
-//            joinColumns = @JoinColumn(name = "person_id"),
-//            inverseJoinColumns = @JoinColumn(name = "center_id")
-//    )
-//    private List<TestingCenter> testingCenters = new ArrayList<>();
 
     // =============================== Constructors ================================== //
 
@@ -242,11 +212,4 @@ public class Person {
         return this.role == UserRoles.STUDENT;
     }
 
-    public Set<Exam> getExams() {
-        return exams;
-    }
-
-    public void setExams(Set<Exam> exams) {
-        this.exams = exams;
-    }
 }

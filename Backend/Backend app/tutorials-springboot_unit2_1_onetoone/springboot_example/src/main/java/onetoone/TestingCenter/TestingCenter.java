@@ -23,6 +23,11 @@ public class TestingCenter {
     @OneToMany(mappedBy = "testingCenter", cascade = CascadeType.ALL)
     private List<ExamInfo> examInfo;
 
+    // Many-to-many relationship with ExamInfo
+    @ManyToMany(mappedBy = "testingCenters")
+    private List<ExamInfo> examInfo2 = new ArrayList<>();
+
+
     public TestingCenter() {}
 
     //constructor
@@ -70,5 +75,13 @@ public class TestingCenter {
 
     public void setExamInfo(List<ExamInfo> examInfo) {
         this.examInfo = examInfo;
+    }
+
+    public List<ExamInfo> getExamInfo2() {
+        return examInfo2;
+    }
+
+    public void setExamInfo2(List<ExamInfo> examInfo2) {
+        this.examInfo2 = examInfo2;
     }
 }

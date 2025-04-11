@@ -7,6 +7,10 @@ import onetoone.Login.LoginRepository;
 import onetoone.Signup.Signup;
 import onetoone.Signup.SignupRepository;
 import onetoone.StudyTable.StudyTable;
+import onetoone.TestingCenter.ExamInfo;
+import onetoone.TestingCenter.ExamInfoRepository;
+import onetoone.TestingCenter.TestingCenter;
+import onetoone.TestingCenter.TestingCenterRepository;
 import onetoone.UserRoles.UserRoles;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -73,7 +77,7 @@ class Main {
 
 
     @Bean
-    CommandLineRunner initData(LoginRepository loginRepository, PersonRepository personRepository, SignupRepository signupRepository, DiningHallRepository diningHallRepository) {
+    CommandLineRunner initData(LoginRepository loginRepository, PersonRepository personRepository, SignupRepository signupRepository, DiningHallRepository diningHallRepository, TestingCenterRepository testingCenterRepository, ExamInfoRepository examInfoRepository) {
         return args -> {
             // Creating Person entities
             Person person1 = new Person("Michael Johnson", "515-789-9852", UserRoles.ADMIN);
@@ -176,6 +180,15 @@ class Main {
             diningHallRepository.save(diningHall1);
             diningHallRepository.save(diningHall2);
 
+            TestingCenter testingCenter1 = new TestingCenter("Carver 101", "central campus", "math department building");
+            TestingCenter testingCenter2 = new TestingCenter("Troxel 1001", "north side", "chemistry building");
+            testingCenterRepository.save(testingCenter1);
+            testingCenterRepository.save(testingCenter2);
+
+            ExamInfo examInfo1 = new ExamInfo("math", "Calc 1 exam");
+            ExamInfo examInfo2 = new ExamInfo("physics", "PHYS 2 midterm");
+            examInfoRepository.save(examInfo1);
+            examInfoRepository.save(examInfo2);
 
             // Logging to console (optional, for verification)
             System.out.println("Sample login and person data inserted into the database.");

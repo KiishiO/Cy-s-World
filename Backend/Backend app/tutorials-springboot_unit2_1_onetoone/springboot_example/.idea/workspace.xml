@@ -5,20 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1aba0881-e0d1-4070-88f5-61f265d2e936" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/TestingSystem/Exam.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/TestingSystem/ExamController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/TestingSystem/ExamRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/TestingSystem/TestingSystem.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/TestingSystem/TestingSystemController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/TestingSystem/TestingSystemRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/TestingCenter/ExamInfoController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/TestingCenter/ExamInfoRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/TestingCenter/StudentExamController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/Persons/Person.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/Persons/Person.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/Persons/PersonController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/Persons/PersonController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/Persons/PersonRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/Persons/PersonRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/TestingCenter/ExamInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/TestingCenter/ExamInfo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/TestingCenter/TestingCenterController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/TestingCenter/TestingCenterController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/TestingCenter/TestingCenterRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/TestingCenter/TestingCenterRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/testbranch/.gitkeep" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/TestingCenter/TestingCenter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/TestingCenter/TestingCenter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/TestingSystem/Exam.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/TestingSystem/ExamController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/TestingSystem/ExamRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/TestingSystem/TestingSystem.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/TestingSystem/TestingSystemController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/TestingSystem/TestingSystemRepository.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/onetoone/Persons/Person.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/onetoone/Persons/Person.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
