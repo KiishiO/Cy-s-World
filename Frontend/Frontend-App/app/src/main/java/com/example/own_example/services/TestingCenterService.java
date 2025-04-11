@@ -25,7 +25,7 @@ import java.util.List;
 
 public class TestingCenterService {
     private static final String TAG = "TestingCenterService";
-    private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu:8080/testingcenter";
+    private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu:8080/api";
     private RequestQueue requestQueue;
     private Gson gson;
 
@@ -59,7 +59,7 @@ public class TestingCenterService {
     public void getAllTestingCenters(final TestingCentersCallback callback) {
         JsonArrayRequest request = new JsonArrayRequest(
                 Request.Method.GET,
-                BASE_URL,
+                BASE_URL + "/testing-centers",
                 null,
                 new Response.Listener<JSONArray>() {
                     @Override
@@ -93,7 +93,7 @@ public class TestingCenterService {
     public void getTestingCenterById(int id, final TestingCenterCallback callback) {
         JsonObjectRequest request = new JsonObjectRequest(
                 Request.Method.GET,
-                BASE_URL + "/" + id,
+                BASE_URL + "/testing-centers/" + id,
                 null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -119,14 +119,14 @@ public class TestingCenterService {
         requestQueue.add(request);
     }
 
-    // Create a new testing center
+    // Create a new testing center - this might need to be updated depending on the server API
     public void createTestingCenter(TestingCenter testingCenter, final TestingCenterCallback callback) {
         try {
             JSONObject jsonBody = new JSONObject(gson.toJson(testingCenter));
 
             JsonObjectRequest request = new JsonObjectRequest(
                     Request.Method.POST,
-                    BASE_URL + "/new",
+                    BASE_URL + "/testing-centers",
                     jsonBody,
                     new Response.Listener<JSONObject>() {
                         @Override
@@ -163,7 +163,7 @@ public class TestingCenterService {
 
             JsonObjectRequest request = new JsonObjectRequest(
                     Request.Method.PUT,
-                    BASE_URL + "/" + id,
+                    BASE_URL + "/testing-centers/" + id,
                     jsonBody,
                     new Response.Listener<JSONObject>() {
                         @Override
@@ -197,7 +197,7 @@ public class TestingCenterService {
     public void deleteTestingCenter(int id, final OperationCallback callback) {
         JsonObjectRequest request = new JsonObjectRequest(
                 Request.Method.DELETE,
-                BASE_URL + "/" + id,
+                BASE_URL + "/testingcenters/" + id, // Note the different endpoint path based on backend code
                 null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -221,7 +221,7 @@ public class TestingCenterService {
     public void getExamsForTestingCenter(int centerId, final ExamsCallback callback) {
         JsonArrayRequest request = new JsonArrayRequest(
                 Request.Method.GET,
-                BASE_URL + "/" + centerId + "/exams",
+                BASE_URL + "/testing-centers/" + centerId + "/exams",
                 null,
                 new Response.Listener<JSONArray>() {
                     @Override
@@ -248,14 +248,14 @@ public class TestingCenterService {
         requestQueue.add(request);
     }
 
-    // Add an exam to a testing center
+    // Add an exam to a testing center - this will need to be updated after reviewing API
     public void addExamToTestingCenter(int centerId, ExamInfo examInfo, final OperationCallback callback) {
         try {
             JSONObject jsonBody = new JSONObject(gson.toJson(examInfo));
 
             JsonObjectRequest request = new JsonObjectRequest(
                     Request.Method.POST,
-                    BASE_URL + "/" + centerId + "/exams",
+                    BASE_URL + "/exams",  // Based on new API
                     jsonBody,
                     new Response.Listener<JSONObject>() {
                         @Override

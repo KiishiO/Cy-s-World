@@ -8,7 +8,6 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.own_example.BusActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
 
@@ -96,10 +95,11 @@ public class StudentDashboardActivity extends AppCompatActivity {
             if (testingCenterCard != null) {
                 testingCenterCard.setOnClickListener(v -> {
                     try {
-                        Intent intent = new Intent(StudentDashboardActivity.this, BusActivity.class); //change this to testing center activity once implemented
+                        Intent intent = new Intent(StudentDashboardActivity.this, TestingCenterActivity.class);
                         startActivity(intent);
+                        Log.d(TAG, "Navigating to TestingCenterActivity");
                     } catch (Exception e) {
-                        Log.e(TAG, "Error navigating to BusActivity: " + e.getMessage());
+                        Log.e(TAG, "Error navigating to TestingCenterActivity: " + e.getMessage());
                     }
                 });
             }
