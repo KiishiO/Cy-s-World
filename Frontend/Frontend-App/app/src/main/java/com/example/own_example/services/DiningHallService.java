@@ -373,7 +373,9 @@ public class DiningHallService {
             // Create a simple map with just the required fields instead of a full MenuItem object
             Map<String, Object> menuItemMap = new HashMap<>();
             menuItemMap.put("name", name);
-            menuItemMap.put("price", 5.99); // Default price required by backend
+            menuItemMap.put("description", description);
+            menuItemMap.put("menuType", categoryName); // Use category name as menu type
+            menuItemMap.put("price", 5.99); // Include price if required
 
             // Add menu item to the dining hall via API
             RetrofitClient.getInstance().getApiService().addMenuItem(diningHallId, menuItemMap)
