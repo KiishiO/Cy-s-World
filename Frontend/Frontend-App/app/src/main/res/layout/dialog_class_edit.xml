@@ -182,43 +182,25 @@
         </LinearLayout>
 
         <!-- Students Section -->
-        <TextView
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/student_spinner_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Assign Students"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
+            android:hint="Select Student">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/student_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/add_student_button"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="12dp">
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/search_student_layout"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Search by Net-ID"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/search_student_input"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="text" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/add_student_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Add"
-                android:layout_marginStart="8dp"
-                android:backgroundTint="@color/gold" />
-        </LinearLayout>
+            android:text="Add Student" />
 
         <!-- Selected Students List -->
         <androidx.cardview.widget.CardView
