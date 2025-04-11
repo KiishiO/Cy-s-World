@@ -21,5 +21,5 @@ public interface DiningHallRepository extends JpaRepository<DiningHall, Integer>
     List<DiningHall> findByMenuItemsNameContainingIgnoreCase(String menuItemName);
 
     // Find dining halls with menu items below a certain price
-    List<DiningHall> findDistinctByMenuItemsPriceLessThanEqual(double maxPrice);
+    //List<DiningHall> findDistinctByMenuItemsPriceLessThanEqual(double maxPrice);
 }
