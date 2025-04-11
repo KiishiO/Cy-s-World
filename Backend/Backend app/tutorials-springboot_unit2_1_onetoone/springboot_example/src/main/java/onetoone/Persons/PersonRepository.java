@@ -24,4 +24,6 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
     Person findByLaptop_Id(int id);
 
     List<Person> findByRole(UserRoles role);
+
+    int id(int id);
 }
