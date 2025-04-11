@@ -76,6 +76,38 @@ public class UnifiedController {
         return new ResponseEntity<>(examInfo.getTestingCenters(), HttpStatus.OK);
     }
 
+    @PutMapping("/exams/{id}")
+    public ResponseEntity<ExamInfo> updateExam(@PathVariable int id, @RequestBody ExamInfo updatedExam) {
+        return examInfoRepo.findById(id)
+                .map(exam -> {
+                    exam.setExamName(updatedExam.getExamName());
+                    exam.setExamDescription(updatedExam.getExamDescription());
+                    return new ResponseEntity<>(examInfoRepo.save(exam), HttpStatus.OK);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/exams/{id}")
+    public ResponseEntity<Void> deleteExam(@PathVariable int id) {
+        return examInfoRepo.findById(id)
+                .map(exam -> {
+                    exam.getTestingCenters().forEach(center -> center.getExamInfo2().remove(exam));
+                    examInfoRepo.delete(exam);
+                    return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/testingcenters/{id}")
+    public ResponseEntity<Void> deleteTestingCenter(@PathVariable int id) {
+        return testingCenterRepo.findById(id)
+                .map(tc -> {
+                    testingCenterRepo.delete(tc);
+                    return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     // === Student-Exam Operations ===
 
     @PostMapping("/students/{studentId}/signup-exam/{examId}")
@@ -112,6 +144,39 @@ public class UnifiedController {
         TestingCenter tc = testingCenterRepo.findById(testingCenterId)
                 .orElseThrow(() -> new RuntimeException("Testing center not found"));
         return new ResponseEntity<>(tc.getExamInfo2(), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/students/{studentId}/exam/{examId}")
+    public ResponseEntity<String> removeStudentFromExam(@PathVariable int studentId, @PathVariable int examId) {
+        Person student = personRepo.findById(studentId);
+        ExamInfo exam = examInfoRepo.findById(examId).orElse(null);
+
+        if (student == null || exam == null) return ResponseEntity.notFound().build();
+
+        exam.getPersons().remove(student);
+        examInfoRepo.save(exam);
+        return ResponseEntity.ok("Student removed from exam.");
+    }
+
+    @PutMapping("/students/{studentId}/update-exam")
+    public ResponseEntity<String> updateStudentExam(@PathVariable int studentId,
+                                                    @RequestParam int oldExamId,
+                                                    @RequestParam int newExamId) {
+        Person student = personRepo.findById(studentId);
+        ExamInfo oldExam = examInfoRepo.findById(oldExamId).orElse(null);
+        ExamInfo newExam = examInfoRepo.findById(newExamId).orElse(null);
+
+        if (student == null || oldExam == null || newExam == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        oldExam.getPersons().remove(student);
+        newExam.getPersons().add(student);
+
+        examInfoRepo.save(oldExam);
+        examInfoRepo.save(newExam);
+
+        return ResponseEntity.ok("Student moved to new exam.");
     }
 }
 
