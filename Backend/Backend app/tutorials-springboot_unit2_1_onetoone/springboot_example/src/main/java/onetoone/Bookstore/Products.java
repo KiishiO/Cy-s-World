@@ -20,10 +20,10 @@ public class Products {
 
     public Products() {}
 
-    public Products(String item, double price, Bookstore bookstore) {
+    public Products(String item, double price) {
         this.item = item;
         this.price = price;
-        this.bookstore = bookstore;
+        //this.bookstore = bookstore;
     }
 
     public int getId() {
