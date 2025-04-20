@@ -190,6 +190,11 @@ class Main {
             examInfoRepository.save(examInfo1);
             examInfoRepository.save(examInfo2);
 
+            ExamInfo examInfo3 = new ExamInfo("JAVA Intro", "Coms 288");
+            ExamInfo examInfo4 = new ExamInfo("English Intro", "Expressive writing");
+            examInfoRepository.save(examInfo3);
+            examInfoRepository.save(examInfo4);
+
             // Logging to console (optional, for verification)
             System.out.println("Sample login and person data inserted into the database.");
         };

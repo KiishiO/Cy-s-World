@@ -1,6 +1,8 @@
 package onetoone.BusSystem;
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +28,7 @@ public class Bus {
     private char busRating;
 
     @Column
+    @JsonIgnore
     private LocalDateTime lastReportTime;
 
     // Default constructor needed for JPA
@@ -41,6 +44,16 @@ public class Bus {
 
     public LocalDateTime getLastReportTime() {
         return lastReportTime;
+    }
+
+    // Add the formatted time getter
+    @Transient // This indicates it's not stored in the database
+    public String getFormattedLastReportTime() {
+        if (lastReportTime == null) {
+            return "";
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy - HH:mm:ss");
+        return lastReportTime.format(formatter);
     }
 
     public void setLastReportTime(LocalDateTime lastReportTime) {
@@ -69,6 +82,16 @@ public class Bus {
     }
 
     public String getCurrentStopLocation(){
+        return this.currentStopLocation;
+    }
+
+    public void setCurrentStopLocation(String currentStopLocation){
+        this.currentStopLocation = currentStopLocation;
+    }
+
+    // Kept for backward compatibility
+    @JsonIgnore
+    public String getStopLocation(){
         return this.currentStopLocation;
     }
 
@@ -109,6 +132,7 @@ public class Bus {
                 ", currentStopLocation='" + currentStopLocation + '\'' +
                 ", busRating=" + busRating +
                 ", lastReportTime=" + lastReportTime +
+                ", formattedTime='" + getFormattedLastReportTime() + '\'' +
                 '}';
     }
 }
