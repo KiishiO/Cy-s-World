@@ -44,7 +44,7 @@ public class JaydenSystemTest {
 
 	@Test
 	public void testGetAllBuses() {
-		// Send request and receive response - try both potential endpoints
+		// Send request and receive response
 		Response response;
 		try {
 			response = RestAssured.given()
@@ -61,7 +61,7 @@ public class JaydenSystemTest {
 				response = RestAssured.given()
 						.header("Content-Type", "application/json")
 						.when()
-						.get("/bus/all");
+						.get("/busOpt/all");
 				statusCode = response.getStatusCode();
 			}
 
@@ -126,7 +126,7 @@ public class JaydenSystemTest {
 				response = RestAssured.given()
 						.header("Content-Type", "application/json")
 						.when()
-						.get("/bus/" + busNumToTest);
+						.get("/busOpt/" + busNumToTest);
 				statusCode = response.getStatusCode();
 			}
 
@@ -136,7 +136,7 @@ public class JaydenSystemTest {
 			String returnString = response.getBody().asString();
 			JSONObject busObject = new JSONObject(returnString);
 
-			// Verify expected fields are present (even if values might differ)
+			// Verify expected fields are present
 			assertTrue(busObject.has("busNum"), "Bus should have a busNum property");
 			assertTrue(busObject.has("busName"), "Bus should have a busName property");
 
@@ -258,5 +258,50 @@ public class JaydenSystemTest {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Test
+	public void testBusDeletion(){
+		// Create new bus data
+		String busData = "{\"busNum\":99,\"busName\":\"Test Express\",\"busRating\":\"A\",\"stopLocations\":[\"Campus Center\",\"Library\",\"Dorms\"]}";
+		int busNum = 99;
+
+		// Send request and receive response
+		Response response = RestAssured.given()
+				.header("Content-Type", "application/json")
+				.body(busData)
+				.when()
+				.delete("/busOpt/" + busNum);
+
+		// Check status code
+		int statusCode = response.getStatusCode();
+		assertEquals(200, statusCode);
+
+		// Verify the bus was deleted by getting all buses
+		Response getResponse = RestAssured.given().header("Content-Type", "application/json")
+				.when().get("/bsuOpt/all");
+
+		String returnString = getResponse.getBody().asString();
+		try {
+			JSONArray busArray = new JSONArray(returnString);
+			boolean oldBusDeleted = false;
+
+			for (int i = 0; i < busArray.length(); i++) {
+				JSONObject bus = busArray.getJSONObject(i);
+				if (bus.getInt("busNum") != 99) {
+					oldBusDeleted = true;
+					assertEquals("Test Express", bus.getString("busName"));
+					break;
+				}
+			}
+
+            assertTrue(oldBusDeleted, "BusNum:" + busNum + " has been deleted from the list");
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+
+
+
 	}
 }

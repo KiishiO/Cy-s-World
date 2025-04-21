@@ -5,17 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1aba0881-e0d1-4070-88f5-61f265d2e936" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/test/application-logging-test.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/java/onetoone/JaydenSystemTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/java/onetoone/MainTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/resources/logback-test.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/onetoone/JaydenSystemTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/onetoone/JaydenSystemTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExportToHTMLSettings">
+    <option name="OUTPUT_DIRECTORY" value="$USER_HOME$/Desktop/Test coverage tutuorial/NEW/BusSystem" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -59,7 +58,9 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Application.Main.executor": "Run",
+    "JUnit.All in onetoone.executor": "Coverage",
     "JUnit.JaydenSystemTest.executor": "Coverage",
+    "JUnit.JaydenSystemTest.testBusDeletion.executor": "Debug",
     "JUnit.JaydenSystemTest.testGetAllBuses.executor": "Coverage",
     "JUnit.JaydenSystemTest.testGetBusByNumber.executor": "Debug",
     "JUnit.JaydenSystemTest.testUpdateBusLocation.executor": "Debug",
@@ -94,7 +95,15 @@
       <recent name="onetoone" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.onetoone in onetoone">
+  <component name="RunManager" selected="JUnit.All in onetoone">
+    <configuration name="All in onetoone" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="onetoone" />
+      <option name="PACKAGE_NAME" value="" />
+      <option name="TEST_OBJECT" value="package" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="JaydenSystemTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="onetoone" />
       <extension name="coverage">
@@ -110,7 +119,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="JaydenSystemTest.testGetAllBuses" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="JaydenSystemTest.testBusDeletion" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="onetoone" />
       <extension name="coverage">
         <pattern>
@@ -120,7 +129,7 @@
       </extension>
       <option name="PACKAGE_NAME" value="onetoone" />
       <option name="MAIN_CLASS_NAME" value="onetoone.JaydenSystemTest" />
-      <option name="METHOD_NAME" value="testGetAllBuses" />
+      <option name="METHOD_NAME" value="testBusDeletion" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -138,21 +147,6 @@
       <option name="MAIN_CLASS_NAME" value="onetoone.JaydenSystemTest" />
       <option name="METHOD_NAME" value="testUpdateBusLocation" />
       <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="JaydennSystemTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="onetoone" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="onetoone.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="onetoone" />
-      <option name="MAIN_CLASS_NAME" value="onetoone.JaydennSystemTest" />
-      <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -175,11 +169,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.onetoone in onetoone" />
+        <item itemvalue="JUnit.All in onetoone" />
+        <item itemvalue="JUnit.JaydenSystemTest.testBusDeletion" />
         <item itemvalue="JUnit.JaydenSystemTest" />
+        <item itemvalue="JUnit.onetoone in onetoone" />
         <item itemvalue="JUnit.JaydenSystemTest.testUpdateBusLocation" />
-        <item itemvalue="JUnit.JaydenSystemTest.testGetAllBuses" />
-        <item itemvalue="JUnit.JaydennSystemTest" />
       </list>
     </recent_temporary>
   </component>
@@ -297,6 +291,15 @@
           </properties>
           <option name="timeStamp" value="81" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-method">
+          <url>file://$PROJECT_DIR$/src/test/java/onetoone/JaydenSystemTest.java</url>
+          <line>263</line>
+          <properties class="onetoone.JaydenSystemTest" method="testBusDeletion">
+            <option name="EMULATED" value="true" />
+            <option name="WATCH_EXIT" value="false" />
+          </properties>
+          <option name="timeStamp" value="85" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
@@ -307,16 +310,20 @@
     <SUITE FILE_PATH="coverage/springboot_example$MainTest.ic" NAME="MainTest Coverage Results" MODIFIED="1745173903553" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>onetoone.*</FILTER>
     </SUITE>
-    <SUITE FILE_PATH="coverage/springboot_example$onetoone_in_onetoone.ic" NAME="onetoone in onetoone Coverage Results" MODIFIED="1745197252228" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+    <SUITE FILE_PATH="coverage/springboot_example$onetoone_in_onetoone.ic" NAME="onetoone in onetoone Coverage Results" MODIFIED="1745197590701" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>onetoone.TestingControllerIntegration</FILTER>
     </SUITE>
+    <SUITE FILE_PATH="coverage/springboot_example$JaydenSystemTest_testBusDeletion.ic" NAME="JaydenSystemTest.testBusDeletion Coverage Results" MODIFIED="1745203873515" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>onetoone.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/springboot_example$All_in_onetoone.ic" NAME="All in onetoone Coverage Results" MODIFIED="1745204325578" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
     <SUITE FILE_PATH="coverage/springboot_example$TestingBusControllerIntegration.ic" NAME="TestingBusControllerIntegration Coverage Results" MODIFIED="1745173217149" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>onetoone.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/springboot_example$MainTest_testInitDataMethodCreatesEntities.ic" NAME="MainTest.testInitDataMethodCreatesEntities Coverage Results" MODIFIED="1745176071841" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>onetoone.*</FILTER>
     </SUITE>
-    <SUITE FILE_PATH="coverage/springboot_example$JaydenSystemTest.ic" NAME="JaydenSystemTest Coverage Results" MODIFIED="1745197313999" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+    <SUITE FILE_PATH="coverage/springboot_example$JaydenSystemTest.ic" NAME="JaydenSystemTest Coverage Results" MODIFIED="1745203929721" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>onetoone.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/springboot_example$JaydenSystemTest_testGetAllBuses.ic" NAME="JaydenSystemTest.testGetAllBuses Coverage Results" MODIFIED="1745195400490" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
