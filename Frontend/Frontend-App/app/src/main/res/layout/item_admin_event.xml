@@ -139,7 +139,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="Edit event"
                 android:src="@android:drawable/ic_menu_edit"
-                android:tint="@color/cardinal_red" />
+                app:tint="@color/cardinal_red" />
 
             <!-- Delete Button -->
             <ImageButton
@@ -149,7 +149,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="Delete event"
                 android:src="@android:drawable/ic_menu_delete"
-                android:tint="#D32F2F" />
+                app:tint="#D32F2F" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
