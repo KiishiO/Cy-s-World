@@ -175,10 +175,12 @@ class Main {
 
 //            StudyTable studyTable1 = new StudyTable(1L, person1, person2);
 
-            DiningHall diningHall1 = new DiningHall("UDCC", "central campus");
-            DiningHall diningHall2 = new DiningHall("Windows", "Friley");
+            DiningHall diningHall1 = new DiningHall("Union Drive Community Center", "West Campus");
+            DiningHall diningHall2 = new DiningHall("Seasons Dining", "Central Campus");
+            DiningHall diningHall3 = new DiningHall("Memorial Union", "Central Campus");
             diningHallRepository.save(diningHall1);
             diningHallRepository.save(diningHall2);
+            diningHallRepository.save(diningHall3);
 
             TestingCenter testingCenter1 = new TestingCenter("Carver 101", "central campus", "math department building");
             TestingCenter testingCenter2 = new TestingCenter("Troxel 1001", "north side", "chemistry building");
