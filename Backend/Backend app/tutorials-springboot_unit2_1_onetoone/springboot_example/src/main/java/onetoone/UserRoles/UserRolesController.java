@@ -86,4 +86,5 @@ public class UserRolesController {
             return ResponseEntity.ok("{\"message\":\"Account activated with " + role + " role\"}");
         }
 
+
     }
