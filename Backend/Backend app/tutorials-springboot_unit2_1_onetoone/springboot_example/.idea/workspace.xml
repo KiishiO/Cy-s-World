@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="1aba0881-e0d1-4070-88f5-61f265d2e936" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/onetoone/JaydenSystemTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/onetoone/JaydenSystemTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -14,7 +13,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="ExportToHTMLSettings">
-    <option name="OUTPUT_DIRECTORY" value="$USER_HOME$/Desktop/Test coverage tutuorial/NEW/BusSystem" />
+    <option name="OUTPUT_DIRECTORY" value="$USER_HOME$/Desktop/Test coverage tutuorial/NEW/Coverage Report BusSystem" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -77,7 +76,7 @@
     "Notification.DoNotAsk-Lombok plugin": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "campusEvents-backend",
+    "git-widget-placeholder": "Jayden__CICD",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/Users/jrock25/2_swarna_4/Backend/Backend app/tutorials-springboot_unit2_1_onetoone/springboot_example/src/test/resources",
     "node.js.selected.package.tslint": "(autodetect)",
@@ -316,7 +315,7 @@
     <SUITE FILE_PATH="coverage/springboot_example$JaydenSystemTest_testBusDeletion.ic" NAME="JaydenSystemTest.testBusDeletion Coverage Results" MODIFIED="1745203873515" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>onetoone.*</FILTER>
     </SUITE>
-    <SUITE FILE_PATH="coverage/springboot_example$All_in_onetoone.ic" NAME="All in onetoone Coverage Results" MODIFIED="1745204325578" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
+    <SUITE FILE_PATH="coverage/springboot_example$All_in_onetoone.ic" NAME="All in onetoone Coverage Results" MODIFIED="1745207026081" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
     <SUITE FILE_PATH="coverage/springboot_example$TestingBusControllerIntegration.ic" NAME="TestingBusControllerIntegration Coverage Results" MODIFIED="1745173217149" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>onetoone.*</FILTER>
     </SUITE>
