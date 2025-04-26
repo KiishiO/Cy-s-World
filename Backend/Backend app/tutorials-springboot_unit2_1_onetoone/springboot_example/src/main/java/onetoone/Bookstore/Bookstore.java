@@ -15,7 +15,7 @@ public class Bookstore {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String name;
-    private double location;
+    private String location;
 
     //list to hold the products that are available at the bookstore
     @OneToMany(mappedBy = "bookstore", cascade = CascadeType.ALL)
@@ -23,7 +23,7 @@ public class Bookstore {
 
     public Bookstore() {}
 
-    public Bookstore(String name, double location) {
+    public Bookstore(String name, String location) {
         this.name = name;
         this.location = location;
         products = new ArrayList<>();
@@ -45,11 +45,11 @@ public class Bookstore {
         this.name = name;
     }
 
-    public double getLocation() {
+    public String getLocation() {
         return location;
     }
 
-    public void setLocation(double location) {
+    public void setLocation(String location) {
         this.location = location;
     }
 

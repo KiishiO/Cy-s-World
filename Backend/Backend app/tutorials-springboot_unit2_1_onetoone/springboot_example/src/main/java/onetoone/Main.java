@@ -1,6 +1,10 @@
 package onetoone;
 
 import jakarta.transaction.Transactional;
+import onetoone.Bookstore.Bookstore;
+import onetoone.Bookstore.BookstoreRepository;
+import onetoone.Bookstore.Products;
+import onetoone.Bookstore.ProductsRepository;
 import onetoone.DiningHall.DiningHall;
 import onetoone.DiningHall.DiningHallRepository;
 import onetoone.Login.Login;
@@ -72,7 +76,7 @@ class Main {
 
 
     @Bean
-    CommandLineRunner initData(LoginRepository loginRepository, PersonRepository personRepository, SignupRepository signupRepository, DiningHallRepository diningHallRepository) {
+    CommandLineRunner initData(LoginRepository loginRepository, PersonRepository personRepository, SignupRepository signupRepository, DiningHallRepository diningHallRepository, BookstoreRepository bookstoreRepository, ProductsRepository productsRepository) {
         return args -> {
             // Creating Person entities
             Person person1 = new Person("Michael Johnson", "515-789-9852", "Student");
@@ -170,6 +174,10 @@ class Main {
 
 //            StudyTable studyTable1 = new StudyTable(1L, person1, person2);
 
+
+            //Bookstore information
+            Bookstore bookstore = new Bookstore("Iowa State Bookstore", "Memorial Union");
+            bookstoreRepository.save(bookstore);
 
             // Logging to console (optional, for verification)
             System.out.println("Sample login and person data inserted into the database.");

@@ -17,10 +17,18 @@ public class BookstoreController {
 
     @Autowired
     private BookstoreRepository bookstoreRepository;
+    @Autowired
+    private ProductsRepository productsRepository;
 
     //get all the bookstores (should only be one this is for expansion purposes)
     @GetMapping
     public List<Bookstore> getAllBookstores() {return bookstoreRepository.findAll();}
+
+    @PostMapping
+    public ResponseEntity<Bookstore> createBookstore(@RequestBody Bookstore bookstore) {
+        bookstoreRepository.save(bookstore);
+        return new ResponseEntity<>(bookstore, HttpStatus.CREATED);
+    }
 
     //get bookstore by id (again should only be one this is for if a new bookstore opened for some reason)
     @GetMapping("/{id}")
@@ -79,5 +87,6 @@ public class BookstoreController {
         return bookstoreRepository.findById(id)
                 .map(bookstore -> ResponseEntity.ok(bookstore.getProducts()))
                 .orElseGet(() -> ResponseEntity.notFound().build());
-                }
+    }
+
 }

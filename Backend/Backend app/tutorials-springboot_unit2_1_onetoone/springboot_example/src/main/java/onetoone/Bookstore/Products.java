@@ -1,6 +1,8 @@
 package onetoone.Bookstore;
 
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 /**
@@ -16,6 +18,7 @@ public class Products {
 
     @ManyToOne
     @JoinColumn(name = "bookstore_id")
+    @JsonBackReference
     private Bookstore bookstore;
 
     public Products() {}
