@@ -1,5 +1,6 @@
 package onetoone.Bookstore;
 
+import onetoone.Persons.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,12 +61,6 @@ public class BookstoreController {
                     return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    // search dining halls by products - check this later
-    @GetMapping("/search/product")
-    public List<Bookstore> searchBookstoreByProduct(@RequestParam String productName) {
-        return null;
     }
 
     //add a product to the bookstore

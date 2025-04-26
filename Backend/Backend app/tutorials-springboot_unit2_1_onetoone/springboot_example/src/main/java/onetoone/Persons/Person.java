@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
+import onetoone.Bookstore.Order.Order;
 import onetoone.Laptops.Laptop;
 import onetoone.Login.Login;
 import onetoone.Signup.Signup;
@@ -52,6 +53,9 @@ public class Person {
     @OneToOne
     @JoinColumn
     private Signup signup;
+
+    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL)
+    private List<Order> orders = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(
