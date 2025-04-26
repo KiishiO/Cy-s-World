@@ -5,9 +5,9 @@ stages:
 maven-build:            
   stage: mavenbuild
   tags:
-    - springboot_tag      # <-- change to your runner's tag
+    - springboot_tag
   script:
-    - cd Backend        # change 'Backend' to to where you have the pom.xml (do not add / in the beginning)
+    - cd "Backend/Backend app/tutorials-springboot_unit2_1_onetoone/springboot_example"
     - mvn package
   only:
     refs:
@@ -19,13 +19,12 @@ maven-build:
 maven-test:             
   stage: maventest
   tags:
-    - springboot_tag     # <-- change to your runner's tag
+    - springboot_tag
   script:
-    - cd Backend       # change 'Backend' to to where you have the pom.xml (do not add / in the beginning)
+    - cd "Backend/Backend app/tutorials-springboot_unit2_1_onetoone/springboot_example"
     - mvn test
   only:
     refs:
       - Jayden_CICD
     changes:
       - Backend/**/*
-
