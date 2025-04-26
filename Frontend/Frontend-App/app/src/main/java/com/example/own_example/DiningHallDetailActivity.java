@@ -1,11 +1,8 @@
 package com.example.own_example;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -24,11 +21,11 @@ import com.google.android.material.tabs.TabLayout;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DiningHallDetailActivity extends AppCompatActivity {
+public class DiningHallDetailActivity extends AppCompatActivity implements DiningHallService.DiningHallListener {
 
     private static final String TAG = "DiningHallDetailActivity";
 
-    private long diningHallId;
+    private int diningHallId;
     private DiningHall currentDiningHall;
 
     private ImageButton backButton;
@@ -52,15 +49,16 @@ public class DiningHallDetailActivity extends AppCompatActivity {
         Log.d(TAG, "DiningHallDetailActivity onCreate");
 
         // Get dining hall ID from intent
-        diningHallId = getIntent().getLongExtra("dining_hall_id", -1);
+        diningHallId = getIntent().getIntExtra("dining_hall_id", -1);
         if (diningHallId == -1) {
             Toast.makeText(this, "Invalid dining hall", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        // Initialize services
-        diningHallService = new DiningHallService(this);
+        // Initialize service
+        diningHallService = DiningHallService.getInstance(this);
+        diningHallService.setListener(this);
 
         // Initialize views
         backButton = findViewById(R.id.back_button);
@@ -100,28 +98,7 @@ public class DiningHallDetailActivity extends AppCompatActivity {
         });
 
         // Load dining hall data
-        loadDiningHallData();
-    }
-
-    private void loadDiningHallData() {
-        diningHallService.getDiningHallById(diningHallId, new DiningHallService.DiningHallCallback() {
-            @Override
-            public void onSuccess(DiningHall diningHall) {
-                currentDiningHall = diningHall;
-                updateUI();
-            }
-
-            @Override
-            public void onError(String error) {
-                Log.e(TAG, "Error loading dining hall: " + error);
-                runOnUiThread(() -> {
-                    Toast.makeText(DiningHallDetailActivity.this,
-                            "Could not load dining hall details",
-                            Toast.LENGTH_SHORT).show();
-                    finish();
-                });
-            }
-        });
+        diningHallService.getDiningHallById(diningHallId);
     }
 
     private void updateUI() {
@@ -166,5 +143,25 @@ public class DiningHallDetailActivity extends AppCompatActivity {
         menuItemAdapter.notifyDataSetChanged();
     }
 
+    // DiningHallService.DiningHallListener implementation
 
+    @Override
+    public void onDiningHallsLoaded(List<DiningHall> diningHalls) {
+        // Not used in this activity
+    }
+
+    @Override
+    public void onDiningHallLoaded(DiningHall diningHall) {
+        currentDiningHall = diningHall;
+        updateUI();
+    }
+
+    @Override
+    public void onError(String errorMessage) {
+        Log.e(TAG, "Error: " + errorMessage);
+        runOnUiThread(() -> {
+            Toast.makeText(this, "Could not load dining hall details: " + errorMessage, Toast.LENGTH_SHORT).show();
+            finish();
+        });
+    }
 }

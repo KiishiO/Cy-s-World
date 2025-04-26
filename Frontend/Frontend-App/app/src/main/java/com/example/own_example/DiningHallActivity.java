@@ -19,7 +19,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DiningHallActivity extends AppCompatActivity {
+public class DiningHallActivity extends AppCompatActivity implements DiningHallService.DiningHallListener {
 
     private static final String TAG = "DiningHallActivity";
 
@@ -40,7 +40,8 @@ public class DiningHallActivity extends AppCompatActivity {
         Log.d(TAG, "DiningHallActivity onCreate");
 
         // Initialize services
-        diningHallService = new DiningHallService(this);
+        diningHallService = DiningHallService.getInstance(this);
+        diningHallService.setListener(this);
 
         // Initialize views
         diningHallsRecyclerView = findViewById(R.id.dining_halls_recycler);
@@ -92,24 +93,7 @@ public class DiningHallActivity extends AppCompatActivity {
         showEmptyState(true);
 
         // Load dining halls
-        diningHallService.getDiningHalls(new DiningHallService.DiningHallsCallback() {
-            @Override
-            public void onSuccess(List<DiningHall> loadedDiningHalls) {
-                diningHalls.addAll(loadedDiningHalls);
-                updateUI();
-            }
-
-            @Override
-            public void onError(String error) {
-                Log.e(TAG, "Error loading dining halls: " + error);
-                runOnUiThread(() -> {
-                    showEmptyState(true);
-                    Toast.makeText(DiningHallActivity.this,
-                            "Could not load dining halls",
-                            Toast.LENGTH_SHORT).show();
-                });
-            }
-        });
+        diningHallService.loadDiningHalls();
     }
 
     private void updateUI() {
@@ -131,5 +115,31 @@ public class DiningHallActivity extends AppCompatActivity {
             diningHallsRecyclerView.setVisibility(View.VISIBLE);
             emptyStateView.setVisibility(View.GONE);
         }
+    }
+
+    // DiningHallService.DiningHallListener implementation
+
+    @Override
+    public void onDiningHallsLoaded(List<DiningHall> loadedDiningHalls) {
+        // Clear the list again to be safe, in case it was modified between loadDiningHalls() and here
+        diningHalls.clear();
+        diningHalls.addAll(loadedDiningHalls);
+        updateUI();
+    }
+
+    @Override
+    public void onDiningHallLoaded(DiningHall diningHall) {
+        // Not used in this activity
+    }
+
+    @Override
+    public void onError(String errorMessage) {
+        Log.e(TAG, "Error: " + errorMessage);
+        runOnUiThread(() -> {
+            showEmptyState(true);
+            Toast.makeText(DiningHallActivity.this,
+                    "Could not load dining halls: " + errorMessage,
+                    Toast.LENGTH_SHORT).show();
+        });
     }
 }

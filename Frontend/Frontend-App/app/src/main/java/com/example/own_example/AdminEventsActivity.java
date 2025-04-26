@@ -2,6 +2,8 @@ package com.example.own_example;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -51,10 +53,40 @@ public class AdminEventsActivity extends AppCompatActivity implements AdminEvent
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_events);
 
+//        // Get admin username
+//        adminUsername = UserService.getInstance().getCurrentUsername();
+//        if (adminUsername == null || adminUsername.isEmpty() || !UserService.getInstance().isAdmin()) {
+//            Toast.makeText(this, "Administrator access required", Toast.LENGTH_SHORT).show();
+//            finish();
+//            return;
+//        }
+
+        // Get admin username directly from SharedPreferences
+        SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+        adminUsername = prefs.getString("username", "");
+        String role = prefs.getString("user_role", "");
+
+        // Log values for debugging
+        Log.d("AdminEvents", "Username: " + adminUsername + ", Role: " + role);
+
         // Get admin username
-        adminUsername = UserService.getInstance().getCurrentUsername();
-        if (adminUsername == null || adminUsername.isEmpty() || !UserService.getInstance().isAdmin()) {
-            Toast.makeText(this, "Administrator access required", Toast.LENGTH_SHORT).show();
+        //adminUsername = UserService.getInstance().getCurrentUsername();
+
+        // Check role using the same method as AdminDashboardActivity
+        //SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+        String userRoleStr = prefs.getString("user_role", "STUDENT");
+
+        try {
+            UserRoles userRole = UserRoles.valueOf(userRoleStr);
+            if (userRole != UserRoles.ADMIN) {
+                Toast.makeText(this, "You don't have permission to access this feature", Toast.LENGTH_SHORT).show();
+                finish();
+                return;
+            }
+        } catch (IllegalArgumentException e) {
+            Toast.makeText(this, "Session error. Please login again.", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
             finish();
             return;
         }

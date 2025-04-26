@@ -8,8 +8,9 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
+import android.content.Intent;
+import android.content.SharedPreferences;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,20 +22,19 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.example.own_example.fragments.MenuCategoryFragment;
 import com.example.own_example.models.DiningHall;
-import com.example.own_example.services.AdminDiningHallService;
+import com.example.own_example.services.DiningHallService;
 import com.example.own_example.services.UserService;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public class AdminDiningMenuActivity extends AppCompatActivity {
+public class AdminDiningMenuActivity extends AppCompatActivity implements DiningHallService.DiningHallListener {
 
     private static final String TAG = "AdminDiningMenuActivity";
 
-    private long diningHallId;
+    private int diningHallId;
     private String diningHallName;
     private DiningHall currentDiningHall;
 
@@ -44,7 +44,7 @@ public class AdminDiningMenuActivity extends AppCompatActivity {
     private FloatingActionButton addMenuItemButton;
     private FloatingActionButton addCategoryButton;
 
-    private AdminDiningHallService diningHallService;
+    private DiningHallService diningHallService;
     private MenuPagerAdapter pagerAdapter;
 
     @Override
@@ -52,15 +52,29 @@ public class AdminDiningMenuActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_dining_menu);
 
-        // Check if the user is an admin
-        if (!UserService.getInstance().isAdmin()) {
-            Toast.makeText(this, "Administrator access required", Toast.LENGTH_SHORT).show();
+        // Check if the user is an admin using SharedPreferences directly
+        // (This is the approach that's working in your other admin activities)
+        SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+        String userRoleStr = prefs.getString("user_role", "STUDENT");
+
+        try {
+            UserRoles userRole = UserRoles.valueOf(userRoleStr);
+            if (userRole != UserRoles.ADMIN) {
+                Toast.makeText(this, "You don't have permission to access this feature", Toast.LENGTH_SHORT).show();
+                finish();
+                return;
+            }
+        } catch (IllegalArgumentException e) {
+            Toast.makeText(this, "Session error. Please login again.", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
             finish();
             return;
         }
 
+
         // Get dining hall ID from intent
-        diningHallId = getIntent().getLongExtra("dining_hall_id", -1);
+        diningHallId = getIntent().getIntExtra("dining_hall_id", -1);
         diningHallName = getIntent().getStringExtra("dining_hall_name");
 
         if (diningHallId == -1) {
@@ -81,43 +95,9 @@ public class AdminDiningMenuActivity extends AppCompatActivity {
         addCategoryButton = findViewById(R.id.add_category_button);
 
         // Initialize service
-        diningHallService = new AdminDiningHallService(this, UserService.getInstance().getCurrentUsername(),
-                new AdminDiningHallService.AdminDiningHallListener() {
-                    @Override
-                    public void onDiningHallsUpdated(List<DiningHall> diningHalls) {
-                        // Not needed
-                    }
-
-                    @Override
-                    public void onDiningHallCreated(DiningHall diningHall) {
-                        // Not needed
-                    }
-
-                    @Override
-                    public void onDiningHallUpdated(DiningHall updatedDiningHall) {
-                        if (updatedDiningHall.getId() == diningHallId) {
-                            currentDiningHall = updatedDiningHall;
-                            refreshUI();
-                        }
-                    }
-
-                    @Override
-                    public void onDiningHallDeleted(long diningHallId) {
-                        // Not needed
-                    }
-
-                    @Override
-                    public void onConnectionStateChanged(boolean connected) {
-                        // Update UI based on connection state
-                        addMenuItemButton.setEnabled(connected);
-                        addCategoryButton.setEnabled(connected);
-                    }
-
-                    @Override
-                    public void onError(String errorMessage) {
-                        Toast.makeText(AdminDiningMenuActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
-                    }
-                });
+        diningHallService = DiningHallService.getInstance(this);
+        diningHallService.setListener(this);
+        diningHallService.setUsername(UserService.getInstance().getCurrentUsername());
 
         // Set up FAB click listeners
         addMenuItemButton.setOnClickListener(v -> showAddMenuItemDialog());
@@ -128,16 +108,8 @@ public class AdminDiningMenuActivity extends AppCompatActivity {
     }
 
     private void loadDiningHallData() {
-        currentDiningHall = diningHallService.getDiningHallById(diningHallId);
-
-        if (currentDiningHall == null) {
-            Toast.makeText(this, "Dining hall not found", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-
-        // Set up the UI
-        refreshUI();
+        // Load dining hall using the unified service
+        diningHallService.getDiningHallById(diningHallId);
     }
 
     private void refreshUI() {
@@ -224,7 +196,7 @@ public class AdminDiningMenuActivity extends AppCompatActivity {
                 allergens = allergensText.split(",\\s*");
             }
 
-            // Add menu item
+            // Add menu item using the unified service
             diningHallService.addMenuItem(
                     diningHallId,
                     categoryName,
@@ -302,5 +274,44 @@ public class AdminDiningMenuActivity extends AppCompatActivity {
         if (diningHallService != null) {
             diningHallService.disconnect();
         }
+    }
+
+    // DiningHallService.DiningHallListener implementation
+
+    @Override
+    public void onDiningHallsLoaded(List<DiningHall> diningHalls) {
+        // Not used in this activity
+    }
+
+    @Override
+    public void onDiningHallLoaded(DiningHall diningHall) {
+        if (diningHall.getId() == diningHallId) {
+            currentDiningHall = diningHall;
+            refreshUI();
+        }
+    }
+
+    @Override
+    public void onDiningHallUpdated(DiningHall updatedDiningHall) {
+        if (updatedDiningHall.getId() == diningHallId) {
+            currentDiningHall = updatedDiningHall;
+            refreshUI();
+        }
+    }
+
+    @Override
+    public void onConnectionStateChanged(boolean connected) {
+        // Update UI based on connection state
+        runOnUiThread(() -> {
+            addMenuItemButton.setEnabled(connected);
+            addCategoryButton.setEnabled(connected);
+        });
+    }
+
+    @Override
+    public void onError(String errorMessage) {
+        runOnUiThread(() -> {
+            Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
+        });
     }
 }

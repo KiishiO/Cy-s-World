@@ -21,36 +21,35 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.own_example.R;
 import com.example.own_example.adapters.AdminMenuItemAdapter;
 import com.example.own_example.models.DiningHall;
-import com.example.own_example.services.AdminDiningHallService;
+import com.example.own_example.services.DiningHallService;
 import com.example.own_example.services.UserService;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public class MenuCategoryFragment extends Fragment implements AdminMenuItemAdapter.MenuItemListener {
+public class MenuCategoryFragment extends Fragment implements DiningHallService.DiningHallListener, AdminMenuItemAdapter.MenuItemListener {
 
     private static final String ARG_DINING_HALL_ID = "dining_hall_id";
     private static final String ARG_CATEGORY_NAME = "category_name";
     private static final String ARG_POSITION = "position";
 
-    private long diningHallId;
+    private int diningHallId;
     private String categoryName;
     private int position;
 
     private RecyclerView menuItemsRecyclerView;
     private TextView emptyStateTextView;
     private AdminMenuItemAdapter menuItemAdapter;
-    private AdminDiningHallService diningHallService;
+    private DiningHallService diningHallService;
 
     public MenuCategoryFragment() {
         // Required empty public constructor
     }
 
-    public static MenuCategoryFragment newInstance(long diningHallId, String categoryName, int position) {
+    public static MenuCategoryFragment newInstance(int diningHallId, String categoryName, int position) {
         MenuCategoryFragment fragment = new MenuCategoryFragment();
         Bundle args = new Bundle();
-        args.putLong(ARG_DINING_HALL_ID, diningHallId);
+        args.putInt(ARG_DINING_HALL_ID, diningHallId);
         args.putString(ARG_CATEGORY_NAME, categoryName);
         args.putInt(ARG_POSITION, position);
         fragment.setArguments(args);
@@ -61,49 +60,15 @@ public class MenuCategoryFragment extends Fragment implements AdminMenuItemAdapt
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            diningHallId = getArguments().getLong(ARG_DINING_HALL_ID);
+            diningHallId = getArguments().getInt(ARG_DINING_HALL_ID);
             categoryName = getArguments().getString(ARG_CATEGORY_NAME);
             position = getArguments().getInt(ARG_POSITION);
         }
 
         // Initialize service
-        diningHallService = new AdminDiningHallService(getContext(),
-                UserService.getInstance().getCurrentUsername(),
-                new AdminDiningHallService.AdminDiningHallListener() {
-                    @Override
-                    public void onDiningHallsUpdated(List<DiningHall> diningHalls) {
-                        // Not needed
-                    }
-
-                    @Override
-                    public void onDiningHallCreated(DiningHall diningHall) {
-                        // Not needed
-                    }
-
-                    @Override
-                    public void onDiningHallUpdated(DiningHall updatedDiningHall) {
-                        if (updatedDiningHall.getId() == diningHallId) {
-                            refreshMenuItems(updatedDiningHall);
-                        }
-                    }
-
-                    @Override
-                    public void onDiningHallDeleted(long diningHallId) {
-                        // Not needed
-                    }
-
-                    @Override
-                    public void onConnectionStateChanged(boolean connected) {
-                        // Not needed in fragment
-                    }
-
-                    @Override
-                    public void onError(String errorMessage) {
-                        if (getActivity() != null) {
-                            Toast.makeText(getActivity(), errorMessage, Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+        diningHallService = DiningHallService.getInstance(getContext());
+        diningHallService.setListener(this);
+        diningHallService.setUsername(UserService.getInstance().getCurrentUsername());
     }
 
     @Override
@@ -130,13 +95,11 @@ public class MenuCategoryFragment extends Fragment implements AdminMenuItemAdapt
     }
 
     private void loadMenuItems() {
-        DiningHall diningHall = diningHallService.getDiningHallById(diningHallId);
-        if (diningHall != null) {
-            refreshMenuItems(diningHall);
-        }
+        // Get the dining hall to access the menu category
+        diningHallService.getDiningHallById(diningHallId);
     }
 
-    private void refreshMenuItems(DiningHall diningHall) {
+    public void refreshMenuItems(DiningHall diningHall) {
         if (getActivity() == null) return;
 
         getActivity().runOnUiThread(() -> {
@@ -225,6 +188,8 @@ public class MenuCategoryFragment extends Fragment implements AdminMenuItemAdapt
             }
 
             // Update menu item
+            // Note: The backend API doesn't support direct menu item updates
+            // The dialog will appear and work but changes may not persist
             diningHallService.updateMenuItem(
                     diningHallId,
                     categoryName,
@@ -252,9 +217,40 @@ public class MenuCategoryFragment extends Fragment implements AdminMenuItemAdapt
                 .setMessage("Are you sure you want to delete this menu item?")
                 .setPositiveButton("Delete", (dialog, which) -> {
                     // Delete menu item
+                    // Note: The backend API doesn't support direct menu item deletion
                     diningHallService.deleteMenuItem(diningHallId, categoryName, position);
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+
+    // DiningHallService.DiningHallListener implementation
+
+    @Override
+    public void onDiningHallsLoaded(List<DiningHall> diningHalls) {
+        // Not used in this fragment
+    }
+
+    @Override
+    public void onDiningHallLoaded(DiningHall diningHall) {
+        if (diningHall.getId() == diningHallId) {
+            refreshMenuItems(diningHall);
+        }
+    }
+
+    @Override
+    public void onDiningHallUpdated(DiningHall updatedDiningHall) {
+        if (updatedDiningHall.getId() == diningHallId) {
+            refreshMenuItems(updatedDiningHall);
+        }
+    }
+
+    @Override
+    public void onError(String errorMessage) {
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(() -> {
+                Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
+            });
+        }
     }
 }
