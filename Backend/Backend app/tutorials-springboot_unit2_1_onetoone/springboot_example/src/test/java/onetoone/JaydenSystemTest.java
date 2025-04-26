@@ -299,9 +299,5 @@ public class JaydenSystemTest {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-
-
-
-
 	}
 }
