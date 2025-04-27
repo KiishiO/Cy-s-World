@@ -54,6 +54,7 @@ dependencies {
 
     // OkHttp for WebSocket support
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+    implementation files('C:\\Users\\jfren\\AppData\\Local\\Android\\Sdk\\platforms\\android-35\\android.jar')
 
     testImplementation 'junit:junit:4.13.2'
 
