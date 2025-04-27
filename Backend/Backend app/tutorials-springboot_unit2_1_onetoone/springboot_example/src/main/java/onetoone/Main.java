@@ -1,16 +1,7 @@
 package onetoone;
 
 import jakarta.transaction.Transactional;
-<<<<<<< HEAD
-import onetoone.Bookstore.Bookstore;
-import onetoone.Bookstore.BookstoreRepository;
-import onetoone.Bookstore.Products;
-import onetoone.Bookstore.ProductsRepository;
 import onetoone.DiningHall.DiningHall;
-import onetoone.DiningHall.DiningHallRepository;
-=======
-import onetoone.DiningHall.DiningHall;
->>>>>>> origin
 import onetoone.Login.Login;
 import onetoone.Login.LoginRepository;
 import onetoone.Signup.Signup;
@@ -35,10 +26,10 @@ import onetoone.Signup.SignupRepository;
 import org.springframework.context.annotation.ComponentScan;
 
 /**
- * 
+ *
  * @author Sonia Patil
- * 
- */ 
+ *
+ */
 
 @SpringBootApplication
 //@ComponentScan(basePackages = {"onetoone.CampusEvents"})
@@ -86,11 +77,7 @@ class Main {
 
 
     @Bean
-<<<<<<< HEAD
-    CommandLineRunner initData(LoginRepository loginRepository, PersonRepository personRepository, SignupRepository signupRepository, DiningHallRepository diningHallRepository, BookstoreRepository bookstoreRepository, ProductsRepository productsRepository) {
-=======
     CommandLineRunner initData(LoginRepository loginRepository, PersonRepository personRepository, SignupRepository signupRepository, DiningHallRepository diningHallRepository, TestingCenterRepository testingCenterRepository, ExamInfoRepository examInfoRepository) {
->>>>>>> origin
         return args -> {
             // Creating Person entities
             Person person1 = new Person("Michael Johnson", "515-789-9852", UserRoles.ADMIN);
@@ -177,9 +164,9 @@ class Main {
             personRepository.save(person4);
 
             // Saving Login details
-           login4.setPerson(person4);            person4.setLogin(login4);
-           login4.setSignup(signup4);
-           loginRepository.save(login4);
+            login4.setPerson(person4);            person4.setLogin(login4);
+            login4.setSignup(signup4);
+            loginRepository.save(login4);
 
             person4.setLogin(login4);
             signup4.setLogin(login4);
@@ -204,10 +191,6 @@ class Main {
             ExamInfo examInfo2 = new ExamInfo("physics", "PHYS 2 midterm");
             examInfoRepository.save(examInfo1);
             examInfoRepository.save(examInfo2);
-
-            //Bookstore information
-            Bookstore bookstore = new Bookstore("Iowa State Bookstore", "Memorial Union");
-            bookstoreRepository.save(bookstore);
 
             // Logging to console (optional, for verification)
             System.out.println("Sample login and person data inserted into the database.");
