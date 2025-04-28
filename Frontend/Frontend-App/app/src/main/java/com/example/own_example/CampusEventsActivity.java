@@ -30,6 +30,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Activity that displays campus events to regular users.
+ * Provides functionality to browse, search, and filter events by date and category.
+ * Implements EventWebSocketClient.EventsListener for real-time event updates
+ * and EventsAdapter.OnEventClickListener for handling event clicks.
+ */
 public class CampusEventsActivity extends AppCompatActivity implements
         EventWebSocketClient.EventsListener,
         EventsAdapter.OnEventClickListener {
@@ -54,6 +60,14 @@ public class CampusEventsActivity extends AppCompatActivity implements
 
     private static final boolean USE_DUMMY_DATA = false; // Set to false when using real backend
 
+    /**
+     * Initializes the activity, sets up the UI components, and establishes connection
+     * to the WebSocket server for real-time event updates.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after previously
+     *                           being shut down, this contains the data it most recently
+     *                           supplied in onSaveInstanceState(Bundle)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,10 +78,6 @@ public class CampusEventsActivity extends AppCompatActivity implements
 
             // Initialize user service and get current username
             currentUsername = UserService.getInstance().getCurrentUsername();
-
-//            // First try user_prefs
-//            SharedPreferences userPrefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
-//            currentUsername = userPrefs.getString("username", "");
 
             // Initialize views
             calendarView = findViewById(R.id.calendar_view);
@@ -90,19 +100,6 @@ public class CampusEventsActivity extends AppCompatActivity implements
                 currentUsername = "test_user";
                 loadSimpleDummyEvents();
             } else {
-//                if (currentUsername == null || currentUsername.isEmpty()) {
-//                // Redirect to login if not logged in
-//                Toast.makeText(this, "Please log in to view events", Toast.LENGTH_SHORT).show();
-//                // Redirect to login screen
-//                finish();
-//                return;
-//                }
-//
-//                if (currentUsername == null || currentUsername.isEmpty()) {
-//                    Toast.makeText(this, "Please log in to view events", Toast.LENGTH_SHORT).show();
-//                    finish();
-//                    return;
-//                }
                 // Initialize WebSocket client
                 webSocketClient = new EventWebSocketClient(this, currentUsername, this);
             }
@@ -142,60 +139,66 @@ public class CampusEventsActivity extends AppCompatActivity implements
         }
     }
 
-// Method containing dummy data to showcase
-private void loadSimpleDummyEvents() {
-    List<CampusEvent> dummyEvents = new ArrayList<>();
+    /**
+     * Loads dummy event data for testing purposes when not connected to a backend.
+     * This method creates sample events with realistic data for UI testing.
+     */
+    private void loadSimpleDummyEvents() {
+        List<CampusEvent> dummyEvents = new ArrayList<>();
 
-    // Create first dummy event
-    CampusEvent event1 = new CampusEvent();
-    event1.setId("event-001");
-    event1.setTitle("Career Fair 2025");
-    event1.setDescription("Join us for the largest career fair on campus! Meet representatives from over 200 companies.");
-    event1.setLocation("Memorial Union");
-    event1.setCategory("Career");
-    event1.setCreator("admin_user");
-    event1.setAttendees(87);
+        // Create first dummy event
+        CampusEvent event1 = new CampusEvent();
+        event1.setId("event-001");
+        event1.setTitle("Career Fair 2025");
+        event1.setDescription("Join us for the largest career fair on campus! Meet representatives from over 200 companies.");
+        event1.setLocation("Memorial Union");
+        event1.setCategory("Career");
+        event1.setCreator("admin_user");
+        event1.setAttendees(87);
 
-    // Set dates for first event (tomorrow)
-    Calendar tomorrow = Calendar.getInstance();
-    tomorrow.add(Calendar.DAY_OF_MONTH, 1);
-    tomorrow.set(Calendar.HOUR_OF_DAY, 10);
-    event1.setStartTime(tomorrow.getTime());
+        // Set dates for first event (tomorrow)
+        Calendar tomorrow = Calendar.getInstance();
+        tomorrow.add(Calendar.DAY_OF_MONTH, 1);
+        tomorrow.set(Calendar.HOUR_OF_DAY, 10);
+        event1.setStartTime(tomorrow.getTime());
 
-    tomorrow.add(Calendar.HOUR_OF_DAY, 3);
-    event1.setEndTime(tomorrow.getTime());
+        tomorrow.add(Calendar.HOUR_OF_DAY, 3);
+        event1.setEndTime(tomorrow.getTime());
 
-    // Create second dummy event
-    CampusEvent event2 = new CampusEvent();
-    event2.setId("event-002");
-    event2.setTitle("Campus Movie Night");
-    event2.setDescription("Free outdoor movie screening on central campus. Bring blankets and chairs!");
-    event2.setLocation("Central Campus");
-    event2.setCategory("Entertainment");
-    event2.setCreator("events_coordinator");
-    event2.setAttendees(42);
+        // Create second dummy event
+        CampusEvent event2 = new CampusEvent();
+        event2.setId("event-002");
+        event2.setTitle("Campus Movie Night");
+        event2.setDescription("Free outdoor movie screening on central campus. Bring blankets and chairs!");
+        event2.setLocation("Central Campus");
+        event2.setCategory("Entertainment");
+        event2.setCreator("events_coordinator");
+        event2.setAttendees(42);
 
-    // Set dates for second event (this weekend)
-    Calendar weekend = Calendar.getInstance();
-    weekend.add(Calendar.DAY_OF_MONTH, 3); // 3 days from now
-    weekend.set(Calendar.HOUR_OF_DAY, 19); // 7 PM
-    event2.setStartTime(weekend.getTime());
+        // Set dates for second event (this weekend)
+        Calendar weekend = Calendar.getInstance();
+        weekend.add(Calendar.DAY_OF_MONTH, 3); // 3 days from now
+        weekend.set(Calendar.HOUR_OF_DAY, 19); // 7 PM
+        event2.setStartTime(weekend.getTime());
 
-    weekend.add(Calendar.HOUR_OF_DAY, 2); // 2 hour movie
-    event2.setEndTime(weekend.getTime());
+        weekend.add(Calendar.HOUR_OF_DAY, 2); // 2 hour movie
+        event2.setEndTime(weekend.getTime());
 
-    // Add events to list
-    dummyEvents.add(event1);
-    dummyEvents.add(event2);
+        // Add events to list
+        dummyEvents.add(event1);
+        dummyEvents.add(event2);
 
-    // Update the adapter
-    allEvents.clear();
-    allEvents.addAll(dummyEvents);
-    filteredEvents.clear();
-    filteredEvents.addAll(dummyEvents);
-    eventsAdapter.notifyDataSetChanged();
-}
+        // Update the adapter
+        allEvents.clear();
+        allEvents.addAll(dummyEvents);
+        filteredEvents.clear();
+        filteredEvents.addAll(dummyEvents);
+        eventsAdapter.notifyDataSetChanged();
+    }
 
+    /**
+     * Sets up the calendar view with a date change listener to filter events by date.
+     */
     private void setupCalendarListener() {
         calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
             try {
@@ -219,6 +222,9 @@ private void loadSimpleDummyEvents() {
         });
     }
 
+    /**
+     * Sets up the search view for filtering events by title, location, or description.
+     */
     private void setupSearchView() {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -235,6 +241,9 @@ private void loadSimpleDummyEvents() {
         });
     }
 
+    /**
+     * Sets up the category spinner for filtering events by category.
+     */
     private void setupCategorySpinner() {
         String[] categories = {"All Categories", "Career", "Academic", "Entertainment", "Social"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
@@ -255,16 +264,31 @@ private void loadSimpleDummyEvents() {
         });
     }
 
+    /**
+     * Gets the currently selected category from the spinner.
+     *
+     * @return The selected category, or an empty string if "All Categories" is selected
+     */
     private String getSelectedCategory() {
         return categorySpinner.getSelectedItemPosition() == 0 ?
                 "" : categorySpinner.getSelectedItem().toString();
     }
 
+    /**
+     * Updates the displayed selected date text.
+     *
+     * @param date The date to display
+     */
     private void updateSelectedDateText(Date date) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE, MMMM d, yyyy", Locale.US);
         selectedDateText.setText(dateFormat.format(date));
     }
 
+    /**
+     * Filters events by the selected date.
+     *
+     * @param dateString The date string in format yyyy-MM-dd to filter by
+     */
     private void filterEventsByDate(String dateString) {
         List<CampusEvent> dateFilteredEvents = new ArrayList<>();
         for (CampusEvent event : allEvents) {
@@ -291,6 +315,12 @@ private void loadSimpleDummyEvents() {
         filterEvents(searchView.getQuery().toString(), getSelectedCategory());
     }
 
+    /**
+     * Filters events by search query and category.
+     *
+     * @param query The search query to filter by
+     * @param category The category to filter by
+     */
     private void filterEvents(String query, String category) {
         List<CampusEvent> tempFilteredList = new ArrayList<>();
 
@@ -320,6 +350,11 @@ private void loadSimpleDummyEvents() {
         eventsAdapter.updateEvents(tempFilteredList);
     }
 
+    /**
+     * Updates the connection status UI based on the connection state.
+     *
+     * @param connected Whether the app is connected to the server
+     */
     private void updateConnectionStatus(boolean connected) {
         runOnUiThread(() -> {
             if (connected) {
@@ -334,6 +369,11 @@ private void loadSimpleDummyEvents() {
 
     // EventWebSocketClient.EventsListener implementation
 
+    /**
+     * Called when a list of events is received from the server.
+     *
+     * @param events The list of events received
+     */
     @Override
     public void onEventsReceived(List<CampusEvent> events) {
         runOnUiThread(() -> {
@@ -343,6 +383,11 @@ private void loadSimpleDummyEvents() {
         });
     }
 
+    /**
+     * Called when a new event is received from the server.
+     *
+     * @param event The new event received
+     */
     @Override
     public void onNewEventReceived(CampusEvent event) {
         runOnUiThread(() -> {
@@ -367,6 +412,11 @@ private void loadSimpleDummyEvents() {
         });
     }
 
+    /**
+     * Called when an event is updated on the server.
+     *
+     * @param updatedEvent The updated event
+     */
     @Override
     public void onEventUpdated(CampusEvent updatedEvent) {
         runOnUiThread(() -> {
@@ -389,6 +439,13 @@ private void loadSimpleDummyEvents() {
         });
     }
 
+    /**
+     * Called when an event's RSVP count is updated.
+     *
+     * @param eventId The ID of the event
+     * @param attendees The new number of attendees
+     * @param isRsvped Whether the current user has RSVP'd
+     */
     @Override
     public void onRsvpUpdated(String eventId, int attendees, boolean isRsvped) {
         runOnUiThread(() -> {
@@ -414,16 +471,32 @@ private void loadSimpleDummyEvents() {
         });
     }
 
+    /**
+     * Called when a chat message is received for an event.
+     * Not handled in this activity, only in EventDetailActivity.
+     *
+     * @param chatMessage The chat message received
+     */
     @Override
     public void onChatMessageReceived(EventChat chatMessage) {
         // Not handled in the main activity - only in EventDetailActivity
     }
 
+    /**
+     * Called when the connection state changes.
+     *
+     * @param connected Whether the app is connected to the server
+     */
     @Override
     public void onConnectionStateChanged(boolean connected) {
         updateConnectionStatus(connected);
     }
 
+    /**
+     * Called when an error occurs in the event service.
+     *
+     * @param errorMessage The error message
+     */
     @Override
     public void onError(String errorMessage) {
         runOnUiThread(() -> {
@@ -433,6 +506,12 @@ private void loadSimpleDummyEvents() {
 
     // EventsAdapter.OnEventClickListener implementation
 
+    /**
+     * Called when an event is clicked in the RecyclerView.
+     * Opens the EventDetailActivity with the clicked event's details.
+     *
+     * @param event The event that was clicked
+     */
     @Override
     public void onEventClick(CampusEvent event) {
         // Open event detail activity
@@ -456,6 +535,10 @@ private void loadSimpleDummyEvents() {
         startActivity(intent);
     }
 
+    /**
+     * Cleans up resources when the activity is destroyed.
+     * Disconnects from the WebSocket server.
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
