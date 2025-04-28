@@ -2,7 +2,6 @@ package onetoone.Persons;
 
 import java.util.*;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import onetoone.Login.Login;
 import onetoone.TestingCenter.ExamInfoRepository;
@@ -17,17 +16,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
-import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Parameter;
 
-/**
- * Sonia Patil, Jayden Sorter
- */
 @RestController
-@Tag(name = "Person Management API")
+@Tag(name = "Person", description = "Person management API")
 public class PersonController {
 
     @Autowired
@@ -47,18 +45,25 @@ public class PersonController {
 
     // ----------------- Basic CRUD operations -----------------
 
-    @Operation(summary = "Get all persons", description = "Retrieve a list of all persons")
-    @ApiResponse(responseCode = "200", description = "Successfully retrieved list of persons", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Person.class)))
+    @Operation(summary = "Get all persons", description = "Returns a list of all persons in the system")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved list of persons",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Person.class)))
+    })
     @GetMapping(path = "/persons")
     public List<Person> getAllPersons() {
         return personRepository.findAll();
     }
 
-    @Operation(summary = "Get person by ID", description = "Retrieve a person by their unique ID")
-    @ApiResponse(responseCode = "200", description = "Successfully retrieved person", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Person.class)))
-    @ApiResponse(responseCode = "404", description = "Person not found", content = @Content(mediaType = "application/json"))
+    @Operation(summary = "Get person by ID", description = "Returns a single person by their ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved person",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Person.class))),
+            @ApiResponse(responseCode = "404", description = "Person not found")
+    })
     @GetMapping(path = "/persons/{id}")
-    public Person getPersonById(@PathVariable int id) {
+    public Person getPersonById(
+            @Parameter(description = "ID of the person to be retrieved", required = true) @PathVariable int id) {
         Person person = personRepository.findById(id);
         if (person == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Person not found");
@@ -66,15 +71,20 @@ public class PersonController {
         return person;
     }
 
-    @Operation(summary = "Create a new person", description = "Create a new person in the system")
-    @ApiResponse(responseCode = "200", description = "Person created successfully", content = @Content(mediaType = "application/json"))
-    @ApiResponse(responseCode = "400", description = "Bad request due to invalid data", content = @Content(mediaType = "application/json"))
+    @Operation(summary = "Create a new person", description = "Creates a new person entity in the system")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Person successfully created"),
+            @ApiResponse(responseCode = "400", description = "Invalid input, object invalid")
+    })
     @PostMapping(path = "/persons")
-    public ResponseEntity<String> createPerson(@RequestBody Person person) {
+    public ResponseEntity<String> createPerson(
+            @Parameter(description = "Person object to be created", required = true,
+                    schema = @Schema(implementation = Person.class)) @RequestBody Person person) {
         if (person == null) {
             return ResponseEntity.badRequest().body(failure);
         }
 
+        // Default to STUDENT role if not specified
         if (person.getRole() == null) {
             person.setRole(UserRoles.STUDENT);
         }
@@ -86,12 +96,18 @@ public class PersonController {
         return ResponseEntity.ok(success);
     }
 
-    @Operation(summary = "Update a person's information", description = "Update the details of an existing person by ID")
-    @ApiResponse(responseCode = "200", description = "Person updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Person.class)))
-    @ApiResponse(responseCode = "400", description = "Bad request due to mismatched IDs or invalid data", content = @Content(mediaType = "application/json"))
-    @ApiResponse(responseCode = "404", description = "Person not found", content = @Content(mediaType = "application/json"))
+    @Operation(summary = "Update an existing person", description = "Updates an existing person entity with new information")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Person successfully updated",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Person.class))),
+            @ApiResponse(responseCode = "404", description = "Person not found"),
+            @ApiResponse(responseCode = "400", description = "ID mismatch between path and request body")
+    })
     @PutMapping("/persons/{id}")
-    public ResponseEntity<?> updatePerson(@PathVariable int id, @RequestBody Person request) {
+    public ResponseEntity<?> updatePerson(
+            @Parameter(description = "ID of the person to update", required = true) @PathVariable int id,
+            @Parameter(description = "Updated person object", required = true,
+                    schema = @Schema(implementation = Person.class)) @RequestBody Person request) {
         Person person = personRepository.findById(id);
 
         if (person == null) {
@@ -105,12 +121,16 @@ public class PersonController {
         return ResponseEntity.ok(personRepository.findById(id));
     }
 
-    @Operation(summary = "Delete a person", description = "Delete a person by their unique ID")
-    @ApiResponse(responseCode = "200", description = "Person deleted successfully", content = @Content(mediaType = "application/json"))
-    @ApiResponse(responseCode = "404", description = "Person not found", content = @Content(mediaType = "application/json"))
-    @Transactional
+    @Operation(summary = "Delete a person", description = "Deletes a person entity by their ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Person successfully deleted"),
+            @ApiResponse(responseCode = "404", description = "Person not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error during deletion")
+    })
     @DeleteMapping(path = "/persons/{id}")
-    public ResponseEntity<String> deletePerson(@PathVariable int id) {
+    @Transactional
+    public ResponseEntity<String> deletePerson(
+            @Parameter(description = "ID of the person to delete", required = true) @PathVariable int id) {
         Person person = personRepository.findById(id);
         if (person == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(failure);
@@ -119,6 +139,7 @@ public class PersonController {
         try {
             // Clear relationships first
             if (person.getSignupInfo() != null) {
+                // Just remove the reference, don't manipulate the signup
                 person.setSignupInfo(null);
             }
 
@@ -139,7 +160,10 @@ public class PersonController {
                 person.getFriends().clear();
             }
 
+            // Save these changes within the same transaction
             personRepository.save(person);
+
+            // Delete the person
             personRepository.delete(person);
 
             return ResponseEntity.ok(success);
@@ -151,14 +175,19 @@ public class PersonController {
 
     // ----------------- Role-based operations -----------------
 
-    @Operation(summary = "Get all persons by role", description = "Retrieve a list of persons filtered by role")
-    @ApiResponse(responseCode = "200", description = "Successfully retrieved persons by role", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Person.class)))
-    @ApiResponse(responseCode = "403", description = "Forbidden, only admin can access this resource", content = @Content(mediaType = "application/json"))
+    @Operation(summary = "Get persons by role", description = "Returns a list of persons with a specific role (admin only)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved list of persons",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Person.class))),
+            @ApiResponse(responseCode = "403", description = "Access denied - Not an admin")
+    })
     @GetMapping("/persons/by-role/{role}")
     public ResponseEntity<?> getPersonsByRole(
-            @PathVariable UserRoles role,
+            @Parameter(description = "Role to filter by", required = true) @PathVariable UserRoles role,
+            @Parameter(description = "ID of the admin making the request", required = true)
             @RequestHeader(value = "Admin-Id", required = true) Integer adminId) {
 
+        // Optional: Verify admin permissions
         if (adminId != null) {
             Person admin = personRepository.findById(adminId);
             if (admin == null || !admin.isAdmin()) {
@@ -171,16 +200,20 @@ public class PersonController {
         return ResponseEntity.ok(persons);
     }
 
-    @Operation(summary = "Change a person's role", description = "Allows an admin to change a person's role")
-    @ApiResponse(responseCode = "200", description = "Role updated successfully", content = @Content(mediaType = "application/json"))
-    @ApiResponse(responseCode = "403", description = "Forbidden, only admin can change roles", content = @Content(mediaType = "application/json"))
-    @ApiResponse(responseCode = "404", description = "Person not found", content = @Content(mediaType = "application/json"))
+    @Operation(summary = "Change person role", description = "Updates a person's role (admin only)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Role successfully updated"),
+            @ApiResponse(responseCode = "404", description = "Person not found"),
+            @ApiResponse(responseCode = "403", description = "Access denied - Not an admin")
+    })
     @PutMapping("/persons/{id}/role")
     public ResponseEntity<String> changePersonRole(
-            @PathVariable int id,
-            @RequestParam UserRoles newRole,
+            @Parameter(description = "ID of the person to change role", required = true) @PathVariable int id,
+            @Parameter(description = "New role to assign", required = true) @RequestParam UserRoles newRole,
+            @Parameter(description = "ID of the admin making the request", required = true)
             @RequestHeader("Admin-Id") int adminId) {
 
+        // Verify admin permissions
         Person admin = personRepository.findById(adminId);
         if (admin == null || !admin.isAdmin()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -197,11 +230,16 @@ public class PersonController {
         return ResponseEntity.ok("{\"message\":\"Role updated successfully\"}");
     }
 
-    @Operation(summary = "Get all classes taught by a teacher", description = "Retrieve all classes taught by a specific teacher")
-    @ApiResponse(responseCode = "200", description = "Successfully retrieved classes taught by teacher", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StudentClasses.class)))
-    @ApiResponse(responseCode = "404", description = "Teacher not found", content = @Content(mediaType = "application/json"))
+    @Operation(summary = "Get classes taught by teacher", description = "Returns a list of classes taught by a specific teacher")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved list of classes",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "Teacher not found"),
+            @ApiResponse(responseCode = "400", description = "Person is not a teacher")
+    })
     @GetMapping("/persons/{id}/classes/teaching")
-    public ResponseEntity<?> getClassesTeaching(@PathVariable int id) {
+    public ResponseEntity<?> getClassesTeaching(
+            @Parameter(description = "ID of the teacher", required = true) @PathVariable int id) {
         Person person = personRepository.findById(id);
         if (person == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(failure);
@@ -215,11 +253,16 @@ public class PersonController {
         return ResponseEntity.ok(classesRepository.findByTeacher(person));
     }
 
-    @Operation(summary = "Get all classes enrolled by a student", description = "Retrieve all classes a specific student is enrolled in")
-    @ApiResponse(responseCode = "200", description = "Successfully retrieved enrolled classes", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StudentClasses.class)))
-    @ApiResponse(responseCode = "404", description = "Student not found", content = @Content(mediaType = "application/json"))
+    @Operation(summary = "Get classes enrolled by student", description = "Returns a list of classes a student is enrolled in")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved list of enrolled classes",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "Student not found"),
+            @ApiResponse(responseCode = "400", description = "Person is not a student")
+    })
     @GetMapping("/persons/{id}/classes/enrolled")
-    public ResponseEntity<?> getClassesEnrolled(@PathVariable int id) {
+    public ResponseEntity<?> getClassesEnrolled(
+            @Parameter(description = "ID of the student", required = true) @PathVariable int id) {
         Person person = personRepository.findById(id);
         if (person == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(failure);
@@ -233,11 +276,17 @@ public class PersonController {
         return ResponseEntity.ok(classesRepository.findClassesByStudentId(id));
     }
 
-    @Operation(summary = "Get admin dashboard", description = "Retrieve the admin dashboard with user statistics")
-    @ApiResponse(responseCode = "200", description = "Successfully retrieved admin dashboard", content = @Content(mediaType = "application/json"))
-    @ApiResponse(responseCode = "403", description = "Forbidden, only admin can access this resource", content = @Content(mediaType = "application/json"))
+    @Operation(summary = "Get admin dashboard", description = "Returns system statistics for admin dashboard")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved dashboard data",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "Access denied - Not an admin")
+    })
     @GetMapping("/admin/dashboard")
-    public ResponseEntity<?> getAdminDashboard(@RequestHeader("Admin-Id") int adminId) {
+    public ResponseEntity<?> getAdminDashboard(
+            @Parameter(description = "ID of the admin making the request", required = true)
+            @RequestHeader("Admin-Id") int adminId) {
+        // Verify admin permissions
         Person admin = personRepository.findById(adminId);
         if (admin == null || !admin.isAdmin()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
