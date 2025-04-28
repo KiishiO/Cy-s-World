@@ -4,22 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1aba0881-e0d1-4070-88f5-61f265d2e936" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/Bus.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/Bus.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/BusController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/BusController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/Login/LoginController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/Login/LoginController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/Persons/Person.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/Persons/Person.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/Persons/PersonController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/Persons/PersonController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/Profiles/ProfileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/Profiles/ProfileController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/StudentClasses/StudentClassesController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/StudentClasses/StudentClassesController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/StudyTable/StudyTableController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/StudyTable/StudyTableController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/UserRoles/UserRolesController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/UserRoles/UserRolesController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/onetoone/Persons/Person.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/onetoone/Persons/Person.class" afterDir="false" />
-    </list>
+    <list default="true" id="1aba0881-e0d1-4070-88f5-61f265d2e936" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
