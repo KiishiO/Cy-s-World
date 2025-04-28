@@ -1,5 +1,6 @@
 package onetoone.FriendRequest;
 
+import onetoone.DiningHall.DiningHall;
 import onetoone.FriendRequest.FriendRequestRepository;
 import onetoone.Persons.Person;
 import onetoone.Persons.PersonRepository;
@@ -36,7 +37,7 @@ public class FriendRequestController {
     @PostMapping("/send")
     @Operation(summary = "Send a friend request", description = "Sends a friend request from one person to another")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Friend request sent successfully"),
+            @ApiResponse(responseCode = "200", description = "Friend request sent successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FriendRequest.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input or request"),
             @ApiResponse(responseCode = "404", description = "Sender or receiver not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
@@ -99,7 +100,7 @@ public class FriendRequestController {
     @GetMapping("/all")
     @Operation(summary = "Get all friend requests", description = "Retrieves all friend requests in the system")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of all friend requests"),
+            @ApiResponse(responseCode = "200", description = "List of all friend requests", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FriendRequest.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<?> getAllRequests() {
@@ -127,7 +128,7 @@ public class FriendRequestController {
     @GetMapping("/sent/{senderId}")
     @Operation(summary = "Get sent friend requests", description = "Retrieves all friend requests sent by a specific sender")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of sent friend requests"),
+            @ApiResponse(responseCode = "200", description = "List of sent friend requests", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FriendRequest.class))),
             @ApiResponse(responseCode = "404", description = "Sender not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
@@ -162,7 +163,7 @@ public class FriendRequestController {
     @GetMapping("/received/{receiverId}")
     @Operation(summary = "Get received friend requests", description = "Retrieves all friend requests received by a specific receiver")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of received friend requests"),
+            @ApiResponse(responseCode = "200", description = "List of received friend requests", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FriendRequest.class))),
             @ApiResponse(responseCode = "404", description = "Receiver not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
@@ -197,7 +198,7 @@ public class FriendRequestController {
     @PostMapping("/respond")
     @Operation(summary = "Respond to a friend request", description = "Accepts or rejects a friend request")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Friend request responded successfully"),
+            @ApiResponse(responseCode = "200", description = "Friend request responded successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FriendRequest.class))),
             @ApiResponse(responseCode = "400", description = "Invalid status provided"),
             @ApiResponse(responseCode = "404", description = "Friend request not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
@@ -252,7 +253,7 @@ public class FriendRequestController {
     @DeleteMapping("/cancel/{requestId}")
     @Operation(summary = "Cancel a friend request", description = "Cancels a specific friend request by ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Friend request cancelled successfully"),
+            @ApiResponse(responseCode = "200", description = "Friend request cancelled successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FriendRequest.class))),
             @ApiResponse(responseCode = "404", description = "Friend request not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
@@ -284,7 +285,7 @@ public class FriendRequestController {
     @GetMapping("/friends/{personId}")
     @Operation(summary = "Get friends list", description = "Retrieves the friends list of a person")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Friends list retrieved successfully"),
+            @ApiResponse(responseCode = "200", description = "Friends list retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FriendRequest.class))),
             @ApiResponse(responseCode = "404", description = "Person not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
