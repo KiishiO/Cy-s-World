@@ -59,6 +59,7 @@ dependencies {
     // OkHttp for WebSocket support
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
     implementation libs.androidx.espresso.contrib
+    implementation files('C:\\Users\\iaosomo\\AppData\\Local\\Android\\Sdk\\platforms\\android-35\\android.jar')
 
     testImplementation 'junit:junit:4.13.2'
 
