@@ -1,12 +1,13 @@
 package onetoone;
 
-import jakarta.transaction.Transactional;
 import onetoone.DiningHall.DiningHall;
+import onetoone.DiningHall.DiningHallRepository;
 import onetoone.Login.Login;
 import onetoone.Login.LoginRepository;
+import onetoone.Persons.Person;
+import onetoone.Persons.PersonRepository;
 import onetoone.Signup.Signup;
 import onetoone.Signup.SignupRepository;
-import onetoone.StudyTable.StudyTable;
 import onetoone.TestingCenter.ExamInfo;
 import onetoone.TestingCenter.ExamInfoRepository;
 import onetoone.TestingCenter.TestingCenter;
@@ -16,14 +17,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-
-//import onetoone.Laptops.Laptop;
-//import onetoone.Laptops.LaptopRepository;
-import onetoone.Persons.Person;
-import onetoone.Persons.PersonRepository;
-import onetoone.DiningHall.DiningHallRepository;
-import onetoone.Signup.SignupRepository;
-import org.springframework.context.annotation.ComponentScan;
 
 /**
  * 
