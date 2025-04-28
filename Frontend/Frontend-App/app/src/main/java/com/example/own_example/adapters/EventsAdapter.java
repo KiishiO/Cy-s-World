@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.own_example.R;
+//import com.example.own_example.R;
 import com.example.own_example.models.CampusEvent;
 
 import java.util.List;
