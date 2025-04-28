@@ -1,5 +1,12 @@
 package onetoone.BusSystem;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,16 +24,22 @@ import java.util.*;
 import java.awt.color.ColorSpace;
 
 @RestController
-@RequestMapping("/busOpt") //Must initial after the port number to use this class//
+@RequestMapping("/busOpt")
+@Tag(name = "Bus System", description = "Bus Management API")
 public class BusController {
 
     @Autowired
     private busRepository busRepository;
 
-    // Create a new bus
-    // Update addBus method to handle uniqueness of busNum
+    @Operation(summary = "Add a new bus", description = "Creates a new bus with unique bus number and name")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Bus successfully added"),
+            @ApiResponse(responseCode = "400", description = "Bus with specified number or name already exists")
+    })
     @PostMapping("/add")
-    public ResponseEntity<String> addBus(@RequestBody Bus bus) {
+    public ResponseEntity<String> addBus(
+            @Parameter(description = "Bus object to be added", required = true)
+            @RequestBody Bus bus) {
         // Check if bus with this number already exists
         Optional<Bus> existingBusWithNumber = busRepository.findByBusNum(bus.getBusNum());
         if (existingBusWithNumber.isPresent()) {
@@ -44,16 +57,23 @@ public class BusController {
         return ResponseEntity.ok("A new Bus has been added successfully: " + bus.getBusName());
     }
 
-
-    // Get all buses
+    @Operation(summary = "Get all buses", description = "Retrieves a list of all buses in the system")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved all buses",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Bus.class)))
     @GetMapping("/all")
     public List<Bus> getAllBuses() {
         return busRepository.findAll();
     }
 
-    // Get a bus by number
+    @Operation(summary = "Get bus by number", description = "Retrieves a specific bus by its unique number")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the bus"),
+            @ApiResponse(responseCode = "404", description = "Bus with specified number not found")
+    })
     @GetMapping("/{busNum}")
-    public ResponseEntity<Bus> getBusByNumber(@PathVariable int busNum) {
+    public ResponseEntity<Bus> getBusByNumber(
+            @Parameter(description = "Bus number to retrieve", required = true)
+            @PathVariable int busNum) {
         Optional<Bus> busOptional = busRepository.findByBusNum(busNum);
         if (busOptional.isPresent()) {
             return ResponseEntity.ok(busOptional.get());
@@ -62,9 +82,17 @@ public class BusController {
         }
     }
 
-    // Update the bus rating
+    @Operation(summary = "Update bus rating", description = "Updates the rating of a specific bus")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Bus rating successfully updated"),
+            @ApiResponse(responseCode = "404", description = "Bus with specified name not found")
+    })
     @PutMapping("/{busName}/rating")
-    public ResponseEntity<String> updateBusRating(@PathVariable String busName, @RequestBody RatingRequest ratingRequest) {
+    public ResponseEntity<String> updateBusRating(
+            @Parameter(description = "Name of the bus to update", required = true)
+            @PathVariable String busName,
+            @Parameter(description = "New rating value", required = true)
+            @RequestBody RatingRequest ratingRequest) {
         Optional<Bus> busOptional = busRepository.findByBusName(busName);
         if (busOptional.isPresent()) {
             Bus bus = busOptional.get();
@@ -76,8 +104,17 @@ public class BusController {
         }
     }
 
+    @Operation(summary = "Update bus stop location", description = "Updates the current stop location of a bus")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Stop location successfully updated"),
+            @ApiResponse(responseCode = "404", description = "Bus with specified name not found")
+    })
     @PutMapping("/{busName}/updateStop")
-    public ResponseEntity<String> updateStopLocation(@PathVariable String busName, @RequestBody StopLocationRequest stopLocationRequest) {
+    public ResponseEntity<String> updateStopLocation(
+            @Parameter(description = "Name of the bus to update", required = true)
+            @PathVariable String busName,
+            @Parameter(description = "New stop location", required = true)
+            @RequestBody StopLocationRequest stopLocationRequest) {
         Optional<Bus> busOptional = busRepository.findByBusName(busName);
         if (busOptional.isPresent()) {
             Bus bus = busOptional.get();
@@ -89,9 +126,14 @@ public class BusController {
         }
     }
 
-    // Delete a bus by Name
+    @Operation(summary = "Delete bus by name", description = "Removes a bus from the system by its name")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Bus successfully deleted or bus not found")
+    })
     @DeleteMapping("/{busName}")
-    public ResponseEntity<String> deleteBus(@PathVariable String busName) {
+    public ResponseEntity<String> deleteBus(
+            @Parameter(description = "Name of the bus to delete", required = true)
+            @PathVariable String busName) {
         Optional<Bus> busOptional = busRepository.findByBusName(busName);
         if (busOptional.isPresent()) {
             busRepository.delete(busOptional.get());
@@ -101,8 +143,14 @@ public class BusController {
         }
     }
 
+    @Operation(summary = "Remove stop location", description = "Removes stop location from a bus route")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Stop location removed or stop not found")
+    })
     @DeleteMapping("removeStop/{stopLocation}")
-    public ResponseEntity<String> deleteLocation(@PathVariable String stopLocation) {
+    public ResponseEntity<String> deleteLocation(
+            @Parameter(description = "Stop location to remove", required = true)
+            @PathVariable String stopLocation) {
         List<Bus> buses = busRepository.findByStopLocation(stopLocation);
         if (!buses.isEmpty()) {
             Bus bus = buses.get(0);
@@ -112,12 +160,19 @@ public class BusController {
         }
         return ResponseEntity.ok("Bus stop was not found for this bus!");
     }
-    // Add these methods to your BusController.java
 
-    // Add a new stop location to a bus route
-    // Add a new stop location to a bus route - FIXED and using busNum
+    @Operation(summary = "Add stop to bus route", description = "Adds a new stop location to a specific bus route")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Stop location successfully added to route"),
+            @ApiResponse(responseCode = "400", description = "Stop location already exists in route"),
+            @ApiResponse(responseCode = "404", description = "Bus with specified number not found")
+    })
     @PostMapping("/{busNum}/addRouteStop")
-    public ResponseEntity<String> addRouteStop(@PathVariable int busNum, @RequestBody StopLocationRequest stopLocationRequest) {
+    public ResponseEntity<String> addRouteStop(
+            @Parameter(description = "Bus number", required = true)
+            @PathVariable int busNum,
+            @Parameter(description = "Stop location to add", required = true)
+            @RequestBody StopLocationRequest stopLocationRequest) {
         Optional<Bus> busOptional = busRepository.findByBusNum(busNum);
         if (busOptional.isPresent()) {
             Bus bus = busOptional.get();
@@ -136,9 +191,18 @@ public class BusController {
         }
     }
 
-    // Remove a stop location from a bus route - FIXED and using busNum
+    @Operation(summary = "Remove stop from bus route", description = "Removes a stop location from a specific bus route")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Stop location successfully removed from route"),
+            @ApiResponse(responseCode = "400", description = "Stop location not found in route"),
+            @ApiResponse(responseCode = "404", description = "Bus with specified number not found")
+    })
     @DeleteMapping("/{busNum}/removeRouteStop")
-    public ResponseEntity<String> removeRouteStop(@PathVariable int busNum, @RequestBody StopLocationRequest stopLocationRequest) {
+    public ResponseEntity<String> removeRouteStop(
+            @Parameter(description = "Bus number", required = true)
+            @PathVariable int busNum,
+            @Parameter(description = "Stop location to remove", required = true)
+            @RequestBody StopLocationRequest stopLocationRequest) {
         Optional<Bus> busOptional = busRepository.findByBusNum(busNum);
         if (busOptional.isPresent()) {
             Bus bus = busOptional.get();
@@ -156,9 +220,15 @@ public class BusController {
         }
     }
 
-    // Get all stops for a specific bus route - FIXED and using busNum
+    @Operation(summary = "Get all stops for a bus route", description = "Retrieves all stop locations for a specific bus route")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved all stops for the route"),
+            @ApiResponse(responseCode = "404", description = "Bus with specified number not found")
+    })
     @GetMapping("/{busNum}/routeStops")
-    public ResponseEntity<?> getBusRouteStops(@PathVariable int busNum) {
+    public ResponseEntity<?> getBusRouteStops(
+            @Parameter(description = "Bus number", required = true)
+            @PathVariable int busNum) {
         Optional<Bus> busOptional = busRepository.findByBusNum(busNum);
         if (busOptional.isPresent()) {
             Bus bus = busOptional.get();
