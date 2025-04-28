@@ -2,9 +2,15 @@ package onetoone.Signup;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import onetoone.Login.Login;
 import onetoone.Persons.Person;
+import onetoone.Persons.PersonRepository;
 import onetoone.UserRoles.UserRoles;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,16 +18,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import onetoone.Persons.PersonRepository;
-
 /**
  *
  * @author Vivek Bengre
  *
  */
-
 @RestController
 @RequestMapping("/signup")
+@Tag(name = "Sign up Management API")
 public class SignupController {
 
     @Autowired
@@ -30,14 +34,23 @@ public class SignupController {
     @Autowired
     PersonRepository personRepository;
 
-    // Admin and teacher authentication codes
     private static final String ADMIN_AUTH_CODE = "admin-secret-2025";
     private static final String TEACHER_AUTH_CODE = "teacher-access-2025";
 
     private String success = "{\"message\":\"success\"}";
     private String failure = "{\"message\":\"failure\"}";
 
+    /**
+     * Get all signups.
+     *
+     * @return List of all signup information
+     */
     @GetMapping
+    @Operation(summary = "Get all signups", description = "Fetches a list of all signups.")
+    @ApiResponse(responseCode = "200", description = "Successfully fetched all signups",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Signup.class)))
+    @ApiResponse(responseCode = "204", description = "No signups found")
     public ResponseEntity<List<Signup>> getAllSignUp() {
         List<Signup> signup = signupRepository.findAll();
         if (signup.isEmpty()) {
@@ -46,12 +59,35 @@ public class SignupController {
         return ResponseEntity.ok(signup);
     }
 
+    /**
+     * Get signup by ID.
+     *
+     * @param id Signup ID
+     * @return Signup information
+     */
     @GetMapping("/{id}")
-    Signup getSignupById(@PathVariable int id){
+    @Operation(summary = "Get signup by ID", description = "Fetches signup information by ID.")
+    @ApiResponse(responseCode = "200", description = "Successfully fetched the signup",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Signup.class)))
+    @ApiResponse(responseCode = "404", description = "Signup not found")
+    public Signup getSignupById(@PathVariable int id) {
         return signupRepository.findById(id);
     }
 
+    /**
+     * Create a new signup.
+     *
+     * @param signup Signup data
+     * @param authCode Authentication code for role-based signup
+     * @return Response entity indicating success or failure
+     */
     @PostMapping("/Newsignup")
+    @Operation(summary = "Create a new signup", description = "Creates a new signup entry for a person.")
+    @ApiResponse(responseCode = "200", description = "Successfully created the signup",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "400", description = "Bad request due to missing fields")
+    @ApiResponse(responseCode = "403", description = "Invalid authentication code for restricted role")
     public ResponseEntity<String> createSignup(@RequestBody Signup signup,
                                                @RequestParam(required = false) String authCode) {
         if (signup == null || signup.getUsername() == null || signup.getEmail() == null) {
@@ -80,14 +116,28 @@ public class SignupController {
         return ResponseEntity.ok(success);
     }
 
+    /**
+     * Update signup information.
+     *
+     * @param id Signup ID
+     * @param request New signup data
+     * @param authCode Authentication code for role-based update
+     * @return Updated signup information
+     */
     @PutMapping("/{id}")
+    @Operation(summary = "Update signup information", description = "Updates the information for an existing signup.")
+    @ApiResponse(responseCode = "200", description = "Successfully updated the signup",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Signup.class)))
+    @ApiResponse(responseCode = "400", description = "Bad request due to invalid data")
+    @ApiResponse(responseCode = "403", description = "Forbidden: Invalid authentication code for role update")
+    @ApiResponse(responseCode = "404", description = "Signup not found")
     public ResponseEntity<Signup> updateSignupInfo(@PathVariable int id, @RequestBody Signup request,
                                                    @RequestParam(required = false) String authCode) {
         Signup currentSignup = signupRepository.findById(id);
         if(currentSignup == null) {
             return ResponseEntity.notFound().build();
         }
-
 
         // If role is being updated and is restricted, validate auth code
         if (request.getRole() != null && request.getRole() != currentSignup.getRole()
@@ -125,8 +175,20 @@ public class SignupController {
         return ResponseEntity.ok(signupRepository.findById(id));
     }
 
+    /**
+     * Delete signup information.
+     *
+     * @param id Signup ID
+     * @param authCode Authentication code for role-based delete
+     * @return Response entity indicating success or failure
+     */
     @DeleteMapping("/{id}")
     @Transactional
+    @Operation(summary = "Delete signup information", description = "Deletes a signup entry along with associated person data.")
+    @ApiResponse(responseCode = "200", description = "Successfully deleted the signup")
+    @ApiResponse(responseCode = "403", description = "Forbidden: Only admins can delete users")
+    @ApiResponse(responseCode = "404", description = "Signup not found")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
     public ResponseEntity<String> deleteSignupInfo(@PathVariable int id,
                                                    @RequestParam(required = false) String authCode) {
 

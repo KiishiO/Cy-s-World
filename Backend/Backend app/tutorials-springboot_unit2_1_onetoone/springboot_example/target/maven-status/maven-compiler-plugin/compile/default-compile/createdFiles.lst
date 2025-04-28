@@ -23,6 +23,7 @@ onetoone\Signup\SignupController.class
 onetoone\StudentClasses\StudentClasses.class
 onetoone\Signup\Signup.class
 onetoone\TestingCenter\ExamInfo.class
+onetoone\DiningHall\MenuItemsRepository.class
 onetoone\StudentClasses\ClassesDTO.class
 onetoone\FriendRequest\FriendRequestRepository.class
 onetoone\FriendRequest\FriendRequestController.class
