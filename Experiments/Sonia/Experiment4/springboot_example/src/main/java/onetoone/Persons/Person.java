@@ -8,18 +8,18 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 
-import onetoone.Laptops.Laptop;
+import onetoone.Signup.Signup;
 
 /**
- * 
+ *
  * @author Vivek Bengre
- * 
- */ 
+ *
+ */
 
 @Entity
 public class Person {
 
-     /* 
+    /*
      * The annotation @ID marks the field below as the primary key for the table created by springboot
      * The @GeneratedValue generates a value if not already present, The strategy in this case is to start from 1 and increment for each table
      */
@@ -28,7 +28,7 @@ public class Person {
     private int id;
     private String name;
     private String emailId;
-    private boolean ifActive;
+    //private boolean ifActive;
 
     /*
      * @OneToOne creates a relation between the current entity/table(Laptop) with the entity/table defined below it(Person)
@@ -37,13 +37,13 @@ public class Person {
      * @JoinColumn defines the ownership of the foreign key i.e. the Person table will have a field called laptop_id
      */
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "laptop_id")
-    private Laptop laptop;
+    @JoinColumn(name = "signup_id")
+    private Signup signup;
 
     public Person(String name, String emailId) {
         this.name = name;
         this.emailId = emailId;
-        this.ifActive = true;
+        //this.ifActive = true;
     }
 
     public Person() {
@@ -75,20 +75,20 @@ public class Person {
         this.emailId = emailId;
     }
 
-    public boolean getIsActive(){
-        return ifActive;
+//    public boolean getIsActive(){
+//        return ifActive;
+//    }
+//
+//    public void setIfActive(boolean ifActive){
+//        this.ifActive = ifActive;
+//    }
+
+    public Signup getSignupInfo(){
+        return signup;
     }
 
-    public void setIfActive(boolean ifActive){
-        this.ifActive = ifActive;
+    public void setSignupInfo(Signup signup){
+        this.signup = signup;
     }
 
-    public Laptop getLaptop(){
-        return laptop;
-    }
-
-    public void setLaptop(Laptop laptop){
-        this.laptop = laptop;
-    }
-    
 }

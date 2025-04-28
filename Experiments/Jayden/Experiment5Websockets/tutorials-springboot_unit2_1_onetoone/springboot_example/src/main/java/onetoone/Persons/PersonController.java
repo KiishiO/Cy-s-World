@@ -12,8 +12,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+<<<<<<<< HEAD:Experiments/Jayden/Experiment5Websockets/tutorials-springboot_unit2_1_onetoone/springboot_example/src/main/java/onetoone/Persons/PersonController.java
 //import onetoone.Laptops.Laptop;
 //import onetoone.Laptops.LaptopRepository;
+========
+import onetoone.Laptops.Laptop;
+import onetoone.Laptops.LaptopRepository;
+>>>>>>>> origin:Experiments/Sonia/Experiment6/springboot_example/src/main/java/onetoone/Persons/PersonController.java
 
 /**
  * 
@@ -27,8 +32,13 @@ public class PersonController {
     @Autowired
     PersonRepository PersonRepository;
 
+<<<<<<<< HEAD:Experiments/Jayden/Experiment5Websockets/tutorials-springboot_unit2_1_onetoone/springboot_example/src/main/java/onetoone/Persons/PersonController.java
 //    @Autowired
 //    LaptopRepository laptopRepository;
+========
+    @Autowired
+    LaptopRepository laptopRepository;
+>>>>>>>> origin:Experiments/Sonia/Experiment6/springboot_example/src/main/java/onetoone/Persons/PersonController.java
 
     private String success = "{\"message\":\"success\"}";
     private String failure = "{\"message\":\"failure\"}";
@@ -76,6 +86,7 @@ public class PersonController {
         return PersonRepository.findById(id);
     }
 
+<<<<<<<< HEAD:Experiments/Jayden/Experiment5Websockets/tutorials-springboot_unit2_1_onetoone/springboot_example/src/main/java/onetoone/Persons/PersonController.java
 //    @PutMapping("/Persons/{PersonId}/laptops/{laptopId}")
 //    String assignLaptopToPerson(@PathVariable int PersonId,@PathVariable int laptopId){
 //        Person Person = PersonRepository.findById(PersonId);
@@ -87,6 +98,19 @@ public class PersonController {
 //        PersonRepository.save(Person);
 //        return success;
 //    }
+========
+    @PutMapping("/Persons/{PersonId}/laptops/{laptopId}")
+    String assignLaptopToPerson(@PathVariable int PersonId,@PathVariable int laptopId){
+        Person Person = PersonRepository.findById(PersonId);
+        Laptop laptop = laptopRepository.findById(laptopId);
+        if(Person == null || laptop == null)
+            return failure;
+        laptop.setPerson(Person);
+        Person.setLaptop(laptop);
+        PersonRepository.save(Person);
+        return success;
+    }
+>>>>>>>> origin:Experiments/Sonia/Experiment6/springboot_example/src/main/java/onetoone/Persons/PersonController.java
 
     @DeleteMapping(path = "/Persons/{id}")
     String deletePerson(@PathVariable int id){

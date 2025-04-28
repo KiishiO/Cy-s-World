@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image WebSocket Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .upload-section, .view-section {
+            flex: 1;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .image-preview {
+            width: 100%;
+            height: 300px;
+            background-color: #f5f5f5;
+            border: 1px dashed #ccc;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        input[type="file"] {
+            margin-bottom: 10px;
+        }
+        #status {
+            margin-top: 10px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image Test Page</h1>
+    
+    <div class="container">
+        <div class="upload-section">
+            <h2>Upload Image</h2>
+            <form id="uploadForm">
+                <input type="file" id="imageInput" accept="image/*">
+                <button type="submit">Upload Image</button>
+            </form>
+            <div class="image-preview" id="uploadPreview">
+                <p>Preview will appear here</p>
+            </div>
+        </div>
+        
+        <div class="view-section">
+            <h2>Latest Image</h2>
+            <button id="checkLatest">Check for Latest Image</button>
+            <div class="image-preview" id="latestImage">
+                <p>Latest image will appear here</p>
+            </div>
+            <div id="status">Status: Ready</div>
+        </div>
+    </div>
+    
+    <script>
+        const SERVER_URL = 'http://192.168.1.150:8080';
+        
+        // Image preview for upload
+        const imageInput = document.getElementById('imageInput');
+        const uploadPreview = document.getElementById('uploadPreview');
+        
+        imageInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadPreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Upload form
+        const uploadForm = document.getElementById('uploadForm');
+        uploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const file = imageInput.files[0];
+            if (!file) {
+                alert('Please select an image first!');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            fetch(`${SERVER_URL}/images`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(result => {
+                document.getElementById('status').textContent = `Status: ${result}`;
+                // After upload, check for latest image
+                checkForLatestImage();
+            })
+            .catch(error => {
+                document.getElementById('status').textContent = `Status: Error - ${error.message}`;
+            });
+        });
+        
+        // Check for latest image
+        const checkLatestButton = document.getElementById('checkLatest');
+        const latestImageDiv = document.getElementById('latestImage');
+        
+        function checkForLatestImage() {
+            fetch(`${SERVER_URL}/latest-image`)
+            .then(response => response.text())
+            .then(imageId => {
+                if (imageId && parseInt(imageId) > 0) {
+                    document.getElementById('status').textContent = `Status: Found image ID ${imageId}`;
+                    latestImageDiv.innerHTML = `<img src="${SERVER_URL}/images/${imageId}" alt="Latest Image">`;
+                } else {
+                    document.getElementById('status').textContent = `Status: No images found`;
+                }
+            })
+            .catch(error => {
+                document.getElementById('status').textContent = `Status: Error - ${error.message}`;
+            });
+        }
+        
+        checkLatestButton.addEventListener('click', checkForLatestImage);
+        
+        // Initial check for latest image
+        checkForLatestImage();
+    </script>
+</body>
+</html>

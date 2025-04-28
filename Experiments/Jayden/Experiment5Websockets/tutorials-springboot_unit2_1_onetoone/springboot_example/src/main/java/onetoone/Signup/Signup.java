@@ -36,6 +36,7 @@ public class Signup {
     @JsonIgnore
     private Person person;
 
+<<<<<<<< HEAD:Experiments/Jayden/Experiment5Websockets/tutorials-springboot_unit2_1_onetoone/springboot_example/src/main/java/onetoone/Signup/Signup.java
 
     @OneToOne(mappedBy = "signup")
     //@JsonManagedReference // Prevents infinite recursion in Signup
@@ -50,6 +51,17 @@ public class Signup {
         this.roles = roles;
         //this.person = person;
         //createNewPerson
+========
+    //String firstAndLastName
+    public Signup(String username, String email, String password) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        //this.firstAndLastName = firstAndLastName;
+        //this.person = person;
+        //createNewPerson
+        this.person = new Person(username, email);
+>>>>>>>> origin:Experiments/Sonia/Experiment4/springboot_example/src/main/java/onetoone/Signup/Signup.java
 
     }
 

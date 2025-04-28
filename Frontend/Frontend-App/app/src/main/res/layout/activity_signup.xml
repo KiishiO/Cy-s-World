@@ -22,7 +22,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Login Card -->
+    <!-- SignUp Card -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/signUpCard"
         android:layout_width="match_parent"
@@ -83,6 +83,44 @@
                     android:layout_height="wrap_content"
                     android:hint="Net-ID @iastate.edu"
                     android:inputType="text"
+                    android:textColor="@color/white" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Role Selection Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/signUp_btnRoleSelection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:backgroundTint="#2A2A2A"
+                android:padding="12dp"
+                android:text="Select Role"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:cornerRadius="8dp"
+                app:icon="@android:drawable/arrow_down_float"
+                app:iconGravity="end"
+                app:iconTint="@color/white"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                app:strokeColor="@color/cardinal_red" />
+
+            <!-- Authentication Code Input (for teacher & Admin Users) -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/signUp_authCodeLayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Authentication Code"
+                app:boxStrokeColor="@color/white"
+                app:hintTextColor="@color/white"
+                android:visibility="gone">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/signUp_etAuthCode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
                     android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
 

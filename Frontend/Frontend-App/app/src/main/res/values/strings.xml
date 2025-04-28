@@ -1,3 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Own_Example</string>
+
+    <!-- Bus System Strings -->
+    <string name="title_activity_bus">Cyclone Bus Tracker</string>
+    <string name="empty_bus_list">No buses available</string>
+    <string name="add_bus">Add Bus</string>
+    <string name="update_location">Update Location</string>
+    <string name="rate_bus">Rate Bus</string>
+    <string name="bus_name_hint">Bus Name (e.g., Red Route)</string>
+    <string name="bus_number_hint">Bus Number</string>
+    <string name="stop_location_hint">Current Stop Location (Optional)</string>
+    <string name="rating_label">Bus Rating</string>
+    <string name="rating_a">A - Excellent</string>
+    <string name="rating_b">B - Good</string>
+    <string name="rating_c">C - Average</string>
+    <string name="rating_d">D - Poor</string>
+    <string name="rating_f">F - Critical</string>
+    <string name="error_loading_buses">Error loading buses. Pull down to retry.</string>
+    <string name="success_add_bus">Bus added successfully</string>
+    <string name="success_update_location">Location updated successfully</string>
+    <string name="success_rate_bus">Rating updated successfully</string>
 </resources>

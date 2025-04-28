@@ -16,7 +16,10 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
     void deleteById(int id);
 
+<<<<<<<< HEAD:Experiments/Jayden/Experiment5Websockets/tutorials-springboot_unit2_1_onetoone/springboot_example/src/main/java/onetoone/Persons/PersonRepository.java
     Person findBySignup_Id(int id);
 
+========
+>>>>>>>> origin:Experiments/Sonia/Experiment6/springboot_example/src/main/java/onetoone/Persons/PersonRepository.java
     Person findByLaptop_Id(int id);
 }
