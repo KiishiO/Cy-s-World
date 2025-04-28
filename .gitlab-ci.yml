@@ -40,12 +40,12 @@ auto-deploy:
   - springboot_tag      # change to your runner's tag
   script:               # script to run the deployment service you created
     script:
-    - cd "Backend/Backend app/tutorials-springboot_unit2_1_onetoone/springboot_example"
-    - mvn package                      # <<< Build the project first!!
-    - sudo mv target/*.jar /target/web-demo.jar 
-    - sudo systemctl stop system-web-demo
-    - sudo systemctl start system-web-demo
-  only:
+      - cd "Backend/Backend app/tutorials-springboot_unit2_1_onetoone/springboot_example"
+      - mvn package                      # <<< Build the project first!!
+      - sudo mv target/*.jar /target/web-demo.jar 
+      - sudo systemctl stop system-web-demo
+      - sudo systemctl start system-web-demo
+    only:
     refs:
       - main            # only to trigger the pipeline when changes are pushed to 'main'
     changes:
