@@ -1,5 +1,8 @@
 package onetoone.BusSystem;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +34,8 @@ public class Bus {
     // Default constructor needed for JPA
     public Bus() {
     }
-
+    @NotBlank
+    @Size(min = 0, max = 20)
     public Bus(int busNum, String busName, char busRating) {
         this.busNum = busNum;
         this.busName = busName;
