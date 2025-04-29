@@ -58,8 +58,9 @@ android-build:
   before_script:                    # enable gradlew, change 'Frontend' to where you have 'gradlew'
     - export GRADLE_USER_HOME=`pwd`/.gradle
     - chmod +x ./Frontend/Frontend-App/gradlew
+    - cd Frontend/Frontend-App
   script:
-    - cd Frontend/Frontend-App                   # change 'Frontend' to where you have 'gradlew' (do not add / in the beginning)
+    #- cd Frontend/Frontend-App                   # change 'Frontend' to where you have 'gradlew' (do not add / in the beginning)
     - ./gradlew build               # gradle build
   only:
     refs:
