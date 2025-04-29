@@ -15,9 +15,13 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+<<<<<<< HEAD
+=======
         <option value="Enum" />
         <option value="Class" />
+>>>>>>> origin
         <option value="Interface" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -58,11 +62,23 @@
     "Maven.onetoone [compile].executor": "Run",
     "Maven.onetoone [install].executor": "Run",
     "Maven.onetoone [package].executor": "Run",
+<<<<<<< HEAD
+    "Notification.DisplayName-DoNotAsk-Vcs Important Messages": "VCS important messages",
+    "Notification.DoNotAsk-Vcs Important Messages": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "Bookstore-Backend",
+=======
     "Notification.DisplayName-DoNotAsk-Lombok plugin": "Lombok integration problem",
     "Notification.DoNotAsk-Lombok plugin": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
+<<<<<<< HEAD
+    "git-widget-placeholder": "testBranch",
+>>>>>>> origin
+=======
     "git-widget-placeholder": "main",
+>>>>>>> origin
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/sonia/2_swarna_4/Backend/Backend app/tutorials-springboot_unit2_1_onetoone/springboot_example",
     "node.js.detected.package.eslint": "true",
@@ -124,8 +140,15 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1739499231099</updated>
+<<<<<<< HEAD
+      <workItem from="1745633789796" duration="4436000" />
+=======
       <workItem from="1744391399815" duration="325000" />
+<<<<<<< HEAD
+>>>>>>> origin
+=======
       <workItem from="1745871172627" duration="609000" />
+>>>>>>> origin
     </task>
     <servers />
   </component>
@@ -174,6 +197,29 @@
           <option name="timeStamp" value="41" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
+<<<<<<< HEAD
+          <url>file://$PROJECT_DIR$/src/main/java/onetoone/Signup/Signup.java</url>
+          <line>20</line>
+          <option name="timeStamp" value="45" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/onetoone/Signup/SignupController.java</url>
+          <line>77</line>
+          <option name="timeStamp" value="50" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/onetoone/Signup/SignupController.java</url>
+          <line>60</line>
+          <option name="timeStamp" value="55" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/onetoone/Signup/SignupController.java</url>
+          <line>63</line>
+          <option name="timeStamp" value="56" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+=======
+>>>>>>> origin
           <url>file://$PROJECT_DIR$/src/main/java/onetoone/StudyTable/StudyTableController.java</url>
           <line>17</line>
           <option name="timeStamp" value="57" />
@@ -234,6 +280,20 @@
           <properties field="signup" class="onetoone.Login.Login" />
           <option name="timeStamp" value="42" />
         </line-breakpoint>
+<<<<<<< HEAD
+<<<<<<< HEAD
+        <line-breakpoint enabled="true" type="java-method">
+          <url>file://$PROJECT_DIR$/src/main/java/onetoone/Signup/Signup.java</url>
+          <line>119</line>
+          <properties class="onetoone.Signup.Signup">
+            <option name="EMULATED" value="true" />
+            <option name="WATCH_EXIT" value="false" />
+          </properties>
+          <option name="timeStamp" value="51" />
+        </line-breakpoint>
+=======
+>>>>>>> origin
+=======
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/onetoone/Login/LoginController.java</url>
           <line>45</line>
@@ -243,6 +303,7 @@
           </properties>
           <option name="timeStamp" value="87" />
         </line-breakpoint>
+>>>>>>> origin
       </breakpoints>
     </breakpoint-manager>
   </component>

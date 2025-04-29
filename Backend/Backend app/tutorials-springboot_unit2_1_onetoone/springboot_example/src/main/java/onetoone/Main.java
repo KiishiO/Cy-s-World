@@ -19,10 +19,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 /**
- * 
+ *
  * @author Sonia Patil
- * 
- */ 
+ *
+ */
 
 @SpringBootApplication
 //@ComponentScan(basePackages = {"onetoone.CampusEvents"})
@@ -157,9 +157,9 @@ class Main {
             personRepository.save(person4);
 
             // Saving Login details
-           login4.setPerson(person4);            person4.setLogin(login4);
-           login4.setSignup(signup4);
-           loginRepository.save(login4);
+            login4.setPerson(person4);            person4.setLogin(login4);
+            login4.setSignup(signup4);
+            loginRepository.save(login4);
 
             person4.setLogin(login4);
             signup4.setLogin(login4);
