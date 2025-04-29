@@ -1,0 +1,1 @@
+typeSearchIndex = [{"p":"com.example.own_example","l":"AdminEventsActivity"},{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"com.example.own_example.models","l":"CampusEvent"},{"p":"com.example.own_example","l":"CampusEventsActivity"}];updateSearchResults();

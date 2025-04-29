@@ -35,6 +35,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Activity for managing campus events by administrators.
+ * Allows admins to create, edit, delete and send updates about campus events.
+ * Implements AdminEventService.AdminEventsListener to handle events from the service.
+ */
 public class AdminEventsActivity extends AppCompatActivity implements AdminEventService.AdminEventsListener {
 
     private static final String TAG = "AdminEventsActivity";
@@ -53,14 +58,6 @@ public class AdminEventsActivity extends AppCompatActivity implements AdminEvent
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_events);
 
-//        // Get admin username
-//        adminUsername = UserService.getInstance().getCurrentUsername();
-//        if (adminUsername == null || adminUsername.isEmpty() || !UserService.getInstance().isAdmin()) {
-//            Toast.makeText(this, "Administrator access required", Toast.LENGTH_SHORT).show();
-//            finish();
-//            return;
-//        }
-
         // Get admin username directly from SharedPreferences
         SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
         adminUsername = prefs.getString("username", "");
@@ -69,11 +66,7 @@ public class AdminEventsActivity extends AppCompatActivity implements AdminEvent
         // Log values for debugging
         Log.d("AdminEvents", "Username: " + adminUsername + ", Role: " + role);
 
-        // Get admin username
-        //adminUsername = UserService.getInstance().getCurrentUsername();
-
         // Check role using the same method as AdminDashboardActivity
-        //SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
         String userRoleStr = prefs.getString("user_role", "STUDENT");
 
         try {
@@ -119,6 +112,11 @@ public class AdminEventsActivity extends AppCompatActivity implements AdminEvent
         updateConnectionStatus(false);
     }
 
+    /**
+     * Displays a dialog for adding a new event or editing an existing one.
+     *
+     * @param eventToEdit The event to edit, or null if adding a new event
+     */
     private void showEventDialog(CampusEvent eventToEdit) {
         boolean isEditing = eventToEdit != null;
 
@@ -270,11 +268,24 @@ public class AdminEventsActivity extends AppCompatActivity implements AdminEvent
         });
     }
 
+    /**
+     * Parse a date and time string into a Date object.
+     *
+     * @param date The date string in format yyyy-MM-dd
+     * @param time The time string in format HH:mm
+     * @return A Date object representing the combined date and time
+     * @throws Exception If the date/time cannot be parsed
+     */
     private Date parseDateTime(String date, String time) throws Exception {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
         return formatter.parse(date + " " + time);
     }
 
+    /**
+     * Shows a date picker dialog for the given EditText.
+     *
+     * @param dateInput The EditText to update with the selected date
+     */
     private void showDatePicker(final EditText dateInput) {
         final Calendar calendar = Calendar.getInstance();
 
@@ -307,6 +318,11 @@ public class AdminEventsActivity extends AppCompatActivity implements AdminEvent
         datePickerDialog.show();
     }
 
+    /**
+     * Shows a time picker dialog for the given EditText.
+     *
+     * @param timeInput The EditText to update with the selected time
+     */
     private void showTimePicker(final EditText timeInput) {
         final Calendar calendar = Calendar.getInstance();
 
@@ -338,10 +354,20 @@ public class AdminEventsActivity extends AppCompatActivity implements AdminEvent
         timePickerDialog.show();
     }
 
+    /**
+     * Handles the action to edit an event.
+     *
+     * @param event The event to edit
+     */
     private void onEditEvent(CampusEvent event) {
         showEventDialog(event);
     }
 
+    /**
+     * Handles the action to delete an event.
+     *
+     * @param event The event to delete
+     */
     private void onDeleteEvent(CampusEvent event) {
         new AlertDialog.Builder(this)
                 .setTitle("Delete Event")
@@ -353,6 +379,11 @@ public class AdminEventsActivity extends AppCompatActivity implements AdminEvent
                 .show();
     }
 
+    /**
+     * Handles the action to send an update about an event.
+     *
+     * @param event The event to send an update about
+     */
     private void onSendEventUpdate(CampusEvent event) {
         // Show dialog to send an update message about this event
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_send_event_update, null);
@@ -375,6 +406,11 @@ public class AdminEventsActivity extends AppCompatActivity implements AdminEvent
                 .show();
     }
 
+    /**
+     * Updates the connection status UI based on the connection state.
+     *
+     * @param connected Whether the app is connected to the server
+     */
     private void updateConnectionStatus(boolean connected) {
         runOnUiThread(() -> {
             if (connected) {
@@ -392,6 +428,11 @@ public class AdminEventsActivity extends AppCompatActivity implements AdminEvent
 
     // AdminEventService.AdminEventsListener implementation
 
+    /**
+     * Called when the list of events is updated.
+     *
+     * @param updatedEvents The new list of events
+     */
     @Override
     public void onEventsUpdated(List<CampusEvent> updatedEvents) {
         runOnUiThread(() -> {
@@ -401,6 +442,11 @@ public class AdminEventsActivity extends AppCompatActivity implements AdminEvent
         });
     }
 
+    /**
+     * Called when a new event is created.
+     *
+     * @param newEvent The newly created event
+     */
     @Override
     public void onEventCreated(CampusEvent newEvent) {
         runOnUiThread(() -> {
@@ -410,6 +456,11 @@ public class AdminEventsActivity extends AppCompatActivity implements AdminEvent
         });
     }
 
+    /**
+     * Called when an event is updated.
+     *
+     * @param updatedEvent The updated event
+     */
     @Override
     public void onEventUpdated(CampusEvent updatedEvent) {
         runOnUiThread(() -> {
@@ -424,6 +475,11 @@ public class AdminEventsActivity extends AppCompatActivity implements AdminEvent
         });
     }
 
+    /**
+     * Called when an event is deleted.
+     *
+     * @param eventId The ID of the deleted event
+     */
     @Override
     public void onEventDeleted(String eventId) {
         runOnUiThread(() -> {
@@ -438,6 +494,11 @@ public class AdminEventsActivity extends AppCompatActivity implements AdminEvent
         });
     }
 
+    /**
+     * Called when a chat message is sent for an event.
+     *
+     * @param chatMessage The sent chat message
+     */
     @Override
     public void onChatMessageSent(EventChat chatMessage) {
         runOnUiThread(() -> {
@@ -445,11 +506,21 @@ public class AdminEventsActivity extends AppCompatActivity implements AdminEvent
         });
     }
 
+    /**
+     * Called when the connection state changes.
+     *
+     * @param connected Whether the app is connected to the server
+     */
     @Override
     public void onConnectionStateChanged(boolean connected) {
         updateConnectionStatus(connected);
     }
 
+    /**
+     * Called when an error occurs in the event service.
+     *
+     * @param errorMessage The error message
+     */
     @Override
     public void onError(String errorMessage) {
         runOnUiThread(() -> {

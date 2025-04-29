@@ -1,4 +1,6 @@
 package onetoone.FriendRequest;
+
+import onetoone.DiningHall.DiningHall;
 import onetoone.FriendRequest.FriendRequestRepository;
 import onetoone.Persons.Person;
 import onetoone.Persons.PersonRepository;
@@ -6,9 +8,16 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import java.util.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Builder;
 
 @RestController
+@Tag(name = "Friend Request Management API")
 @RequestMapping("/FriendRequests")
 public class FriendRequestController {
 
@@ -20,8 +29,19 @@ public class FriendRequestController {
         this.personRepository = personRepository;
     }
 
-    // Send a friend request with JSON
+    /**
+     * Sends a friend request to another person.
+     * @param requestData A map containing senderId and receiverId.
+     * @return A response entity with the result of the friend request operation.
+     */
     @PostMapping("/send")
+    @Operation(summary = "Send a friend request", description = "Sends a friend request from one person to another")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Friend request sent successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FriendRequest.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input or request"),
+            @ApiResponse(responseCode = "404", description = "Sender or receiver not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<?> sendRequestJson(@RequestBody Map<String, Long> requestData) {
         try {
             Long senderId = requestData.get("senderId");
@@ -56,9 +76,13 @@ public class FriendRequestController {
         }
     }
 
-    // Helper method to create and save friend request
+    /**
+     * Creates and saves the friend request.
+     * @param sender The sender of the request.
+     * @param receiver The receiver of the request.
+     * @return A response entity with the saved friend request.
+     */
     private ResponseEntity<?> createAndSaveFriendRequest(Person sender, Person receiver) {
-        // Temporary workaround if builder is not working
         FriendRequest request = new FriendRequest();
         request.setSender(sender);
         request.setReceiver(receiver);
@@ -68,21 +92,17 @@ public class FriendRequestController {
 
         return ResponseEntity.ok(createFriendRequestResponse(savedRequest));
     }
-//    private ResponseEntity<?> createAndSaveFriendRequest(Person sender, Person receiver) {
-//
-//        FriendRequest request = FriendRequest.builder()
-//                .sender(sender)
-//                .receiver(receiver)
-//                .status(FriendRequest.Status.PENDING)
-//                .build();
-//
-//        FriendRequest savedRequest = requestRepository.save(request);
-//
-//        return ResponseEntity.ok(createFriendRequestResponse(savedRequest));
-//    }
 
-    // Get ALL friend requests
+    /**
+     * Retrieves all friend requests in the system.
+     * @return A response entity with a list of all friend requests.
+     */
     @GetMapping("/all")
+    @Operation(summary = "Get all friend requests", description = "Retrieves all friend requests in the system")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of all friend requests", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FriendRequest.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<?> getAllRequests() {
         try {
             List<FriendRequest> requests = requestRepository.findAll();
@@ -100,8 +120,18 @@ public class FriendRequestController {
         }
     }
 
-    // Get sent requests by sender ID
+    /**
+     * Retrieves all friend requests sent by a specific sender.
+     * @param senderId The ID of the sender.
+     * @return A response entity with the list of sent friend requests.
+     */
     @GetMapping("/sent/{senderId}")
+    @Operation(summary = "Get sent friend requests", description = "Retrieves all friend requests sent by a specific sender")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of sent friend requests", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FriendRequest.class))),
+            @ApiResponse(responseCode = "404", description = "Sender not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<?> getSentRequests(@PathVariable Long senderId) {
         try {
             Optional<Person> senderOpt = personRepository.findById(senderId);
@@ -125,8 +155,18 @@ public class FriendRequestController {
         }
     }
 
-    // Get received requests
+    /**
+     * Retrieves all friend requests received by a specific receiver.
+     * @param receiverId The ID of the receiver.
+     * @return A response entity with the list of received friend requests.
+     */
     @GetMapping("/received/{receiverId}")
+    @Operation(summary = "Get received friend requests", description = "Retrieves all friend requests received by a specific receiver")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of received friend requests", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FriendRequest.class))),
+            @ApiResponse(responseCode = "404", description = "Receiver not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<?> getReceivedRequests(@PathVariable Long receiverId) {
         try {
             Optional<Person> receiverOpt = personRepository.findById(receiverId);
@@ -150,11 +190,21 @@ public class FriendRequestController {
         }
     }
 
-    // Accept or reject friend request
+    /**
+     * Accepts or rejects a specific friend request.
+     * @param requestData A map containing the requestId and the desired status (ACCEPTED or REJECTED).
+     * @return A response entity with the result of the operation.
+     */
     @PostMapping("/respond")
+    @Operation(summary = "Respond to a friend request", description = "Accepts or rejects a friend request")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Friend request responded successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FriendRequest.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid status provided"),
+            @ApiResponse(responseCode = "404", description = "Friend request not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<?> respondToRequest(@RequestBody Map<String, Object> requestData) {
         try {
-            // Extract requestId and status from JSON
             Long requestId = Long.valueOf(requestData.get("requestId").toString());
             String status = requestData.get("status").toString();
 
@@ -171,12 +221,8 @@ public class FriendRequestController {
 
             if ("ACCEPTED".equalsIgnoreCase(status)) {
                 request.setStatus(FriendRequest.Status.ACCEPTED);
-
-                // Add each person to the other's friend list
                 sender.getFriends().add(receiver);
                 receiver.getFriends().add(sender);
-
-                // Save updated persons
                 personRepository.save(sender);
                 personRepository.save(receiver);
 
@@ -186,7 +232,6 @@ public class FriendRequestController {
 
                 return ResponseEntity.ok(response);
             } else if ("REJECTED".equalsIgnoreCase(status)) {
-                // Delete the request from the database
                 requestRepository.deleteById(requestId);
                 return ResponseEntity.ok(createErrorResponse("Friend request rejected and removed."));
             } else {
@@ -200,53 +245,18 @@ public class FriendRequestController {
         }
     }
 
-//    @PostMapping("/respond")
-//    public ResponseEntity<?> respondToRequest(@RequestBody Map<String, Object> requestData) {
-//        try {
-//            // Extract requestId and status from JSON
-//            Long requestId = Long.valueOf(requestData.get("requestId").toString());
-//            String status = requestData.get("status").toString();
-//
-//            Optional<FriendRequest> requestOptional = requestRepository.findById(requestId);
-//
-//            if (requestOptional.isEmpty()) {
-//                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                        .body(createErrorResponse("Friend request not found with ID: " + requestId));
-//            }
-//
-//            FriendRequest request = requestOptional.get();
-//
-//            if ("ACCEPTED".equalsIgnoreCase(status)) {
-//                request.setStatus(FriendRequest.Status.ACCEPTED);
-//                request.getSender().getFriends().add(request.getReceiver());
-//                request.getReceiver().getFriends().add(request.getSender());
-//                personRepository.save(request.getReceiver());
-//                personRepository.save(request.getSender());
-//            } else if ("REJECTED".equalsIgnoreCase(status)) {
-//                request.setStatus(FriendRequest.Status.REJECTED);
-//            } else {
-//                return ResponseEntity.badRequest()
-//                        .body(createErrorResponse("Invalid status. Must be 'ACCEPTED' or 'REJECTED'"));
-//            }
-//
-//            FriendRequest savedRequest = requestRepository.save(request);
-//            Map<String, Object> response = createFriendRequestResponse(savedRequest);
-//
-//            if (request.getStatus() == FriendRequest.Status.ACCEPTED) {
-//                response.put("message", "Friend request accepted. Users are now friends.");
-//            }
-//
-//            return ResponseEntity.ok(response);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(createErrorResponse("Error responding to friend request: " + e.getMessage()));
-//        }
-//    }
-
-
-    // Cancel a friend request
+    /**
+     * Cancels a specific friend request.
+     * @param requestId The ID of the request to be cancelled.
+     * @return A response entity with the result of the cancellation.
+     */
     @DeleteMapping("/cancel/{requestId}")
+    @Operation(summary = "Cancel a friend request", description = "Cancels a specific friend request by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Friend request cancelled successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FriendRequest.class))),
+            @ApiResponse(responseCode = "404", description = "Friend request not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<?> cancelFriendRequest(@PathVariable Long requestId) {
         try {
             Optional<FriendRequest> requestOpt = requestRepository.findById(requestId);
@@ -255,7 +265,6 @@ public class FriendRequestController {
                         .body(createErrorResponse("Friend request not found with ID: " + requestId));
             }
 
-            // Return the request info before deleting
             Map<String, Object> response = createFriendRequestResponse(requestOpt.get());
             response.put("message", "Friend request successfully cancelled");
 
@@ -268,8 +277,18 @@ public class FriendRequestController {
         }
     }
 
-    // Get Friends List with details
+    /**
+     * Retrieves the friends list for a specific person.
+     * @param personId The ID of the person whose friends list is to be retrieved.
+     * @return A response entity with the details of the person's friends.
+     */
     @GetMapping("/friends/{personId}")
+    @Operation(summary = "Get friends list", description = "Retrieves the friends list of a person")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Friends list retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FriendRequest.class))),
+            @ApiResponse(responseCode = "404", description = "Person not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<?> getFriends(@PathVariable Long personId) {
         try {
             Optional<Person> personOpt = personRepository.findById(personId);
@@ -285,7 +304,6 @@ public class FriendRequestController {
                 Map<String, Object> friendDetail = new HashMap<>();
                 friendDetail.put("id", friend.getId());
                 friendDetail.put("name", friend.getName());
-                // Add other properties you want to include
                 friendsDetails.add(friendDetail);
             }
 
@@ -303,7 +321,11 @@ public class FriendRequestController {
         }
     }
 
-    // Helper method to create standardized friend request response
+    /**
+     * Helper method to create a standardized response for a friend request.
+     * @param request The friend request object.
+     * @return A map containing the details of the friend request.
+     */
     private Map<String, Object> createFriendRequestResponse(FriendRequest request) {
         Map<String, Object> response = new HashMap<>();
         response.put("requestId", request.getId());
@@ -324,7 +346,11 @@ public class FriendRequestController {
         return response;
     }
 
-    // Helper method to create error response
+    /**
+     * Helper method to create an error response.
+     * @param message The error message to be included in the response.
+     * @return A map containing the error message.
+     */
     private Map<String, String> createErrorResponse(String message) {
         Map<String, String> response = new HashMap<>();
         response.put("error", message);

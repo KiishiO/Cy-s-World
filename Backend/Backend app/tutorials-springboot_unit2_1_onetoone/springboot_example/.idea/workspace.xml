@@ -6,8 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="1aba0881-e0d1-4070-88f5-61f265d2e936" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/DiningHall/MenuItems.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHall/MenuItems.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/TestingCenter/UnifiedController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/TestingCenter/UnifiedController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -75,10 +73,14 @@
     "Notification.DoNotAsk-Lombok plugin": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
+<<<<<<< HEAD
     "git-widget-placeholder": "testBranch",
 >>>>>>> origin
+=======
+    "git-widget-placeholder": "main",
+>>>>>>> origin
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/Users/jrock25/2_swarna_4/Backend/Backend app/tutorials-springboot_unit2_1_onetoone/springboot_example",
+    "last_opened_file_path": "C:/Users/sonia/2_swarna_4/Backend/Backend app/tutorials-springboot_unit2_1_onetoone/springboot_example",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
@@ -86,6 +88,7 @@
     "project.structure.last.edited": "SDKs",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -124,8 +127,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-a94e463ab2e7-intellij.indexing.shared.core-IU-243.26053.27" />
-        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.26053.27" />
+        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.23774.435" />
+        <option value="bundled-js-predefined-d6986cc7102b-f27c65a3e318-JavaScript-IU-251.23774.435" />
       </set>
     </attachedChunks>
   </component>
@@ -141,6 +144,10 @@
       <workItem from="1745633789796" duration="4436000" />
 =======
       <workItem from="1744391399815" duration="325000" />
+<<<<<<< HEAD
+>>>>>>> origin
+=======
+      <workItem from="1745871172627" duration="609000" />
 >>>>>>> origin
     </task>
     <servers />
@@ -159,22 +166,29 @@
       </map>
     </option>
   </component>
+  <component name="VcsManagerConfiguration">
+    <ignored-roots>
+      <path value="$USER_HOME$" />
+    </ignored-roots>
+    <MESSAGE value="Merge branch 'javadocs-backend' into 'main'&#10;&#10;Javadocs backend&#10;&#10;See merge request cs309/2025spring/2_swarna_4!42" />
+    <option name="LAST_COMMIT_MESSAGE" value="" />
+  </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/onetoone/Profiles/ProfileController.java</url>
-          <line>67</line>
+          <line>102</line>
           <option name="timeStamp" value="21" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/onetoone/Login/LoginController.java</url>
-          <line>114</line>
+          <line>153</line>
           <option name="timeStamp" value="22" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/onetoone/Login/LoginController.java</url>
-          <line>110</line>
+          <line>149</line>
           <option name="timeStamp" value="33" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -207,7 +221,7 @@
 =======
 >>>>>>> origin
           <url>file://$PROJECT_DIR$/src/main/java/onetoone/StudyTable/StudyTableController.java</url>
-          <line>10</line>
+          <line>17</line>
           <option name="timeStamp" value="57" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -222,8 +236,43 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/onetoone/UserRoles/UserRolesController.java</url>
-          <line>26</line>
+          <line>46</line>
           <option name="timeStamp" value="68" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/onetoone/Profiles/ProfileController.java</url>
+          <line>24</line>
+          <option name="timeStamp" value="88" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/onetoone/Profiles/ProfileController.java</url>
+          <line>26</line>
+          <option name="timeStamp" value="89" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/onetoone/Profiles/ProfileController.java</url>
+          <line>31</line>
+          <option name="timeStamp" value="90" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/onetoone/Profiles/ProfileController.java</url>
+          <line>51</line>
+          <option name="timeStamp" value="91" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/onetoone/Profiles/ProfileController.java</url>
+          <line>53</line>
+          <option name="timeStamp" value="92" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/onetoone/Profiles/ProfileController.java</url>
+          <line>112</line>
+          <option name="timeStamp" value="94" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/onetoone/Profiles/ProfileController.java</url>
+          <line>126</line>
+          <option name="timeStamp" value="95" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-field">
           <url>file://$PROJECT_DIR$/src/main/java/onetoone/Login/Login.java</url>
@@ -231,6 +280,7 @@
           <properties field="signup" class="onetoone.Login.Login" />
           <option name="timeStamp" value="42" />
         </line-breakpoint>
+<<<<<<< HEAD
 <<<<<<< HEAD
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/onetoone/Signup/Signup.java</url>
@@ -242,6 +292,17 @@
           <option name="timeStamp" value="51" />
         </line-breakpoint>
 =======
+>>>>>>> origin
+=======
+        <line-breakpoint enabled="true" type="java-method">
+          <url>file://$PROJECT_DIR$/src/main/java/onetoone/Login/LoginController.java</url>
+          <line>45</line>
+          <properties class="onetoone.Login.LoginController" method="getAllLogins">
+            <option name="EMULATED" value="true" />
+            <option name="WATCH_EXIT" value="false" />
+          </properties>
+          <option name="timeStamp" value="87" />
+        </line-breakpoint>
 >>>>>>> origin
       </breakpoints>
     </breakpoint-manager>

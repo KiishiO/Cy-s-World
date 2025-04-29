@@ -24,6 +24,7 @@ import java.util.Set;
  * 
  */
 @Entity
+@Table(name = "Person")
 public class Person {
 
      /* 
@@ -32,6 +33,7 @@ public class Person {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column
     private int id;
     private String name;
     private String phoneNumber;
@@ -48,7 +50,8 @@ public class Person {
      * @JoinColumn defines the ownership of the foreign key i.e. the Person table will have a field called laptop_id
      */
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "laptop_id")
+//    @JoinColumn(name = "laptop_id")
+    @JsonIgnore
     private Laptop laptop;
 
 //    @ManyToOne(fetch = FetchType.EAGER)

@@ -1,5 +1,12 @@
 package onetoone.StudyTable;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import onetoone.Persons.Person;
 import onetoone.Persons.PersonRepository;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +17,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/sTables")
+@Tag(name = "StudyTables", description = "APIs for managing study groups and tables")
 public class StudyTableController {
 
     private final StudyTableRepository studyTableRepository;
@@ -21,6 +29,13 @@ public class StudyTableController {
     }
 
     // Create a study table entry with JSON
+    @Operation(summary = "Create a study table", description = "Creates a new study table group with one leader and up to 3 additional participants")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Study table successfully created"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "Creator or participant not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PostMapping("/create")
     public ResponseEntity<?> createStudyTableJson(@RequestBody Map<String, Object> requestData) {
         try {
@@ -111,6 +126,11 @@ public class StudyTableController {
     }
 
     // Get ALL study tables
+    @Operation(summary = "Get all study tables", description = "Retrieves all study tables in the system")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved all study tables"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping("/all")
     public ResponseEntity<?> getAllStudyTables() {
         try {
@@ -130,6 +150,12 @@ public class StudyTableController {
     }
 
     // Get study tables by person ID
+    @Operation(summary = "Get study tables by person", description = "Retrieves all study tables where the specified person is the leader")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved study tables"),
+            @ApiResponse(responseCode = "404", description = "Person not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping("/person/{personId}")
     public ResponseEntity<?> getStudyTablesByPerson(@PathVariable Long personId) {
         try {
@@ -155,6 +181,12 @@ public class StudyTableController {
     }
 
     // Get study tables where person is friend
+    @Operation(summary = "Get study tables as friend", description = "Retrieves all study tables where the specified person is a participant")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved study tables"),
+            @ApiResponse(responseCode = "404", description = "Person not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping("/friend/{friendId}")
     public ResponseEntity<?> getStudyTablesAsFriend(@PathVariable Long friendId) {
         try {
@@ -180,6 +212,13 @@ public class StudyTableController {
     }
 
     // Update study table status (accept or reject)
+    @Operation(summary = "Respond to study table invitation", description = "Updates the status of a study table invitation (accept or reject)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully updated study table status"),
+            @ApiResponse(responseCode = "400", description = "Invalid status value"),
+            @ApiResponse(responseCode = "404", description = "Study table not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PutMapping("/respond")
     public ResponseEntity<?> respondToStudyTable(@RequestBody Map<String, Object> requestData) {
         try {
@@ -221,6 +260,12 @@ public class StudyTableController {
     }
 
     // Delete a study table
+    @Operation(summary = "Delete a study table", description = "Removes a study table from the system")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Study table successfully deleted"),
+            @ApiResponse(responseCode = "404", description = "Study table not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @DeleteMapping("/delete/{studyTableId}")
     public ResponseEntity<?> deleteStudyTable(@PathVariable Long studyTableId) {
         try {
@@ -244,6 +289,12 @@ public class StudyTableController {
     }
 
     // Get specific study table by ID
+    @Operation(summary = "Get study table by ID", description = "Retrieves a specific study table by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved study table"),
+            @ApiResponse(responseCode = "404", description = "Study table not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping("/{studyTableId}")
     public ResponseEntity<?> getStudyTableById(@PathVariable Long studyTableId) {
         try {
