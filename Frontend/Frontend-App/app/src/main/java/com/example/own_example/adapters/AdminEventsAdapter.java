@@ -12,7 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-//import com.example.own_example.R;
+import com.example.own_example.R;
 import com.example.own_example.models.CampusEvent;
 
 import java.text.SimpleDateFormat;
