@@ -54,6 +54,7 @@ gen-external-apklibs
 
 # Package Files #
 *.jar
+!Frontend/Frontend-App/gradle/wrapper/gradle-wrapper.jar
 *.war
 *.nar
 *.ear
