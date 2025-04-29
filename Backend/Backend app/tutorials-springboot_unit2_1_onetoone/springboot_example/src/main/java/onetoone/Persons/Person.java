@@ -90,7 +90,7 @@ public class Person {
     @ManyToMany(mappedBy = "persons")  // This is the inverse side of the relationship
     private List<ExamInfo> examInfos = new ArrayList<>();
 
-    @OneToMany(mappedBy = "diningPerson", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL)
     private List<DiningOrder> diningOrders = new ArrayList<>();
 
     // =============================== Constructors ================================== //

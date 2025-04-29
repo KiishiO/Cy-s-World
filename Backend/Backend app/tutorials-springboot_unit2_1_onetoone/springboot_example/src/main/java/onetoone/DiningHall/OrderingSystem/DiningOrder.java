@@ -27,7 +27,7 @@ public class DiningOrder {
     private LocalDateTime orderDate;
 
     @ManyToOne
-    @JoinColumn(name = "diningPerson_id")
+    @JoinColumn(name = "person_id")
     private Person person;
 
     @OneToMany(mappedBy = "diningOrder", cascade = CascadeType.ALL)
