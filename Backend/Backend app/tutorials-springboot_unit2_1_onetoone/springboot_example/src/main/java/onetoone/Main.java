@@ -1,12 +1,13 @@
 package onetoone;
 
-import jakarta.transaction.Transactional;
 import onetoone.DiningHall.DiningHall;
+import onetoone.DiningHall.DiningHallRepository;
 import onetoone.Login.Login;
 import onetoone.Login.LoginRepository;
+import onetoone.Persons.Person;
+import onetoone.Persons.PersonRepository;
 import onetoone.Signup.Signup;
 import onetoone.Signup.SignupRepository;
-import onetoone.StudyTable.StudyTable;
 import onetoone.TestingCenter.ExamInfo;
 import onetoone.TestingCenter.ExamInfoRepository;
 import onetoone.TestingCenter.TestingCenter;
@@ -16,14 +17,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-
-//import onetoone.Laptops.Laptop;
-//import onetoone.Laptops.LaptopRepository;
-import onetoone.Persons.Person;
-import onetoone.Persons.PersonRepository;
-import onetoone.DiningHall.DiningHallRepository;
-import onetoone.Signup.SignupRepository;
-import org.springframework.context.annotation.ComponentScan;
 
 /**
  * 
@@ -191,6 +184,11 @@ class Main {
             ExamInfo examInfo2 = new ExamInfo("physics", "PHYS 2 midterm");
             examInfoRepository.save(examInfo1);
             examInfoRepository.save(examInfo2);
+
+            ExamInfo examInfo3 = new ExamInfo("JAVA Intro", "Coms 288");
+            ExamInfo examInfo4 = new ExamInfo("English Intro", "Expressive writing");
+            examInfoRepository.save(examInfo3);
+            examInfoRepository.save(examInfo4);
 
             // Logging to console (optional, for verification)
             System.out.println("Sample login and person data inserted into the database.");
