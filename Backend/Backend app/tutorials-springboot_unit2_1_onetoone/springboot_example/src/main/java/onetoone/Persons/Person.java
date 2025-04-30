@@ -4,11 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
-<<<<<<< HEAD
+
 import onetoone.DiningHall.OrderingSystem.DiningOrder;
-=======
+
 import onetoone.Bookstore.Order.Order;
->>>>>>> origin
+
 import onetoone.Laptops.Laptop;
 import onetoone.Login.Login;
 import onetoone.Signup.Signup;
