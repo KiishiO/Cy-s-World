@@ -4,7 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
+
+import onetoone.DiningHall.OrderingSystem.DiningOrder;
+
 import onetoone.Bookstore.Order.Order;
+
 import onetoone.Laptops.Laptop;
 import onetoone.Login.Login;
 import onetoone.Signup.Signup;
@@ -93,6 +97,8 @@ public class Person {
     @ManyToMany(mappedBy = "persons")  // This is the inverse side of the relationship
     private List<ExamInfo> examInfos = new ArrayList<>();
 
+    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL)
+    private List<DiningOrder> diningOrders = new ArrayList<>();
 
     // =============================== Constructors ================================== //
 
