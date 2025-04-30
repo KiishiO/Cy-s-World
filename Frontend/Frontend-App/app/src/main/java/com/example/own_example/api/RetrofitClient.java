@@ -1,6 +1,7 @@
 package com.example.own_example.api;
 
 import com.example.own_example.models.DiningHall;
+
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
@@ -22,8 +23,9 @@ public class RetrofitClient {
     // Retrofit instance
     private Retrofit retrofit;
 
-    // API service interface
+    // API service interfaces
     private DiningHallApiService apiService;
+    private DiningOrderApiService diningOrderApiService;
 
     // Private constructor for singleton
     private RetrofitClient() {
@@ -63,8 +65,9 @@ public class RetrofitClient {
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
 
-        // Create API service
+        // Create API services
         apiService = retrofit.create(DiningHallApiService.class);
+        diningOrderApiService = retrofit.create(DiningOrderApiService.class);
     }
 
     // Get singleton instance
@@ -75,8 +78,12 @@ public class RetrofitClient {
         return instance;
     }
 
-    // Get API service
+    // Get API services
     public DiningHallApiService getApiService() {
         return apiService;
+    }
+
+    public DiningOrderApiService getDiningOrderApiService() {
+        return diningOrderApiService;
     }
 }

@@ -157,5 +157,17 @@
             android:exported="false"
             tools:node="merge"
             tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".OrderingActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".OrderHistoryActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
     </application>
 </manifest>
