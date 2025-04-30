@@ -4,15 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1aba0881-e0d1-4070-88f5-61f265d2e936" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHall/OrderingSystem/DiningOrder.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHall/OrderingSystem/DiningOrderItem.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHall/OrderingSystem/DiningOrderItemRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHall/OrderingSystem/DiningOrderRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHall/OrderingSystem/DiningOrderService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/Persons/Person.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/Persons/Person.java" afterDir="false" />
-    </list>
+    <list default="true" id="1aba0881-e0d1-4070-88f5-61f265d2e936" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -22,8 +14,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Enum" />
-        <option value="Class" />
         <option value="Interface" />
+        <option value="Class" />
       </list>
     </option>
   </component>
