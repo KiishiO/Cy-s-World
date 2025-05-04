@@ -6,17 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="aca4cb64-b4bd-467d-8f8c-911a50fcdbfb" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/DiningHall/DiningHallRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHall/DiningHallRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/DiningHall/MenuItemsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHall/MenuItemsRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/DiningHall/OrderingSystem/DiningOrder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHallOrderingSystem/DiningOrder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/DiningHall/OrderingSystem/DiningOrderItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHallOrderingSystem/DiningOrderItem.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/DiningHall/OrderingSystem/DiningOrderItemRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHallOrderingSystem/DiningOrderItemRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/DiningHall/OrderingSystem/DiningOrderRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHallOrderingSystem/DiningOrderRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/DiningHall/OrderingSystem/DiningOrderService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHallOrderingSystem/DiningOrderService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/DiningHall/OrderingSystem/OrderingSystemController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHallOrderingSystem/OrderingSystemController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/Login/LoginRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/Login/LoginRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/Persons/Person.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/Persons/Person.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/Signup/SignupRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/Signup/SignupRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/DiningHallOrderingSystem/DiningOrder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHallOrderingSystem/DiningOrder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/DiningHallOrderingSystem/DiningOrderItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHallOrderingSystem/DiningOrderItem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/DiningHallOrderingSystem/OrderingSystemController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHallOrderingSystem/OrderingSystemController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -131,7 +123,7 @@
       <workItem from="1745633789796" duration="4436000" />
       <workItem from="1744391399815" duration="325000" />
       <workItem from="1745871172627" duration="609000" />
-      <workItem from="1746329593087" duration="983000" />
+      <workItem from="1746329593087" duration="1617000" />
     </task>
     <servers />
   </component>

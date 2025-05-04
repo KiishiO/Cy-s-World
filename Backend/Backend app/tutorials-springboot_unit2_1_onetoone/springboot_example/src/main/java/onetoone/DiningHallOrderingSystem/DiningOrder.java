@@ -33,4 +33,36 @@ public class DiningOrder {
     @OneToMany(mappedBy = "diningOrder", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<DiningOrderItem> items = new ArrayList<>();
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public LocalDateTime getOrderDate() {
+        return orderDate;
+    }
+
+    public void setOrderDate(LocalDateTime orderDate) {
+        this.orderDate = orderDate;
+    }
+
+    public Person getPerson() {
+        return person;
+    }
+
+    public void setPerson(Person person) {
+        this.person = person;
+    }
+
+    public List<DiningOrderItem> getItems() {
+        return items;
+    }
+
+    public void setItems(List<DiningOrderItem> items) {
+        this.items = items;
+    }
 }

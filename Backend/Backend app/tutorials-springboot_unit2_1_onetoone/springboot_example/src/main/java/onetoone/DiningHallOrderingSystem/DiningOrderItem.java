@@ -31,5 +31,35 @@ public class DiningOrderItem {
     @JsonBackReference
     private DiningOrder diningOrder;
 
+    public int getId() {
+        return id;
+    }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public MenuItems getMenuItems() {
+        return menuItems;
+    }
+
+    public void setMenuItems(MenuItems menuItems) {
+        this.menuItems = menuItems;
+    }
+
+    public DiningOrder getDiningOrder() {
+        return diningOrder;
+    }
+
+    public void setDiningOrder(DiningOrder diningOrder) {
+        this.diningOrder = diningOrder;
+    }
 }
