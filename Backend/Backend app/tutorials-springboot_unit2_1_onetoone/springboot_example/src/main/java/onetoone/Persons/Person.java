@@ -1,11 +1,10 @@
 package onetoone.Persons;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 
-import onetoone.DiningHall.OrderingSystem.DiningOrder;
+import onetoone.DiningHallOrderingSystem.DiningOrder;
 
 import onetoone.Bookstore.Order.Order;
 

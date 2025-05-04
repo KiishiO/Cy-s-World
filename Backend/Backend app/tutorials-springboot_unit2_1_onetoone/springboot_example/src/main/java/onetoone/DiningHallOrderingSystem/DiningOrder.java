@@ -1,10 +1,9 @@
-package onetoone.DiningHall.OrderingSystem;
+package onetoone.DiningHallOrderingSystem;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import onetoone.DiningHall.DiningHall;
 import onetoone.Persons.Person;
 
 import java.time.LocalDateTime;
@@ -20,6 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @Table(name = "diningOrders")
 public class DiningOrder {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
