@@ -1,5 +1,6 @@
 package onetoone.DiningHallOrderingSystem;
 
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import onetoone.DiningHall.MenuItems;
 
@@ -15,12 +16,13 @@ import java.util.List;
  * Sonia Patil
  */
 @Service
-@RequiredArgsConstructor
+@NoArgsConstructor
 public class DiningOrderService {
 
     PersonRepository personRepository;
     DiningOrderRepository diningOrderRepository;
     MenuItemsRepository menuItemsRepository;
+
 
     public DiningOrder createDiningOrder(DiningOrder diningOrder) {
         int personId = diningOrder.getPerson().getId();
