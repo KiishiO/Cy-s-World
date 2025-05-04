@@ -1,4 +1,4 @@
-package onetoone.Bookstore.Order;
+package onetoone.BookstoreOrderingSystem;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
@@ -6,12 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import onetoone.Bookstore.Products;
-import onetoone.Persons.Person;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
 
 
 @Entity

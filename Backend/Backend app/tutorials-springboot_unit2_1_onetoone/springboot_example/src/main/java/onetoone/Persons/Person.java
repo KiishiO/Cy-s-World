@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 
 import onetoone.DiningHallOrderingSystem.DiningOrder;
 
-import onetoone.Bookstore.Order.Order;
+import onetoone.BookstoreOrderingSystem.Order;
 
 import onetoone.Laptops.Laptop;
 import onetoone.Login.Login;

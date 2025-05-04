@@ -1,4 +1,4 @@
-package onetoone.Bookstore.Order;
+package onetoone.BookstoreOrderingSystem;
 
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
