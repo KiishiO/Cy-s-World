@@ -157,5 +157,11 @@
             android:exported="false"
             tools:node="merge"
             tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".BookstoreActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
     </application>
 </manifest>
