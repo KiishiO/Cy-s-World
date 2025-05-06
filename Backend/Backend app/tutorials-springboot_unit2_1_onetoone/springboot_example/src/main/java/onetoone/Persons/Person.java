@@ -1,13 +1,12 @@
 package onetoone.Persons;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 
-import onetoone.DiningHall.OrderingSystem.DiningOrder;
+import onetoone.DiningHallOrderingSystem.DiningOrder;
 
-import onetoone.Bookstore.Order.Order;
+import onetoone.BookstoreOrderingSystem.Order;
 
 import onetoone.Laptops.Laptop;
 import onetoone.Login.Login;

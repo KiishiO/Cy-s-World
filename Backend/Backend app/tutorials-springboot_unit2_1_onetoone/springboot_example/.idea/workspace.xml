@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1aba0881-e0d1-4070-88f5-61f265d2e936" name="Changes" comment="" />
+    <list default="true" id="aca4cb64-b4bd-467d-8f8c-911a50fcdbfb" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -14,7 +17,6 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Enum" />
-
         <option value="Class" />
         <option value="Interface" />
         <option value="Class" />
@@ -41,7 +43,7 @@
   }
 }</component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="CurrentFile" />
+    <option name="selectedTabId" value="ProjectErrors" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
@@ -58,37 +60,14 @@
     "Maven.onetoone [compile].executor": "Run",
     "Maven.onetoone [install].executor": "Run",
     "Maven.onetoone [package].executor": "Run",
-<<<<<<< HEAD
-    "Notification.DisplayName-DoNotAsk-Vcs Important Messages": "VCS important messages",
-    "Notification.DoNotAsk-Vcs Important Messages": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "Bookstore-Backend",
-=======
-    "Notification.DisplayName-DoNotAsk-Lombok plugin": "Lombok integration problem",
-    "Notification.DoNotAsk-Lombok plugin": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-<<<<<<< HEAD
+    "Spring Boot.Main.executor": "Run",
     "git-widget-placeholder": "DiningHall-orderingsystem",
-=======
-<<<<<<< HEAD
-    "git-widget-placeholder": "testBranch",
->>>>>>> origin
-=======
-    "git-widget-placeholder": "main",
->>>>>>> origin
->>>>>>> origin
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/sonia/2_swarna_4/Backend/Backend app/tutorials-springboot_unit2_1_onetoone/springboot_example",
     "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "SDKs",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -135,16 +114,16 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="1aba0881-e0d1-4070-88f5-61f265d2e936" name="Changes" comment="" />
+      <changelist id="aca4cb64-b4bd-467d-8f8c-911a50fcdbfb" name="Changes" comment="" />
       <created>1739499231099</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1739499231099</updated>
       <workItem from="1745633789796" duration="4436000" />
-
       <workItem from="1744391399815" duration="325000" />
-
       <workItem from="1745871172627" duration="609000" />
+      <workItem from="1746329593087" duration="4011000" />
+      <workItem from="1746389514277" duration="1094000" />
     </task>
     <servers />
   </component>
@@ -193,7 +172,6 @@
           <option name="timeStamp" value="41" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-
           <url>file://$PROJECT_DIR$/src/main/java/onetoone/Signup/Signup.java</url>
           <line>20</line>
           <option name="timeStamp" value="45" />
@@ -274,7 +252,6 @@
           <properties field="signup" class="onetoone.Login.Login" />
           <option name="timeStamp" value="42" />
         </line-breakpoint>
-
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/onetoone/Signup/Signup.java</url>
           <line>119</line>
@@ -284,7 +261,6 @@
           </properties>
           <option name="timeStamp" value="51" />
         </line-breakpoint>
-
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/onetoone/Login/LoginController.java</url>
           <line>45</line>
@@ -294,7 +270,10 @@
           </properties>
           <option name="timeStamp" value="87" />
         </line-breakpoint>
-
+        <breakpoint enabled="true" type="java-exception">
+          <properties class="org.springframework.beans.factory.BeanCreationException" package="org.springframework.beans.factory" />
+          <option name="timeStamp" value="96" />
+        </breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>

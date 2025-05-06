@@ -1,8 +1,7 @@
-package onetoone.Bookstore.Order;
+package onetoone.BookstoreOrderingSystem;
 
 
 import lombok.RequiredArgsConstructor;
-import onetoone.Bookstore.BookstoreRepository;
 import onetoone.Bookstore.Products;
 import onetoone.Bookstore.ProductsRepository;
 import onetoone.Persons.Person;
@@ -16,9 +15,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderService {
 
-    private final PersonRepository personRepository;
-    private final ProductsRepository productRepository;
-    private final OrderRepository orderRepository;
+    PersonRepository personRepository;
+    ProductsRepository productRepository;
+    OrderRepository orderRepository;
 
     public Order createOrder(Order order) {
         int personId = order.getPerson().getId();

@@ -1,4 +1,4 @@
-package onetoone.DiningHall.OrderingSystem;
+package onetoone.DiningHallOrderingSystem;
 
 
 import org.springframework.data.jpa.repository.JpaRepository;

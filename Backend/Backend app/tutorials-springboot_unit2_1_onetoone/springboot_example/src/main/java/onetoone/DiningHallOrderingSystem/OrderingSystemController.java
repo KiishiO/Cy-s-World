@@ -1,6 +1,7 @@
-package onetoone.DiningHall.OrderingSystem;
+package onetoone.DiningHallOrderingSystem;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +16,8 @@ import java.util.List;
 @RequestMapping("/diningOrders")
 public class OrderingSystemController {
 
-    private final DiningOrderService diningOrderService;
+    @Autowired
+    private DiningOrderService diningOrderService;
 
     @PostMapping
     public ResponseEntity<DiningOrder> createDiningOrder(@RequestBody DiningOrder diningOrder) {

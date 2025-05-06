@@ -1,15 +1,14 @@
-package onetoone.DiningHall.OrderingSystem;
+package onetoone.DiningHallOrderingSystem;
 
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import onetoone.DiningHall.DiningHallRepository;
-import onetoone.DiningHall.OrderingSystem.DiningOrderRepository;
 import onetoone.DiningHall.MenuItems;
+
 import onetoone.DiningHall.MenuItemsRepository;
 import onetoone.Persons.Person;
 import onetoone.Persons.PersonRepository;
 import org.springframework.stereotype.Service;
 
-import java.awt.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,12 +16,13 @@ import java.util.List;
  * Sonia Patil
  */
 @Service
-@RequiredArgsConstructor
+@NoArgsConstructor
 public class DiningOrderService {
 
-    private final PersonRepository personRepository;
-    private final DiningOrderRepository diningOrderRepository;
-    private final MenuItemsRepository menuItemsRepository;
+    PersonRepository personRepository;
+    DiningOrderRepository diningOrderRepository;
+    MenuItemsRepository menuItemsRepository;
+
 
     public DiningOrder createDiningOrder(DiningOrder diningOrder) {
         int personId = diningOrder.getPerson().getId();
