@@ -31,7 +31,7 @@ public class BookstoreListFragment extends Fragment {
     private List<BookstoreModel> bookstoreList;
     private BookstoreService bookstoreService;
 
-    
+
     public interface OnBookstoreClickListener {
         void onBookstoreClick(BookstoreModel bookstore);
     }
