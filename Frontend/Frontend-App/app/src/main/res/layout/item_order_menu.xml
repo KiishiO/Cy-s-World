@@ -66,7 +66,7 @@
                 android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:src="@drawable/ic_remove"
-                android:background="circle_shape_gold"
+                android:background="@drawable/circle_shape_gold"
                 android:enabled="false"
                 android:contentDescription="Decrease quantity" />
 
