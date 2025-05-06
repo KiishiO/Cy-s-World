@@ -1,4 +1,4 @@
-package onetoone.DiningHall;
+package onetoone.Bookstore;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -7,5 +7,7 @@ import org.springframework.stereotype.Repository;
  * @author Sonia Patil
  */
 @Repository
-public interface MenuItemsRepository extends JpaRepository<MenuItems, Integer> {
+public interface BookstoreRepository extends JpaRepository<Bookstore, Integer> {
+
+
 }

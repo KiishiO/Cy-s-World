@@ -2,9 +2,11 @@ package onetoone.StudyTable;
 
 import onetoone.Persons.Person;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface StudyTableRepository extends JpaRepository<StudyTable, Long> {
 
     List<StudyTable> findByPerson(Person person);

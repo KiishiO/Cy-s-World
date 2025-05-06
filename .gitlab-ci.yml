@@ -39,15 +39,16 @@ auto-deploy:
   tags:
   - springboot_tag      # change to your runner's tag
   script:               # script to run the deployment service you created
-    - cd "Backend/Backend app/tutorials-springboot_unit2_1_onetoone/springboot_example"        # change 'Backend' to to where you have the pom.xml (do not add / in the beginning)
-    - sudo mv target/*.jar /target/web-demo.jar 
-    - sudo systemctl stop system-web-demo
-    - sudo systemctl start system-web-demo
+      - cd "Backend/Backend app/tutorials-springboot_unit2_1_onetoone/springboot_example"
+      - mvn package
+      - sudo mv target/*.jar /target/web-demo.jar
+      - sudo systemctl stop system-web-demo
+      - sudo systemctl start system-web-demo
   only:
-    refs:
-      - main            # only to trigger the pipeline when changes are pushed to 'main'
-    changes:
-      - Backend/**/*    # more specifically - only when changes are made inside the 'Backend' folder
+      refs:
+        - main            # only to trigger the pipeline when changes are pushed to 'main'
+      changes:
+        - Backend/**/*    # more specifically - only when changes are made inside the 'Backend' folder
 
 android-build:
   image: afirefly/android-ci:java17 # Docker image that has Android environments installed     gjandres/android-ci:latest
@@ -56,9 +57,10 @@ android-build:
    - android_tag                    # change to your runner's tag
   before_script:                    # enable gradlew, change 'Frontend' to where you have 'gradlew'
     - export GRADLE_USER_HOME=`pwd`/.gradle
-    - chmod +x ./Frontend/gradlew
+    - chmod +x ./Frontend/Frontend-App/gradlew
+    - cd Frontend/Frontend-App
   script:
-    - cd Frontend                   # change 'Frontend' to where you have 'gradlew' (do not add / in the beginning)
+    #- cd Frontend/Frontend-App                   # change 'Frontend' to where you have 'gradlew' (do not add / in the beginning)
     - ./gradlew build               # gradle build
   only:
     refs:
@@ -73,9 +75,10 @@ android-test:
     - android_tag                   # change to your runner's tag
   before_script:                   # enable gradlew, change 'Frontend' to where you have 'gradlew'
      - export GRADLE_USER_HOME=`pwd`/.gradle
-     - chmod +x ./Frontend/gradlew
+     - chmod +x ./Frontend/Frontend-App/gradlew
+     - cd Frontend/Frontend-App
   script:
-     - cd Frontend                  # change 'Frontend' to where you have 'gradlew' (do not add / in the beginning)
+     #- cd Frontend/Frontend-App                  # change 'Frontend' to where you have 'gradlew' (do not add / in the beginning)
      - ./gradlew test               # gradle test
   only:
     refs:
