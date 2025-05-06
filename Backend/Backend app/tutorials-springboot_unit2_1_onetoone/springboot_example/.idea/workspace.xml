@@ -5,26 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1aba0881-e0d1-4070-88f5-61f265d2e936" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/gtfs/agency.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/gtfs/calendar.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/gtfs/calendar_dates.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/gtfs/fare_attributes.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/gtfs/fare_rules.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/gtfs/feed_info.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/gtfs/frequencies.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/gtfs/routes.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/gtfs/shapes.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/gtfs/stop_times.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/gtfs/stops.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/gtfs/transfers.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/gtfs/trips.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/Bus.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/Bus.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/BusController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/BusController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/RatingRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/RatingRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/StopLocationRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/StopLocationRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/busRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/BusSystem/busRepository.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
