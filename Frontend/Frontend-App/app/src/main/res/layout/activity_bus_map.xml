@@ -33,6 +33,40 @@
             app:singleLine="true" />
     </HorizontalScrollView>
 
+    <!-- Bottom sheet for bus arrival information -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/arrival_info_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/arrival_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:text="Upcoming Arrivals" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/arrival_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/list_view_fab"
         android:layout_width="wrap_content"
@@ -51,6 +85,16 @@
         android:contentDescription="@string/my_location"
         app:srcCompat="@drawable/ic_my_location"
         app:layout_constraintBottom_toTopOf="@id/list_view_fab"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/toggle_stops_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:contentDescription="Toggle bus stops"
+        app:srcCompat="@drawable/ic_bus_stop"
+        app:layout_constraintBottom_toTopOf="@id/my_location_fab"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
@@ -76,5 +120,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Disclaimer banner -->
+    <TextView
+        android:id="@+id/disclaimer_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#99000000"
+        android:padding="4dp"
+        android:text="@string/disclaimer_text"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

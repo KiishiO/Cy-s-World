@@ -73,15 +73,11 @@ dependencies {
     implementation 'commons-io:commons-io:2.15.1'
     implementation 'org.apache.commons:commons-csv:1.10.0'
 
-    // For caching map data (using excludes to avoid conflicts)
-    implementation('androidx.room:room-runtime:2.6.1') {
-        exclude group: 'com.google.protobuf', module: 'protobuf-lite'
-    }
-    annotationProcessor('androidx.room:room-compiler:2.6.1') {
-        exclude group: 'com.google.protobuf', module: 'protobuf-lite'
-    }
+    // For caching map data
+    implementation 'androidx.room:room-runtime:2.6.1'
+    annotationProcessor 'androidx.room:room-compiler:2.6.1'
 
-    // Optional: For GTFS-RT protobuf parsing (implement it later)
+    // REMOVE THESE LINES:
     // implementation 'com.google.protobuf:protobuf-java:3.19.4'
     // implementation 'com.google.transit:gtfs-realtime-bindings:0.0.5'
 
