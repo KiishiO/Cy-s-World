@@ -2,6 +2,7 @@ package onetoone.DiningHall;
 import java.util.List;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
@@ -20,7 +21,7 @@ public class MenuItems {
 
     @ManyToOne
     @JoinColumn(name = "dininghall_id")
-    @JsonIgnore
+    @JsonBackReference
     private DiningHall diningHall;
 
     public MenuItems() {

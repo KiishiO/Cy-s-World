@@ -12,7 +12,6 @@ import java.util.List;
  * @author Sonia Patil
  */
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/diningOrders")
 public class OrderingSystemController {
 
