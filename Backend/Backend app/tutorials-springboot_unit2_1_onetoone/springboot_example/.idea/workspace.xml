@@ -6,7 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="aca4cb64-b4bd-467d-8f8c-911a50fcdbfb" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/DiningHall/DiningHall.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHall/DiningHall.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/BookstoreOrderingSystem/Order.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/BookstoreOrderingSystem/Order.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/BookstoreOrderingSystem/OrderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/BookstoreOrderingSystem/OrderController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/BookstoreOrderingSystem/OrderItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/BookstoreOrderingSystem/OrderItem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/DiningHallOrderingSystem/DiningOrder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHallOrderingSystem/DiningOrder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/DiningHallOrderingSystem/DiningOrderService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHallOrderingSystem/DiningOrderService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/DiningHallOrderingSystem/OrderingSystemController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHallOrderingSystem/OrderingSystemController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,7 +67,7 @@
     "Maven.onetoone [package].executor": "Run",
     "RunOnceActivity.git.unshallow": "true",
     "Spring Boot.Main.executor": "Run",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "DiningHall-orderingsystem",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -218,11 +223,6 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/onetoone/Profiles/ProfileController.java</url>
-          <line>26</line>
-          <option name="timeStamp" value="89" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/onetoone/Profiles/ProfileController.java</url>
           <line>31</line>
           <option name="timeStamp" value="90" />
         </line-breakpoint>
@@ -264,7 +264,7 @@
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/onetoone/Login/LoginController.java</url>
           <line>45</line>
-          <properties class="onetoone.Login.LoginController">
+          <properties class="onetoone.Login.LoginController" method="getAllLogins">
             <option name="EMULATED" value="true" />
             <option name="WATCH_EXIT" value="false" />
           </properties>
