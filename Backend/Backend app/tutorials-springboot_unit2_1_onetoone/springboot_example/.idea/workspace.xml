@@ -6,7 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="aca4cb64-b4bd-467d-8f8c-911a50fcdbfb" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/BookstoreOrderingSystem/OrderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/BookstoreOrderingSystem/OrderController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/BookstoreOrderingSystem/OrderService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/BookstoreOrderingSystem/OrderService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,24 +55,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.Main.executor": "Run",
-    "Maven.onetoone [clean].executor": "Run",
-    "Maven.onetoone [compile].executor": "Run",
-    "Maven.onetoone [install].executor": "Run",
-    "Maven.onetoone [package].executor": "Run",
-    "RunOnceActivity.git.unshallow": "true",
-    "Spring Boot.Main.executor": "Run",
-    "git-widget-placeholder": "DiningHall-orderingsystem",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.onetoone [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.onetoone [compile].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.onetoone [install].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.onetoone [package].executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Spring Boot.Main.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;DiningHall-orderingsystem&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/main/java/onetoone" />
@@ -264,7 +266,7 @@
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/onetoone/Login/LoginController.java</url>
           <line>45</line>
-          <properties class="onetoone.Login.LoginController" method="getAllLogins">
+          <properties class="onetoone.Login.LoginController">
             <option name="EMULATED" value="true" />
             <option name="WATCH_EXIT" value="false" />
           </properties>
@@ -276,5 +278,15 @@
         </breakpoint>
       </breakpoints>
     </breakpoint-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/springboot_example$DiningHallSystemTest.ic" NAME="DiningHallSystemTest Coverage Results" MODIFIED="1746541642455" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>onetoone.DiningHall.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/springboot_example$java_in_onetoone.ic" NAME="java in onetoone Coverage Results" MODIFIED="1746541844680" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
+    <SUITE FILE_PATH="coverage/springboot_example$PersonSystemTest_testPerson.ic" NAME="PersonSystemTest.testPerson Coverage Results" MODIFIED="1746541760104" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>onetoone.Person.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/springboot_example$onetoone_in_onetoone.ic" NAME="onetoone in onetoone Coverage Results" MODIFIED="1746576618408" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
   </component>
 </project>

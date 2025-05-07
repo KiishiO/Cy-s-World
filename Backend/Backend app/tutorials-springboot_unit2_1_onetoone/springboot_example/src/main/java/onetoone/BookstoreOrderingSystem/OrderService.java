@@ -15,9 +15,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderService {
 
-    PersonRepository personRepository;
-    ProductsRepository productRepository;
-    OrderRepository orderRepository;
+    private final PersonRepository personRepository;
+    private final ProductsRepository productRepository;
+    private final OrderRepository orderRepository;
 
     public Order createOrder(Order order) {
         int personId = order.getPerson().getId();
