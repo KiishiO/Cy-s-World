@@ -7,6 +7,7 @@ import onetoone.DiningHall.MenuItems;
 import onetoone.DiningHall.MenuItemsRepository;
 import onetoone.Persons.Person;
 import onetoone.Persons.PersonRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,8 +20,13 @@ import java.util.List;
 @NoArgsConstructor
 public class DiningOrderService {
 
+    @Autowired
     PersonRepository personRepository;
+
+    @Autowired
     DiningOrderRepository diningOrderRepository;
+
+    @Autowired
     MenuItemsRepository menuItemsRepository;
 
 
