@@ -1,4 +1,5 @@
 package onetoone.DiningHall;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
@@ -19,7 +20,7 @@ public class DiningHall {
 
     //list to hold the menu items at a dining hall
     @OneToMany(mappedBy = "diningHall", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonIgnore
     private List<MenuItems> menuItems;
 
     public DiningHall(String name, String location) {
