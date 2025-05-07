@@ -5,11 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="aca4cb64-b4bd-467d-8f8c-911a50fcdbfb" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/BookstoreOrderingSystem/OrderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/BookstoreOrderingSystem/OrderController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/BookstoreOrderingSystem/OrderService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/BookstoreOrderingSystem/OrderService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/DiningHallOrderingSystem/DiningOrderService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHallOrderingSystem/DiningOrderService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/DiningHallOrderingSystem/OrderingSystemController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHallOrderingSystem/OrderingSystemController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/onetoone/DiningHall/DiningHall.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/onetoone/DiningHall/DiningHall.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
