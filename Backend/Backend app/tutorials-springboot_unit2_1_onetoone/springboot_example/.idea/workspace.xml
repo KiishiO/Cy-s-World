@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="aca4cb64-b4bd-467d-8f8c-911a50fcdbfb" name="Changes" comment="">
+    <list default="true" id="aca4cb64-b4bd-467d-8f8c-911a50fcdbfb" name="Changes" comment="&quot;StudentClassesGPA - Student are graded on assignment with a weighted scale for overall grade of the class --&gt; Workspace.xml file">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,6 +51,7 @@
   &quot;associatedIndex&quot;: 6
 }</component>
   <component name="ProjectId" id="2t0qEwlxRFPbDL1gvjsUjGUEA4m" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -62,7 +65,7 @@
     "Maven.onetoone [package].executor": "Run",
     "RunOnceActivity.git.unshallow": "true",
     "Spring Boot.Main.executor": "Run",
-    "git-widget-placeholder": "DiningHall-orderingsystem",
+    "git-widget-placeholder": "!50 on APIbus-jayden",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -146,7 +149,8 @@
       <path value="$USER_HOME$" />
     </ignored-roots>
     <MESSAGE value="Merge branch 'javadocs-backend' into 'main'&#10;&#10;Javadocs backend&#10;&#10;See merge request cs309/2025spring/2_swarna_4!42" />
-    <option name="LAST_COMMIT_MESSAGE" value="" />
+    <MESSAGE value="&quot;StudentClassesGPA - Student are graded on assignment with a weighted scale for overall grade of the class --&gt; Workspace.xml file" />
+    <option name="LAST_COMMIT_MESSAGE" value="&quot;StudentClassesGPA - Student are graded on assignment with a weighted scale for overall grade of the class --&gt; Workspace.xml file" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
