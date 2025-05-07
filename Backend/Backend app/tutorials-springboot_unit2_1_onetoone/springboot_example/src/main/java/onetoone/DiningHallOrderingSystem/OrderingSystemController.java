@@ -16,8 +16,7 @@ import java.util.List;
 @RequestMapping("/diningOrders")
 public class OrderingSystemController {
 
-    @Autowired
-    private DiningOrderService diningOrderService;
+    private final DiningOrderService diningOrderService;
 
     @PostMapping
     public ResponseEntity<DiningOrder> createDiningOrder(@RequestBody DiningOrder diningOrder) {

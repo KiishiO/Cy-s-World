@@ -16,14 +16,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderService {
 
-    @Autowired
-    private PersonRepository personRepository;
+    private final PersonRepository personRepository;
 
-    @Autowired
-    private ProductsRepository productRepository;
+    private final ProductsRepository productRepository;
 
-    @Autowired
-    private OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
 
     public Order createOrder(Order order) {
         int personId = order.getPerson().getId();
