@@ -17,14 +17,17 @@ import java.util.List;
  * Sonia Patil
  */
 @Service
-@RequiredArgsConstructor
 public class DiningOrderService {
 
-    private final PersonRepository personRepository;
+    @Autowired
+    private PersonRepository personRepository;
 
-    private final DiningOrderRepository diningOrderRepository;
+    @Autowired
+    private DiningOrderRepository diningOrderRepository;
 
-    private final MenuItemsRepository menuItemsRepository;
+    @Autowired
+    private MenuItemsRepository menuItemsRepository;
+
 
     public DiningOrder createDiningOrder(DiningOrder diningOrder) {
         int personId = diningOrder.getPerson().getId();

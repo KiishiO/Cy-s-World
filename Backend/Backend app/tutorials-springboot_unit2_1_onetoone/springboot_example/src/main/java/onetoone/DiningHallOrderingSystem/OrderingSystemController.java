@@ -12,11 +12,11 @@ import java.util.List;
  * @author Sonia Patil
  */
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/diningOrders")
 public class OrderingSystemController {
 
-    private final DiningOrderService diningOrderService;
+    @Autowired
+    private DiningOrderService diningOrderService;
 
     @PostMapping
     public ResponseEntity<DiningOrder> createDiningOrder(@RequestBody DiningOrder diningOrder) {

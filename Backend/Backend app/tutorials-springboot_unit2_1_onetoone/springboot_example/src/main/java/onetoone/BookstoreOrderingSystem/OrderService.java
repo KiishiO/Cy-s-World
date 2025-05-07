@@ -13,14 +13,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class OrderService {
 
-    private final PersonRepository personRepository;
+    @Autowired
+    private PersonRepository personRepository;
 
-    private final ProductsRepository productRepository;
+    @Autowired
+    private ProductsRepository productRepository;
 
-    private final OrderRepository orderRepository;
+    @Autowired
+    private OrderRepository orderRepository;
 
     public Order createOrder(Order order) {
         int personId = order.getPerson().getId();
