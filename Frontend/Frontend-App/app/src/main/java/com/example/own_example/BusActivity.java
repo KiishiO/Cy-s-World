@@ -1,24 +1,22 @@
 package com.example.own_example;
 
-import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.example.own_example.R;
 import com.example.own_example.adapters.BusAdapter;
 import com.example.own_example.models.Bus;
 import com.example.own_example.services.BusService;
@@ -38,6 +36,7 @@ public class BusActivity extends AppCompatActivity implements BusAdapter.OnBusCl
     private SwipeRefreshLayout swipeRefreshLayout;
     private TextView emptyStateTextView;
     private FloatingActionButton addBusFab;
+    private Button mapViewButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +52,7 @@ public class BusActivity extends AppCompatActivity implements BusAdapter.OnBusCl
         swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
         emptyStateTextView = findViewById(R.id.empty_state_text);
         addBusFab = findViewById(R.id.add_bus_fab);
+        mapViewButton = findViewById(R.id.btn_map_view);
 
         // Set up RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -64,6 +64,12 @@ public class BusActivity extends AppCompatActivity implements BusAdapter.OnBusCl
 
         // Set up FAB click listener
         addBusFab.setOnClickListener(v -> showAddBusDialog());
+
+        // Set up Map View button
+        mapViewButton.setOnClickListener(v -> {
+            Intent intent = new Intent(BusActivity.this, BusMapActivity.class);
+            startActivity(intent);
+        });
 
         // Load buses
         loadBuses();
