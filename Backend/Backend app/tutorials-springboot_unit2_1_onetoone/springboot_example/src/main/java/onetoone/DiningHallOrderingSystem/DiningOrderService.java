@@ -21,13 +21,13 @@ import java.util.List;
 public class DiningOrderService {
 
     @Autowired
-    PersonRepository personRepository;
+    private PersonRepository personRepository;
 
     @Autowired
-    DiningOrderRepository diningOrderRepository;
+    private DiningOrderRepository diningOrderRepository;
 
     @Autowired
-    MenuItemsRepository menuItemsRepository;
+    private MenuItemsRepository menuItemsRepository;
 
 
     public DiningOrder createDiningOrder(DiningOrder diningOrder) {
