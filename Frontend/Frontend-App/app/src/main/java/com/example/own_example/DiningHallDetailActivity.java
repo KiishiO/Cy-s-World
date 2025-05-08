@@ -1,10 +1,11 @@
 package com.example.own_example;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.own_example.adapters.MenuItemAdapter;
 import com.example.own_example.models.DiningHall;
 import com.example.own_example.services.DiningHallService;
-import com.google.android.material.button.MaterialButton;
+import com.example.own_example.services.UserService;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ public class DiningHallDetailActivity extends AppCompatActivity implements Dinin
     private DiningHall currentDiningHall;
 
     private ImageButton backButton;
+    private Button orderNowButton;
     private TextView diningHallNameText;
     private TextView hoursValue;
     private TextView locationValue;
@@ -62,6 +64,7 @@ public class DiningHallDetailActivity extends AppCompatActivity implements Dinin
 
         // Initialize views
         backButton = findViewById(R.id.back_button);
+        orderNowButton = findViewById(R.id.order_now_button);
         diningHallNameText = findViewById(R.id.dining_hall_name);
         hoursValue = findViewById(R.id.hours_value);
         locationValue = findViewById(R.id.location_value);
@@ -71,6 +74,9 @@ public class DiningHallDetailActivity extends AppCompatActivity implements Dinin
 
         // Set up back button
         backButton.setOnClickListener(v -> finish());
+
+        // Set up order now button
+        orderNowButton.setOnClickListener(v -> launchOrderingActivity());
 
         // Set up RecyclerView
         menuItemsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -101,6 +107,19 @@ public class DiningHallDetailActivity extends AppCompatActivity implements Dinin
         diningHallService.getDiningHallById(diningHallId);
     }
 
+    private void launchOrderingActivity() {
+        // Check if the dining hall is open
+        if (currentDiningHall != null && !currentDiningHall.isOpen()) {
+            Toast.makeText(this, "Sorry, this dining hall is currently closed", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Launch ordering activity
+        Intent intent = new Intent(this, OrderingActivity.class);
+        intent.putExtra("dining_hall_id", diningHallId);
+        startActivity(intent);
+    }
+
     private void updateUI() {
         runOnUiThread(() -> {
             // Set basic info
@@ -112,9 +131,11 @@ public class DiningHallDetailActivity extends AppCompatActivity implements Dinin
             if (currentDiningHall.isOpen()) {
                 statusValue.setText("Open");
                 statusValue.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+                orderNowButton.setEnabled(true);
             } else {
                 statusValue.setText("Closed");
                 statusValue.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                orderNowButton.setEnabled(false);
             }
 
             // Set up tabs

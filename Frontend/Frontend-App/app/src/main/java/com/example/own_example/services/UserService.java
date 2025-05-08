@@ -29,6 +29,7 @@ public class UserService {
     private String email;
     private String fullName;
     private boolean isInitialized = false;
+    private Context context;
 
     private UserService() {
         // Private constructor to enforce singleton pattern
@@ -46,6 +47,9 @@ public class UserService {
             Log.e(TAG, "Cannot initialize UserService with null context");
             return;
         }
+
+        // Store the context for future use
+        this.context = context.getApplicationContext();
 
         // Try to load from both preference stores
         preferences = context.getApplicationContext()
@@ -81,8 +85,43 @@ public class UserService {
         return isInitialized;
     }
 
-    public String getCurrentUserId() {
-        return currentUserId;
+    public int getCurrentUserId() {
+        // Default user ID to return if anything goes wrong
+        int defaultUserId = 1;
+
+        try {
+            // Check if context is initialized
+            if (context == null) {
+                Log.e(TAG, "Context is null in getCurrentUserId!");
+                return defaultUserId;
+            }
+
+            // Get the SharedPreferences
+            SharedPreferences prefs = context.getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
+
+            // First try string version
+            String userIdStr = prefs.getString(KEY_USER_ID, null);
+            if (userIdStr != null && !userIdStr.isEmpty()) {
+                try {
+                    return Integer.parseInt(userIdStr);
+                } catch (NumberFormatException e) {
+                    Log.e(TAG, "Failed to parse user ID string: " + userIdStr);
+                }
+            }
+
+            // Then try long version
+            long longUserId = prefs.getLong(KEY_USER_ID, 0);
+            if (longUserId > 0) {
+                return (int) longUserId;
+            }
+
+            // If we get here, no valid ID was found
+            Log.w(TAG, "No user ID found in preferences");
+            return defaultUserId;
+        } catch (Exception e) {
+            Log.e(TAG, "Error in getCurrentUserId: " + e.getMessage(), e);
+            return defaultUserId;
+        }
     }
 
     public String getCurrentUsername() {

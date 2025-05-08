@@ -61,6 +61,25 @@ public class StudyGroupAdapter extends RecyclerView.Adapter<StudyGroupAdapter.Vi
         // Set member count
         holder.memberCount.setText(group.getMemberCountText());
 
+        // Set status (if TextView exists in layout)
+        if (holder.groupStatus != null) {
+            String status = group.getStatus();
+            if (status != null) {
+                holder.groupStatus.setVisibility(View.VISIBLE);
+                if ("PENDING".equals(status)) {
+                    holder.groupStatus.setText("Pending");
+                    holder.groupStatus.setBackgroundResource(R.drawable.status_background_pending);
+                } else if ("ACCEPTED".equals(status)) {
+                    holder.groupStatus.setText("Active");
+                    holder.groupStatus.setBackgroundResource(R.drawable.status_background);
+                } else {
+                    holder.groupStatus.setVisibility(View.GONE);
+                }
+            } else {
+                holder.groupStatus.setVisibility(View.GONE);
+            }
+        }
+
         // Set up manage button click
         holder.manageButton.setOnClickListener(v -> {
             showManageOptions(group, position);
@@ -213,12 +232,14 @@ public class StudyGroupAdapter extends RecyclerView.Adapter<StudyGroupAdapter.Vi
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView groupName;
         TextView memberCount;
+        TextView groupStatus;
         ImageButton manageButton;
 
         ViewHolder(View itemView) {
             super(itemView);
             groupName = itemView.findViewById(R.id.study_group_name);
             memberCount = itemView.findViewById(R.id.member_count);
+            groupStatus = itemView.findViewById(R.id.group_status);
             manageButton = itemView.findViewById(R.id.manage_group_button);
         }
     }

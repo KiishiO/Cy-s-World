@@ -4,11 +4,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -39,7 +41,7 @@ public class StudyGroupsActivity extends AppCompatActivity {
     private MaterialButton createGroupButton;
 
     private ImageButton manageGroupButton;
-    private BottomNavigationView bottomNavigationView;
+    //private BottomNavigationView bottomNavigationView;
 
     private StudyGroupAdapter studyGroupsAdapter;
     private List<StudyGroup> studyGroups = new ArrayList<>();
@@ -73,11 +75,7 @@ public class StudyGroupsActivity extends AppCompatActivity {
         studyGroupsRecyclerView = findViewById(R.id.study_groups_recycler);
         emptyStateView = findViewById(R.id.empty_state_view);
         createGroupButton = findViewById(R.id.create_group_button);
-        bottomNavigationView = findViewById(R.id.bottom_navigation);
-
-        //setting up manage group button
-        View manageGroupView = getLayoutInflater().inflate(R.layout.item_study_group, studyGroupsRecyclerView, false);
-        manageGroupButton = manageGroupView.findViewById(R.id.manage_group_button);
+        //bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         // Set up RecyclerView
         studyGroupsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -87,38 +85,33 @@ public class StudyGroupsActivity extends AppCompatActivity {
         // Set up create button
         createGroupButton.setOnClickListener(v -> showCreateTableDialog());
 
-        // Set up manage group button usage
-        manageGroupButton.setOnClickListener(v -> {
-            try {
-                Intent intent = new Intent(StudyGroupsActivity.this, ManageStudyGroupActivity.class);
-                startActivity(intent);
-            } catch (Exception e) {
-                Log.e(TAG, "Error navigating to ManageStudyGroupsActivity: " + e.getMessage());
-            }
-        });
-
-        // Set up bottom navigation
-        if (bottomNavigationView != null) {
-            bottomNavigationView.inflateMenu(R.menu.student_bottom_navigation_menu);
-            bottomNavigationView.setOnItemSelectedListener(item -> {
-                int itemId = item.getItemId();
-
-                if (itemId == R.id.nav_home) {
-                    Intent intent = new Intent(StudyGroupsActivity.this, StudentDashboardActivity.class);
-                    startActivity(intent);
-                    return true;
-                } else if (itemId == R.id.nav_dining) {
-                    Intent intent = new Intent(StudyGroupsActivity.this, DiningHallActivity.class);
-                    startActivity(intent);
-                    return true;
-                } else if (itemId == R.id.nav_buses) {
-                    Intent intent = new Intent(StudyGroupsActivity.this, ClassesActivity.class);//needs to be changed to bus activity
-                    startActivity(intent);
-                    return true;
-                }
-                return false;
-            });
+        MaterialButton emptyStateCreateButton = findViewById(R.id.empty_state_create_button);
+        if (emptyStateCreateButton != null) {
+            emptyStateCreateButton.setOnClickListener(v -> showCreateTableDialog());
         }
+
+//        // Set up bottom navigation
+//        if (bottomNavigationView != null) {
+//            bottomNavigationView.inflateMenu(R.menu.student_bottom_navigation_menu);
+//            bottomNavigationView.setOnItemSelectedListener(item -> {
+//                int itemId = item.getItemId();
+//
+//                if (itemId == R.id.nav_home) {
+//                    Intent intent = new Intent(StudyGroupsActivity.this, StudentDashboardActivity.class);
+//                    startActivity(intent);
+//                    return true;
+//                } else if (itemId == R.id.nav_dining) {
+//                    Intent intent = new Intent(StudyGroupsActivity.this, DiningHallActivity.class);
+//                    startActivity(intent);
+//                    return true;
+//                } else if (itemId == R.id.nav_buses) {
+//                    Intent intent = new Intent(StudyGroupsActivity.this, BusActivity.class);
+//                    startActivity(intent);
+//                    return true;
+//                }
+//                return false;
+//            });
+ //       }
 
         // Load data
         loadStudyTables();
@@ -132,30 +125,53 @@ public class StudyGroupsActivity extends AppCompatActivity {
     }
 
     private void loadStudyTables() {
-        // First clear existing data
-        studyGroups.clear();
+        // Don't clear existing data until we have new data
+        List<StudyGroup> newStudyGroups = new ArrayList<>();
 
         // Show loading state
-        showEmptyState(true);
+        ProgressBar loadingIndicator = findViewById(R.id.loading_indicator);
+        if (loadingIndicator != null) {
+            loadingIndicator.setVisibility(View.VISIBLE);
+        }
 
         // First get my tables
         studyGroupService.getMyStudyGroups(new StudyGroupService.StudyTablesCallback() {
             @Override
             public void onSuccess(List<StudyGroup> myTables) {
-                studyGroups.addAll(myTables);
+                Log.d(TAG, "My tables loaded: " + myTables.size());
+                newStudyGroups.addAll(myTables);
 
                 // Then get joined tables
                 studyGroupService.getJoinedStudyGroups(new StudyGroupService.StudyTablesCallback() {
                     @Override
                     public void onSuccess(List<StudyGroup> joinedTables) {
-                        studyGroups.addAll(joinedTables);
+                        Log.d(TAG, "Joined tables loaded: " + joinedTables.size());
+                        newStudyGroups.addAll(joinedTables);
+
+                        // Now update our main list all at once
+                        studyGroups.clear();
+                        studyGroups.addAll(newStudyGroups);
+
+                        // Hide loading indicator
+                        if (loadingIndicator != null) {
+                            loadingIndicator.setVisibility(View.GONE);
+                        }
                         updateUI();
                     }
 
                     @Override
                     public void onError(String error) {
                         Log.e(TAG, "Error getting joined tables: " + error);
-                        updateUI(); // Still update with what we have
+
+                        // Still update with what we have
+                        studyGroups.clear();
+                        studyGroups.addAll(newStudyGroups);
+
+                        // Hide loading indicator
+                        if (loadingIndicator != null) {
+                            loadingIndicator.setVisibility(View.GONE);
+                        }
+                        updateUI();
                     }
                 });
             }
@@ -168,14 +184,25 @@ public class StudyGroupsActivity extends AppCompatActivity {
                 studyGroupService.getJoinedStudyGroups(new StudyGroupService.StudyTablesCallback() {
                     @Override
                     public void onSuccess(List<StudyGroup> joinedTables) {
+                        Log.d(TAG, "Only joined tables loaded: " + joinedTables.size());
                         studyGroups.clear();
                         studyGroups.addAll(joinedTables);
+
+                        // Hide loading indicator
+                        if (loadingIndicator != null) {
+                            loadingIndicator.setVisibility(View.GONE);
+                        }
                         updateUI();
                     }
 
                     @Override
                     public void onError(String joinedError) {
                         Log.e(TAG, "Error getting joined tables: " + joinedError);
+
+                        // Hide loading indicator
+                        if (loadingIndicator != null) {
+                            loadingIndicator.setVisibility(View.GONE);
+                        }
                         showEmptyState(true);
                         Toast.makeText(StudyGroupsActivity.this,
                                 "Could not load study groups",
@@ -287,7 +314,11 @@ public class StudyGroupsActivity extends AppCompatActivity {
                 Toast.makeText(StudyGroupsActivity.this,
                         message,
                         Toast.LENGTH_SHORT).show();
-                loadStudyTables(); // Refresh the list
+                // Add a delay to give server time to process
+                new Handler().postDelayed(() -> {
+                    Log.d(TAG, "Refreshing study groups after creation");
+                    loadStudyTables(); // Refresh the list
+                }, 1000); // 1 second delay
             }
 
             @Override

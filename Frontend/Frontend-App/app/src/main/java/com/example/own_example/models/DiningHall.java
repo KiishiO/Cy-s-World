@@ -109,9 +109,11 @@ public class DiningHall {
 
     // Helper method to get a category by name
     public MenuCategory getMenuCategoryByName(String name) {
-        for (MenuCategory category : menuCategories) {
-            if (category.getName().equals(name)) {
-                return category;
+        if (menuCategories != null) {
+            for (MenuCategory category : menuCategories) {
+                if (category.getName().equals(name)) {
+                    return category;
+                }
             }
         }
         return null;
@@ -144,6 +146,7 @@ public class DiningHall {
         private int id;
         private String name;
         private double price;
+        private String menuType;
 
         // Prevent circular references with @JsonIgnore or @Expose annotations
         @SerializedName("diningHall")
@@ -198,7 +201,9 @@ public class DiningHall {
         public void setDescription(String description) {
             this.description = description;
         }
-
+        // Getters and setters
+        public String getMenuType() { return menuType;}
+        public void setMenuType(String menuType) { this.menuType = menuType;}
         public List<String> getAllergens() {
             return allergens;
         }
@@ -263,6 +268,9 @@ public class DiningHall {
         }
 
         public void addItem(MenuItem item) {
+            if (items == null) {
+                items = new ArrayList<>();
+            }
             items.add(item);
         }
     }

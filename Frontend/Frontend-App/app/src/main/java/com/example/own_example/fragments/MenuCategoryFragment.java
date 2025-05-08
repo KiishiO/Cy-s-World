@@ -2,6 +2,7 @@ package com.example.own_example.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +27,7 @@ import com.example.own_example.services.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MenuCategoryFragment extends Fragment implements DiningHallService.DiningHallListener, AdminMenuItemAdapter.MenuItemListener {
 
@@ -103,13 +105,33 @@ public class MenuCategoryFragment extends Fragment implements DiningHallService.
         if (getActivity() == null) return;
 
         getActivity().runOnUiThread(() -> {
-            DiningHall.MenuCategory category = diningHall.getMenuCategoryByName(categoryName);
+            Log.d("MenuCategoryFragment", "Refreshing menu items for category: " + categoryName);
 
-            if (category != null && !category.getItems().isEmpty()) {
+            // Log all categories for debugging
+            if (diningHall.getMenuCategories() != null) {
+                for (DiningHall.MenuCategory cat : diningHall.getMenuCategories()) {
+                    Log.d("MenuCategoryFragment", "Available category: " + cat.getName() +
+                            " with " + cat.getItems().size() + " items");
+                }
+            }
+
+            // Find the specific category
+            DiningHall.MenuCategory category = null;
+            for (DiningHall.MenuCategory cat : diningHall.getMenuCategories()) {
+                if (cat.getName().equals(categoryName)) {
+                    category = cat;
+                    break;
+                }
+            }
+
+            if (category != null && category.getItems() != null && !category.getItems().isEmpty()) {
+                Log.d("MenuCategoryFragment", "Found category with items: " +
+                        category.getItems().size());
                 menuItemAdapter.updateMenuItems(category.getItems());
                 menuItemsRecyclerView.setVisibility(View.VISIBLE);
                 emptyStateTextView.setVisibility(View.GONE);
             } else {
+                Log.d("MenuCategoryFragment", "Category has no items or not found");
                 menuItemsRecyclerView.setVisibility(View.GONE);
                 emptyStateTextView.setVisibility(View.VISIBLE);
             }
