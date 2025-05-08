@@ -25,7 +25,6 @@ public class TeacherDashboardActivity extends AppCompatActivity {
     private MaterialCardView classesManagementCard;
     private MaterialCardView gradingCard;
     private MaterialCardView attendanceCard;
-    private MaterialCardView officeHoursCard;
     private MaterialCardView testingCenterCard;
     private RecyclerView recentActivityRecycler;
     private BottomNavigationView bottomNavigationView;
@@ -72,7 +71,7 @@ public class TeacherDashboardActivity extends AppCompatActivity {
         // Initialize views
         welcomeText = findViewById(R.id.welcome_text);
         classesManagementCard = findViewById(R.id.classes_management_card);
-        officeHoursCard = findViewById(R.id.office_hours_card);
+        testingCenterCard = findViewById(R.id.testing_center_card);
         //recentActivityRecycler = findViewById(R.id.recent_activity_recycler);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
@@ -110,7 +109,7 @@ public class TeacherDashboardActivity extends AppCompatActivity {
             }
         });
 
-        officeHoursCard.setOnClickListener(new View.OnClickListener() {
+        testingCenterCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Navigate to office hours activity

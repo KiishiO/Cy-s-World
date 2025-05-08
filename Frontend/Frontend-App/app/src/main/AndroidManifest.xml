@@ -25,10 +25,10 @@
         tools:replace="android:label,android:icon,android:theme"
         tools:node="merge">
 
-        <!-- Google Maps API Key -->
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="${MAPS_API_KEY}" />
+<!--        &lt;!&ndash; Google Maps API Key &ndash;&gt;-->
+<!--        <meta-data-->
+<!--            android:name="com.google.android.geo.API_KEY"-->
+<!--            android:value="${MAPS_API_KEY}" />-->
 
         <activity
             android:name=".MainActivity"
@@ -182,12 +182,6 @@
             tools:node="merge"
             tools:ignore="DuplicateActivity,Instantiatable"/>
 
-        <activity
-            android:name=".OrderConfirmationActivity"
-            android:exported="false"
-            tools:node="merge"
-            tools:ignore="DuplicateActivity,Instantiatable"/>
-
         <!-- Add TestingCenterActivity -->
         <activity
             android:name=".TestingCenterActivity"
@@ -198,6 +192,24 @@
         <!-- Add TestingCenterDetailActivity -->
         <activity
             android:name=".TestingCenterDetailActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".OrderingActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".OrderHistoryActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".OrderConfirmationActivity"
             android:exported="false"
             tools:node="merge"
             tools:ignore="DuplicateActivity,Instantiatable"/>
