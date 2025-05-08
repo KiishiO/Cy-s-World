@@ -20,6 +20,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
     private MaterialCardView friendRequestsCard;
     private MaterialCardView classesCard;
     private MaterialCardView testingCenterCard;
+    private MaterialCardView bookstoreCard;
     private BottomNavigationView bottomNavigationView;
 
     @Override
@@ -62,6 +63,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
             friendRequestsCard = findViewById(R.id.friends_request_card);
             classesCard = findViewById(R.id.classes_card);
             testingCenterCard = findViewById(R.id.testing_center_card);
+            bookstoreCard = findViewById(R.id.bookstore_card);
             bottomNavigationView = findViewById(R.id.bottom_navigation);
 
             // Make sure bottom navigation isn't null before using it
@@ -178,6 +180,18 @@ public class StudentDashboardActivity extends AppCompatActivity {
                         startActivity(intent);
                     } catch (Exception e) {
                         Log.e(TAG, "Error navigating to BusActivity: " + e.getMessage());
+                    }
+                });
+            }
+
+            // Set click listener for bookstore card
+            if (bookstoreCard != null) {
+                bookstoreCard.setOnClickListener(v -> {
+                    try {
+                        Intent intent = new Intent(StudentDashboardActivity.this, BookstoreActivity.class);
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error navigating to BookstoreActivity: " + e.getMessage());
                     }
                 });
             }
