@@ -73,17 +73,10 @@ public class AdminDashboardActivity extends AppCompatActivity {
         classesManagementCard = findViewById(R.id.admin_classes_management_card);
         eventManagementCard = findViewById(R.id.admin_event_management_card);
         diningManagementCard = findViewById(R.id.admin_dining_management_card);
-        busRouteCard = findViewById(R.id.admin_bus_management_card);
-        //recentActivityRecycler = findViewById(R.id.recent_activity_recycler);
+        testingCenterCard = findViewById(R.id.testing_center_card);
 
         // Set up click listeners for action cards
         setupCardClickListeners();
-
-//        // Initialize recent activities
-//        populateRecentActivities();
-//
-//        // Set up RecyclerView for recent activities
-//        setupRecentActivitiesRecyclerView();
     }
 
 
@@ -111,15 +104,6 @@ public class AdminDashboardActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // Navigate to attendance activity
                 Intent intent = new Intent(AdminDashboardActivity.this, AdminDiningHallActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        busRouteCard.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Navigate to office hours activity
-                Intent intent = new Intent(AdminDashboardActivity.this, OfficeHoursActivity.class);//need to change this to map to bus management java class
                 startActivity(intent);
             }
         });

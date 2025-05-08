@@ -14,375 +14,474 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@color/cardinal_red"
         app:titleTextColor="@color/white"
+        app:title="Student Dashboard"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Student Profile Icon -->
-    <ImageView
-        android:id="@+id/studentProfile_image"
+    <!-- ScrollView for all content except toolbar and bottom navigation -->
+    <ScrollView
+        android:id="@+id/content_scroll_view"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:src="@drawable/iconpic_studentprofile"
-        android:layout_marginTop="16dp"
-        android:scaleType="fitCenter"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent">
-    </ImageView>
-
-    <!-- Welcome Text -->
-    <TextView
-        android:id="@+id/welcome_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Welcome, username..."
-        android:textStyle="italic"
-        android:textSize="28sp"
-        android:fontFamily="serif"
-        app:layout_constraintTop_toBottomOf="@+id/studentProfile_image"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:textColor="@color/gold"
-        android:layout_marginTop="16dp">
-    </TextView>
-
-    <!-- Action Buttons Row -->
-    <LinearLayout
-        android:id="@+id/action_buttons_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="24dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintTop_toBottomOf="@+id/welcome_text">
-
-        <!-- Friend Requests Button -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/friends_request_card"
-            android:layout_width="0dp"
-            android:layout_height="100dp"
-            android:layout_weight="1"
-            android:layout_marginEnd="8dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="@color/cardinal_red">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:gravity="center">
-
-                <ImageView
-                    android:layout_width="160dp"
-                    android:layout_height="60dp"
-                    android:src="@drawable/ic_people"
-                    android:contentDescription="Friend Requests"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Friend Requests"
-                    android:textColor="@color/white"
-                    android:textSize="16sp"
-                    android:layout_marginTop="4dp" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Classes Button -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/classes_card"
-            android:layout_width="0dp"
-            android:layout_height="100dp"
-            android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="@color/gold">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:gravity="center">
-
-                <ImageView
-                    android:layout_width="160dp"
-                    android:layout_height="60dp"
-                    android:src="@drawable/ic_school"
-                    android:contentDescription="Classes"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="My Classes"
-                    android:textColor="@color/white"
-                    android:textSize="16sp"
-                    android:layout_marginTop="4dp" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-    </LinearLayout>
-
-    <!-- Featured Text -->
-    <TextView
-        android:id="@+id/featured_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Featured"
-        android:textColor="@color/cardinal_red"
-        android:textSize="20sp"
-        android:textStyle="italic"
-        android:fontFamily="serif"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="32dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/action_buttons_layout">
-    </TextView>
-
-    <!-- First Feature Card -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/first_info_card"
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="16dp"
-        app:cardBackgroundColor="#E9E9E9"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="4dp"
-        app:layout_constraintTop_toBottomOf="@+id/featured_text">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
 
+            <!--Cyclones Icon-->
             <ImageView
-                android:id="@+id/featured_image"
-                android:layout_width="100dp"
+                android:id="@+id/cyclone_logo_image"
+                android:layout_width="match_parent"
                 android:layout_height="100dp"
-                android:src="@drawable/university_icon"
-                android:layout_margin="16dp"
-                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="32dp"
+                android:src="@drawable/cyclones_logo_3"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent">
+            </ImageView>
 
+            <!-- Student Profile Icon -->
+            <ImageView
+                android:id="@+id/studentProfile_image"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:src="@drawable/iconpic_studentprofile"
+                android:layout_marginTop="16dp"
+                android:scaleType="fitCenter"
+                app:layout_constraintTop_toBottomOf="@+id/cyclone_logo_image"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent">
+            </ImageView>
+
+            <!-- Welcome Text -->
             <TextView
-                android:id="@+id/featured_title"
-                android:layout_width="0dp"
+                android:id="@+id/welcome_text"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Campus News"
-                android:textSize="18sp"
-                android:textStyle="bold"
+                android:text="Welcome, username..."
+                android:textStyle="italic"
+                android:textSize="28sp"
+                android:fontFamily="serif"
+                app:layout_constraintTop_toBottomOf="@+id/studentProfile_image"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                android:textColor="@color/gold"
+                android:layout_marginTop="16dp">
+            </TextView>
+
+            <!-- School Spirit Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/school_spirit_card"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="@color/cardinal_red"
+                app:layout_constraintTop_toBottomOf="@+id/welcome_text"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent">
+
+                <!-- Card content remains the same -->
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <!-- Background with diagonal stripes -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/diagonal_stripes" />
+
+                    <!-- School mascot or logo -->
+                    <ImageView
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:src="@drawable/iowa_state_logo"
+                        android:layout_gravity="center|start"
+                        android:layout_marginStart="12dp" />
+
+                    <!-- Text section -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_gravity="center|end"
+                        android:layout_marginEnd="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="GO TEAM!"
+                            android:textColor="@color/white"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Next Game: Fri 7PM"
+                            android:textColor="@color/white"
+                            android:textSize="14sp"
+                            android:layout_marginTop="4dp" />
+                    </LinearLayout>
+                </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Action Buttons Row -->
+            <LinearLayout
+                android:id="@+id/action_buttons_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintTop_toBottomOf="@+id/school_spirit_card">
+
+                <!-- Friend Requests Button -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/friends_request_card"
+                    android:layout_width="0dp"
+                    android:layout_height="100dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@color/cardinal_red">
+
+                    <!-- Card content remains the same -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:layout_width="160dp"
+                            android:layout_height="60dp"
+                            android:src="@drawable/ic_people"
+                            android:contentDescription="Friend Requests"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Friend Requests"
+                            android:textColor="@color/white"
+                            android:textSize="16sp"
+                            android:layout_marginTop="4dp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Classes Button -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/classes_card"
+                    android:layout_width="0dp"
+                    android:layout_height="100dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@color/gold">
+
+                    <!-- Card content remains the same -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:layout_width="160dp"
+                            android:layout_height="60dp"
+                            android:src="@drawable/ic_school"
+                            android:contentDescription="Classes"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="My Classes"
+                            android:textColor="@color/white"
+                            android:textSize="16sp"
+                            android:layout_marginTop="4dp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <!-- Featured Text -->
+            <TextView
+                android:id="@+id/featured_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Featured"
                 android:textColor="@color/cardinal_red"
+                android:textSize="20sp"
+                android:textStyle="italic"
+                android:fontFamily="serif"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="32dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/action_buttons_layout">
+            </TextView>
+
+            <!-- First Feature Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/first_info_card"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginTop="16dp"
-                app:layout_constraintStart_toEndOf="@id/featured_image"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:cardBackgroundColor="#E9E9E9"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="4dp"
+                app:layout_constraintTop_toBottomOf="@+id/featured_text">
 
-            <TextView
-                android:id="@+id/featured_description"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:text="Check out the latest campus news and upcoming events!"
-                android:textSize="14sp"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="16dp"
-                app:layout_constraintStart_toEndOf="@id/featured_image"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/featured_title"
-                app:layout_constraintBottom_toBottomOf="parent" />
+                <!-- Card content remains the same -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.material.card.MaterialCardView>
+                    <ImageView
+                        android:id="@+id/featured_image"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:src="@drawable/university_icon"
+                        android:layout_margin="16dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
 
-    <!-- Second Feature Card -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/second_info_card"
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="16dp"
-        app:cardBackgroundColor="#E9E9E9"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="4dp"
-        app:layout_constraintTop_toBottomOf="@+id/first_info_card">
+                    <TextView
+                        android:id="@+id/featured_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Campus News"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/cardinal_red"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginTop="16dp"
+                        app:layout_constraintStart_toEndOf="@id/featured_image"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+                    <TextView
+                        android:id="@+id/featured_description"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:text="Check out the latest campus news and upcoming events!"
+                        android:textSize="14sp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="16dp"
+                        app:layout_constraintStart_toEndOf="@id/featured_image"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/featured_title"
+                        app:layout_constraintBottom_toBottomOf="parent" />
 
-            <ImageView
-                android:id="@+id/featured_image_2"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:src="@drawable/student_icon"
-                android:layout_margin="16dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-            <TextView
-                android:id="@+id/featured_title_2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="Study Groups"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/cardinal_red"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginTop="16dp"
-                app:layout_constraintStart_toEndOf="@id/featured_image_2"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/featured_description_2"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:text="Join study groups for your classModels and collaborate with peers."
-                android:textSize="14sp"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="16dp"
-                app:layout_constraintStart_toEndOf="@id/featured_image_2"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/featured_title_2"
-                app:layout_constraintBottom_toBottomOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <!-- Testing Center Card -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/testing_center_card"
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="16dp"
-        app:cardBackgroundColor="#E9E9E9"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="4dp"
-        app:layout_constraintTop_toBottomOf="@+id/second_info_card">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <ImageView
-                android:id="@+id/testing_icon"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:src="@drawable/ic_testing"
-                android:layout_margin="16dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
-
-            <TextView
-                android:id="@+id/testing_title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="Testing Centers"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/cardinal_red"
+            <!-- Second Feature Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/second_info_card"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginTop="16dp"
-                app:layout_constraintStart_toEndOf="@id/testing_icon"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:cardBackgroundColor="#E9E9E9"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="4dp"
+                app:layout_constraintTop_toBottomOf="@+id/first_info_card">
 
-            <TextView
-                android:id="@+id/testing_description"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:text="Track testing centers across campus and sign up for exams."
-                android:textSize="14sp"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="16dp"
-                app:layout_constraintStart_toEndOf="@id/testing_icon"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/testing_title"
-                app:layout_constraintBottom_toBottomOf="parent" />
+                <!-- Card content remains the same -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.material.card.MaterialCardView>
+                    <ImageView
+                        android:id="@+id/featured_image_2"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:src="@drawable/student_icon"
+                        android:layout_margin="16dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
 
-    <!-- Bookstore Card -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/bookstore_card"
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
-        app:cardBackgroundColor="#E9E9E9"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="4dp"
-        app:layout_constraintTop_toBottomOf="@+id/testing_center_card"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
-        app:layout_constraintVertical_bias="0.0">
+                    <TextView
+                        android:id="@+id/featured_title_2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Study Groups"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/cardinal_red"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginTop="16dp"
+                        app:layout_constraintStart_toEndOf="@id/featured_image_2"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+                    <TextView
+                        android:id="@+id/featured_description_2"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:text="Join study groups for your classModels and collaborate with peers."
+                        android:textSize="14sp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="16dp"
+                        app:layout_constraintStart_toEndOf="@id/featured_image_2"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/featured_title_2"
+                        app:layout_constraintBottom_toBottomOf="parent" />
 
-            <ImageView
-                android:id="@+id/bookstore_icon"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:src="@drawable/ic_school"
-                android:layout_margin="16dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-            <TextView
-                android:id="@+id/bookstore_title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="ISU Bookstore"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/cardinal_red"
+            <!-- Testing Center Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/testing_center_card"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginTop="16dp"
-                app:layout_constraintStart_toEndOf="@id/bookstore_icon"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:cardBackgroundColor="#E9E9E9"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="4dp"
+                app:layout_constraintTop_toBottomOf="@+id/second_info_card">
 
-            <TextView
-                android:id="@+id/bookstore_description"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:text="Browse and purchase books, supplies, and ISU merchandise."
-                android:textSize="14sp"
+                <!-- Card content remains the same -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:id="@+id/testing_icon"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:src="@drawable/ic_testing"
+                        android:layout_margin="16dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                    <TextView
+                        android:id="@+id/testing_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Testing Centers"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/cardinal_red"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginTop="16dp"
+                        app:layout_constraintStart_toEndOf="@id/testing_icon"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/testing_description"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:text="Track testing centers across campus and sign up for exams."
+                        android:textSize="14sp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="16dp"
+                        app:layout_constraintStart_toEndOf="@id/testing_icon"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/testing_title"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Bookstore Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/bookstore_card"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
-                app:layout_constraintStart_toEndOf="@id/bookstore_icon"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/bookstore_title"
-                app:layout_constraintBottom_toBottomOf="parent" />
+                app:cardBackgroundColor="#E9E9E9"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="4dp"
+                app:layout_constraintTop_toBottomOf="@+id/testing_center_card"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+                <!-- Card content remains the same -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:id="@+id/bookstore_icon"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:src="@drawable/ic_school"
+                        android:layout_margin="16dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                    <TextView
+                        android:id="@+id/bookstore_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="ISU Bookstore"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/cardinal_red"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginTop="16dp"
+                        app:layout_constraintStart_toEndOf="@id/bookstore_icon"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/bookstore_description"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:text="Browse and purchase books, supplies, and ISU merchandise."
+                        android:textSize="14sp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="16dp"
+                        app:layout_constraintStart_toEndOf="@id/bookstore_icon"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/bookstore_title"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- You can add more cards here as needed -->
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.material.card.MaterialCardView>
+    </ScrollView>
 
     <!-- Bottom Navigation Bar -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
