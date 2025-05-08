@@ -1,465 +1,427 @@
 package onetoone.BusSystem;
 
+import com.google.transit.realtime.GtfsRealtime;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.*;
+import java.io.IOException;
+import java.net.URL;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * Service for interacting with the Iowa GTFS API
- * Provides methods to retrieve real-time bus information
- */
 @Service
 public class IowaGtfsService {
 
-    @Value("${https://iowa-gtfs.com/}")
-    private String apiBaseUrl;
+    private static final String VEHICLE_POSITIONS_URL = "https://mycyride.com/gtfs-rt/vehiclepositions";
+    private static final String TRIP_UPDATES_URL = "https://mycyride.com/gtfs-rt/tripupdates";
+    private static final String ALERTS_URL = "https://mycyride.com/gtfs-rt/alerts";
 
-    private final RestTemplate restTemplate;
-    private final ObjectMapper objectMapper;
+    @Autowired
+    private busRepository busRepository;
 
-    // Cache for API responses to reduce external calls
-    private final Map<String, Object> vehiclePositionsCache = new ConcurrentHashMap<>();
-    private final Map<String, Object> tripUpdatesCache = new ConcurrentHashMap<>();
-    private final List<Map<String, Object>> stopsCache = new ArrayList<>();
-    private final List<Map<String, Object>> routesCache = new ArrayList<>();
-
-    // Cache timestamps
-    private LocalDateTime vehiclePositionsCacheTime;
-    private LocalDateTime tripUpdatesCacheTime;
-    private LocalDateTime stopsCacheTime;
-    private LocalDateTime routesCacheTime;
-
-    // Cache validity period in milliseconds (5 minutes)
-    private static final long CACHE_VALIDITY_PERIOD = 300000;
-
-    public IowaGtfsService() {
-        this.restTemplate = new RestTemplate();
-        this.objectMapper = new ObjectMapper();
-    }
+    @Autowired
+    private RestTemplate restTemplate;
 
     /**
-     * Gets real-time positions of all vehicles
-     * @return Map containing vehicle position data
+     * Fetches vehicle position data from GTFS-RT feed and updates the database
      */
-    public Map<String, Object> getVehiclePositions() {
-        if (isCacheValid(vehiclePositionsCacheTime) && !vehiclePositionsCache.isEmpty()) {
-            return vehiclePositionsCache;
-        }
+    public List<VehiclePositionDTO> getVehiclePositions() throws IOException {
+        List<VehiclePositionDTO> positions = new ArrayList<>();
 
         try {
-            ResponseEntity<Map> response = restTemplate.getForEntity(
-                    apiBaseUrl + "/vehicle-positions", Map.class);
+            GtfsRealtime.FeedMessage feed = GtfsRealtime.FeedMessage.parseFrom(new URL(VEHICLE_POSITIONS_URL).openStream());
 
-            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                Map<String, Object> result = response.getBody();
-                vehiclePositionsCache.putAll(result);
-                vehiclePositionsCacheTime = LocalDateTime.now();
-                return result;
-            } else {
-                throw new RuntimeException("Failed to fetch vehicle positions: " + response.getStatusCode());
+            for (GtfsRealtime.FeedEntity entity : feed.getEntityList()) {
+                if (entity.hasVehicle()) {
+                    GtfsRealtime.VehiclePosition vehicle = entity.getVehicle();
+
+                    VehiclePositionDTO position = new VehiclePositionDTO();
+                    position.setVehicleId(vehicle.getVehicle().getId());
+                    position.setRouteId(vehicle.getTrip().getRouteId());
+                    position.setTripId(vehicle.getTrip().getTripId());
+                    position.setLatitude(vehicle.getPosition().getLatitude());
+                    position.setLongitude(vehicle.getPosition().getLongitude());
+                    position.setBearing(vehicle.getPosition().getBearing());
+                    position.setSpeed(vehicle.getPosition().getSpeed());
+
+                    if (vehicle.hasCurrentStopSequence()) {
+                        position.setCurrentStopSequence(vehicle.getCurrentStopSequence());
+                    }
+
+                    if (vehicle.hasCurrentStatus()) {
+                        position.setCurrentStatus(vehicle.getCurrentStatus().toString());
+                    }
+
+                    if (vehicle.hasTimestamp()) {
+                        position.setTimestamp(LocalDateTime.ofInstant(
+                                Instant.ofEpochSecond(vehicle.getTimestamp()),
+                                ZoneId.systemDefault()));
+                    }
+
+                    positions.add(position);
+
+                    // Try to update the corresponding bus in our database
+                    updateBusWithVehiclePosition(position);
+                }
             }
         } catch (Exception e) {
-            throw new RuntimeException("Error fetching vehicle positions: " + e.getMessage(), e);
+            throw new IOException("Error fetching vehicle positions: " + e.getMessage(), e);
+        }
+
+        return positions;
+    }
+
+    /**
+     * Updates our bus database with vehicle position information
+     */
+    private void updateBusWithVehiclePosition(VehiclePositionDTO position) {
+        // First try to find by vehicleId
+        Optional<Bus> busOptional = busRepository.findByVehicleId(position.getVehicleId());
+
+        // If not found, try by routeId (which should match our bus number)
+        if (busOptional.isEmpty()) {
+            List<Bus> buses = busRepository.findByRouteId(position.getRouteId());
+            if (!buses.isEmpty()) {
+                busOptional = Optional.of(buses.get(0));
+            }
+        }
+
+        if (busOptional.isPresent()) {
+            Bus bus = busOptional.get();
+            bus.setVehicleId(position.getVehicleId());
+            bus.setTripId(position.getTripId());
+            bus.updatePosition(
+                    position.getLatitude(),
+                    position.getLongitude(),
+                    position.getSpeed(),
+                    position.getBearing()
+            );
+            busRepository.save(bus);
         }
     }
 
     /**
-     * Gets real-time position of vehicles on a specific route
-     * @param routeId the route ID
-     * @return Map containing vehicle position data for the route
+     * Fetches trip updates from GTFS-RT feed
      */
-    public Map<String, Object> getVehiclePositionByRoute(String routeId) {
-        Map<String, Object> allPositions = getVehiclePositions();
+    public List<TripUpdateDTO> getTripUpdates() throws IOException {
+        List<TripUpdateDTO> updates = new ArrayList<>();
 
         try {
-            Map<String, Object> result = new HashMap<>();
-            List<Map<String, Object>> filteredEntities = new ArrayList<>();
+            GtfsRealtime.FeedMessage feed = GtfsRealtime.FeedMessage.parseFrom(new URL(TRIP_UPDATES_URL).openStream());
 
-            if (allPositions.containsKey("entity") && allPositions.get("entity") instanceof List) {
-                List<?> entities = (List<?>) allPositions.get("entity");
+            for (GtfsRealtime.FeedEntity entity : feed.getEntityList()) {
+                if (entity.hasTripUpdate()) {
+                    GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
 
-                for (Object entityObj : entities) {
-                    if (entityObj instanceof Map) {
-                        Map<?, ?> entity = (Map<?, ?>) entityObj;
-                        if (entity.containsKey("vehicle") && entity.get("vehicle") instanceof Map) {
-                            Map<?, ?> vehicle = (Map<?, ?>) entity.get("vehicle");
+                    TripUpdateDTO update = new TripUpdateDTO();
+                    update.setTripId(tripUpdate.getTrip().getTripId());
+                    update.setRouteId(tripUpdate.getTrip().getRouteId());
+                    update.setVehicleId(tripUpdate.getVehicle().getId());
 
-                            if (vehicle.containsKey("trip") && vehicle.get("trip") instanceof Map) {
-                                Map<?, ?> trip = (Map<?, ?>) vehicle.get("trip");
+                    List<StopTimeUpdateDTO> stopTimeUpdates = new ArrayList<>();
+                    for (GtfsRealtime.TripUpdate.StopTimeUpdate stopUpdate : tripUpdate.getStopTimeUpdateList()) {
+                        StopTimeUpdateDTO stopTimeUpdateDTO = new StopTimeUpdateDTO();
+                        stopTimeUpdateDTO.setStopId(stopUpdate.getStopId());
+                        stopTimeUpdateDTO.setStopSequence(stopUpdate.getStopSequence());
 
-                                if (trip.containsKey("route_id") &&
-                                        routeId.equals(String.valueOf(trip.get("route_id")))) {
-                                    filteredEntities.add((Map<String, Object>) entity);
-                                }
+                        if (stopUpdate.hasArrival()) {
+                            LocalDateTime arrivalTime = LocalDateTime.ofInstant(
+                                    Instant.ofEpochSecond(stopUpdate.getArrival().getTime()),
+                                    ZoneId.systemDefault());
+                            stopTimeUpdateDTO.setArrivalTime(arrivalTime);
+                        }
+
+                        if (stopUpdate.hasDeparture()) {
+                            LocalDateTime departureTime = LocalDateTime.ofInstant(
+                                    Instant.ofEpochSecond(stopUpdate.getDeparture().getTime()),
+                                    ZoneId.systemDefault());
+                            stopTimeUpdateDTO.setDepartureTime(departureTime);
+                        }
+
+                        stopTimeUpdates.add(stopTimeUpdateDTO);
+                    }
+
+                    update.setStopTimeUpdates(stopTimeUpdates);
+                    updates.add(update);
+
+                    // Update the next stop information in our database
+                    updateBusWithTripUpdate(update);
+                }
+            }
+        } catch (Exception e) {
+            throw new IOException("Error fetching trip updates: " + e.getMessage(), e);
+        }
+
+        return updates;
+    }
+
+    /**
+     * Updates our bus database with trip update information
+     */
+    private void updateBusWithTripUpdate(TripUpdateDTO update) {
+        // Try to find by tripId
+        Optional<Bus> busOptional = busRepository.findByTripId(update.getTripId());
+
+        // If not found, try by vehicleId
+        if (busOptional.isEmpty()) {
+            busOptional = busRepository.findByVehicleId(update.getVehicleId());
+        }
+
+        // If still not found, try by routeId
+        if (busOptional.isEmpty()) {
+            List<Bus> buses = busRepository.findByRouteId(update.getRouteId());
+            if (!buses.isEmpty()) {
+                busOptional = Optional.of(buses.get(0));
+            }
+        }
+
+        if (busOptional.isPresent() && !update.getStopTimeUpdates().isEmpty()) {
+            Bus bus = busOptional.get();
+
+            // Get the next stop (first in the list)
+            StopTimeUpdateDTO nextStop = update.getStopTimeUpdates().get(0);
+            bus.setNextStopId(nextStop.getStopId());
+
+            if (nextStop.getArrivalTime() != null) {
+                bus.setNextStopArrivalTime(nextStop.getArrivalTime());
+            }
+
+            busRepository.save(bus);
+        }
+    }
+
+    /**
+     * Fetches service alerts from GTFS-RT feed
+     */
+    public List<ServiceAlertDTO> getServiceAlerts() throws IOException {
+        List<ServiceAlertDTO> alerts = new ArrayList<>();
+
+        try {
+            GtfsRealtime.FeedMessage feed = GtfsRealtime.FeedMessage.parseFrom(new URL(ALERTS_URL).openStream());
+
+            for (GtfsRealtime.FeedEntity entity : feed.getEntityList()) {
+                if (entity.hasAlert()) {
+                    GtfsRealtime.Alert alert = entity.getAlert();
+
+                    ServiceAlertDTO alertDTO = new ServiceAlertDTO();
+                    alertDTO.setId(entity.getId());
+
+                    // Process affected entities
+                    List<AffectedEntityDTO> affectedEntities = new ArrayList<>();
+                    for (GtfsRealtime.EntitySelector informed : alert.getInformedEntityList()) {
+                        AffectedEntityDTO entityDTO = new AffectedEntityDTO();
+
+                        if (informed.hasRouteId()) {
+                            entityDTO.setRouteId(informed.getRouteId());
+                        }
+
+                        if (informed.hasStopId()) {
+                            entityDTO.setStopId(informed.getStopId());
+                        }
+
+                        if (informed.hasTrip()) {
+                            entityDTO.setTripId(informed.getTrip().getTripId());
+                        }
+
+                        affectedEntities.add(entityDTO);
+                    }
+                    alertDTO.setAffectedEntities(affectedEntities);
+
+                    // Process header text
+                    if (alert.hasHeaderText()) {
+                        for (GtfsRealtime.TranslatedString.Translation translation : alert.getHeaderText().getTranslationList()) {
+                            if (translation.getLanguage().isEmpty() || translation.getLanguage().equals("en")) {
+                                alertDTO.setHeaderText(translation.getText());
+                                break;
                             }
                         }
                     }
-                }
-            }
 
-            if (!filteredEntities.isEmpty()) {
-                result.put("header", allPositions.getOrDefault("header", new HashMap<>()));
-                result.put("entity", filteredEntities);
-                return result;
-            } else {
-                throw new RuntimeException("No vehicle found for route: " + routeId);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error processing vehicle position for route " + routeId + ": " + e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Gets all bus stops
-     * @return List of stops
-     */
-    public List<Map<String, Object>> getAllStops() {
-        if (isCacheValid(stopsCacheTime) && !stopsCache.isEmpty()) {
-            return new ArrayList<>(stopsCache);
-        }
-
-        try {
-            ResponseEntity<List> response = restTemplate.getForEntity(
-                    apiBaseUrl + "/stops", List.class);
-
-            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                List<Map<String, Object>> stops = response.getBody();
-                stopsCache.clear();
-                stopsCache.addAll(stops);
-                stopsCacheTime = LocalDateTime.now();
-                return stops;
-            } else {
-                throw new RuntimeException("Failed to fetch stops: " + response.getStatusCode());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error fetching stops: " + e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Gets a specific bus stop by ID
-     * @param stopId the stop ID
-     * @return Map containing stop data
-     */
-    public Map<String, Object> getStopById(String stopId) {
-        List<Map<String, Object>> allStops = getAllStops();
-
-        return allStops.stream()
-                .filter(stop -> stopId.equals(stop.get("stop_id")))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Stop not found with ID: " + stopId));
-    }
-
-    /**
-     * Gets real-time trip updates (arrivals/departures)
-     * @return Map containing trip update data
-     */
-    public Map<String, Object> getTripUpdates() {
-        if (isCacheValid(tripUpdatesCacheTime) && !tripUpdatesCache.isEmpty()) {
-            return tripUpdatesCache;
-        }
-
-        try {
-            ResponseEntity<Map> response = restTemplate.getForEntity(
-                    apiBaseUrl + "/trip-updates", Map.class);
-
-            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                Map<String, Object> result = response.getBody();
-                tripUpdatesCache.putAll(result);
-                tripUpdatesCacheTime = LocalDateTime.now();
-                return result;
-            } else {
-                throw new RuntimeException("Failed to fetch trip updates: " + response.getStatusCode());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error fetching trip updates: " + e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Gets real-time trip updates for a specific route
-     * @param routeId the route ID
-     * @return Map containing trip update data for the route
-     */
-    public Map<String, Object> getTripUpdatesByRoute(String routeId) {
-        Map<String, Object> allUpdates = getTripUpdates();
-
-        try {
-            Map<String, Object> result = new HashMap<>();
-            List<Map<String, Object>> filteredEntities = new ArrayList<>();
-
-            if (allUpdates.containsKey("entity") && allUpdates.get("entity") instanceof List) {
-                List<?> entities = (List<?>) allUpdates.get("entity");
-
-                for (Object entityObj : entities) {
-                    if (entityObj instanceof Map) {
-                        Map<?, ?> entity = (Map<?, ?>) entityObj;
-                        if (entity.containsKey("trip_update") && entity.get("trip_update") instanceof Map) {
-                            Map<?, ?> tripUpdate = (Map<?, ?>) entity.get("trip_update");
-
-                            if (tripUpdate.containsKey("trip") && tripUpdate.get("trip") instanceof Map) {
-                                Map<?, ?> trip = (Map<?, ?>) tripUpdate.get("trip");
-
-                                if (trip.containsKey("route_id") &&
-                                        routeId.equals(String.valueOf(trip.get("route_id")))) {
-                                    filteredEntities.add((Map<String, Object>) entity);
-                                }
+                    // Process description text
+                    if (alert.hasDescriptionText()) {
+                        for (GtfsRealtime.TranslatedString.Translation translation : alert.getDescriptionText().getTranslationList()) {
+                            if (translation.getLanguage().isEmpty() || translation.getLanguage().equals("en")) {
+                                alertDTO.setDescriptionText(translation.getText());
+                                break;
                             }
                         }
                     }
-                }
-            }
 
-            if (!filteredEntities.isEmpty()) {
-                result.put("header", allUpdates.getOrDefault("header", new HashMap<>()));
-                result.put("entity", filteredEntities);
-                return result;
-            } else {
-                throw new RuntimeException("No trip updates found for route: " + routeId);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error processing trip updates for route " + routeId + ": " + e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Gets all routes
-     * @return List of routes
-     */
-    public List<Map<String, Object>> getAllRoutes() {
-        if (isCacheValid(routesCacheTime) && !routesCache.isEmpty()) {
-            return new ArrayList<>(routesCache);
-        }
-
-        try {
-            ResponseEntity<List> response = restTemplate.getForEntity(
-                    apiBaseUrl + "/routes", List.class);
-
-            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                List<Map<String, Object>> routes = response.getBody();
-                routesCache.clear();
-                routesCache.addAll(routes);
-                routesCacheTime = LocalDateTime.now();
-                return routes;
-            } else {
-                throw new RuntimeException("Failed to fetch routes: " + response.getStatusCode());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error fetching routes: " + e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Gets a specific route by ID
-     * @param routeId the route ID
-     * @return Map containing route data
-     */
-    public Map<String, Object> getRouteById(String routeId) {
-        List<Map<String, Object>> allRoutes = getAllRoutes();
-
-        return allRoutes.stream()
-                .filter(route -> routeId.equals(route.get("route_id")))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Route not found with ID: " + routeId));
-    }
-
-    /**
-     * Gets the estimated time of arrival to the next stop for a specific bus
-     * @param busNum the bus number
-     * @return Map containing ETA information
-     */
-    public Map<String, Object> getNextStopETA(int busNum) {
-        String routeId = String.valueOf(busNum);
-
-        try {
-            // Get vehicle position to find the current trip
-            Map<String, Object> vehiclePosition = getVehiclePositionByRoute(routeId);
-            String tripId = null;
-            String vehicleId = null;
-
-            if (vehiclePosition.containsKey("entity") && vehiclePosition.get("entity") instanceof List) {
-                List<?> entities = (List<?>) vehiclePosition.get("entity");
-
-                if (!entities.isEmpty() && entities.get(0) instanceof Map) {
-                    Map<?, ?> entity = (Map<?, ?>) entities.get(0);
-
-                    if (entity.containsKey("vehicle") && entity.get("vehicle") instanceof Map) {
-                        Map<?, ?> vehicle = (Map<?, ?>) entity.get("vehicle");
-
-                        if (vehicle.containsKey("trip") && vehicle.get("trip") instanceof Map) {
-                            Map<?, ?> trip = (Map<?, ?>) vehicle.get("trip");
-
-                            if (trip.containsKey("trip_id")) {
-                                tripId = String.valueOf(trip.get("trip_id"));
-                            }
-                        }
-
-                        if (vehicle.containsKey("vehicle") && vehicle.get("vehicle") instanceof Map) {
-                            Map<?, ?> vehicleInfo = (Map<?, ?>) vehicle.get("vehicle");
-
-                            if (vehicleInfo.containsKey("id")) {
-                                vehicleId = String.valueOf(vehicleInfo.get("id"));
-                            }
-                        }
+                    // Process cause and effect
+                    if (alert.hasCause()) {
+                        alertDTO.setCause(alert.getCause().toString());
                     }
-                }
-            }
 
-            if (tripId == null) {
-                throw new RuntimeException("No active trip found for bus: " + busNum);
-            }
-
-            // Get trip updates to find the next stop and ETA
-            Map<String, Object> tripUpdates = getTripUpdates();
-            Map<String, Object> etaInfo = new HashMap<>();
-
-            if (tripUpdates.containsKey("entity") && tripUpdates.get("entity") instanceof List) {
-                List<?> entities = (List<?>) tripUpdates.get("entity");
-
-                for (Object entityObj : entities) {
-                    if (entityObj instanceof Map) {
-                        Map<?, ?> entity = (Map<?, ?>) entityObj;
-
-                        if (entity.containsKey("trip_update") && entity.get("trip_update") instanceof Map) {
-                            Map<?, ?> tripUpdate = (Map<?, ?>) entity.get("trip_update");
-
-                            if (tripUpdate.containsKey("trip") && tripUpdate.get("trip") instanceof Map) {
-                                Map<?, ?> trip = (Map<?, ?>) tripUpdate.get("trip");
-
-                                if (trip.containsKey("trip_id") && tripId.equals(String.valueOf(trip.get("trip_id")))) {
-                                    if (tripUpdate.containsKey("stop_time_update") &&
-                                            tripUpdate.get("stop_time_update") instanceof List) {
-
-                                        List<?> stopTimeUpdates = (List<?>) tripUpdate.get("stop_time_update");
-
-                                        if (!stopTimeUpdates.isEmpty() && stopTimeUpdates.get(0) instanceof Map) {
-                                            Map<?, ?> nextStopUpdate = (Map<?, ?>) stopTimeUpdates.get(0);
-
-                                            String stopId = nextStopUpdate.containsKey("stop_id") ?
-                                                    String.valueOf(nextStopUpdate.get("stop_id")) : null;
-
-                                            if (stopId != null) {
-                                                // Get stop name
-                                                Map<String, Object> stopInfo = getStopById(stopId);
-                                                String stopName = stopInfo.containsKey("stop_name") ?
-                                                        String.valueOf(stopInfo.get("stop_name")) : "Unknown Stop";
-
-                                                // Calculate minutes until arrival
-                                                int minutesUntilArrival = 0;
-
-                                                if (nextStopUpdate.containsKey("arrival") &&
-                                                        nextStopUpdate.get("arrival") instanceof Map) {
-
-                                                    Map<?, ?> arrival = (Map<?, ?>) nextStopUpdate.get("arrival");
-
-                                                    if (arrival.containsKey("time") && arrival.get("time") instanceof Number) {
-                                                        long arrivalTimestamp = ((Number) arrival.get("time")).longValue();
-                                                        long currentTimestamp = System.currentTimeMillis() / 1000;
-                                                        long secondsUntilArrival = arrivalTimestamp - currentTimestamp;
-                                                        minutesUntilArrival = (int) (secondsUntilArrival / 60);
-                                                    }
-                                                }
-
-                                                // Format arrival time
-                                                LocalDateTime arrivalTime = LocalDateTime.now().plusMinutes(minutesUntilArrival);
-                                                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a");
-                                                String formattedArrivalTime = arrivalTime.format(formatter);
-
-                                                // Build result
-                                                etaInfo.put("busNum", busNum);
-                                                etaInfo.put("routeId", routeId);
-                                                etaInfo.put("tripId", tripId);
-                                                etaInfo.put("vehicleId", vehicleId);
-                                                etaInfo.put("nextStopId", stopId);
-                                                etaInfo.put("nextStopName", stopName);
-                                                etaInfo.put("minutesUntilArrival", minutesUntilArrival);
-                                                etaInfo.put("arrivalTime", formattedArrivalTime);
-
-                                                // Add upcoming stops if available
-                                                if (stopTimeUpdates.size() > 1) {
-                                                    List<String> upcomingStopIds = new ArrayList<>();
-
-                                                    for (int i = 1; i < Math.min(stopTimeUpdates.size(), 5); i++) {
-                                                        if (stopTimeUpdates.get(i) instanceof Map) {
-                                                            Map<?, ?> upcomingStop = (Map<?, ?>) stopTimeUpdates.get(i);
-
-                                                            if (upcomingStop.containsKey("stop_id")) {
-                                                                upcomingStopIds.add(String.valueOf(upcomingStop.get("stop_id")));
-                                                            }
-                                                        }
-                                                    }
-
-                                                    if (!upcomingStopIds.isEmpty()) {
-                                                        List<String> upcomingStopNames = new ArrayList<>();
-
-                                                        for (String upcomingStopId : upcomingStopIds) {
-                                                            try {
-                                                                Map<String, Object> upcomingStopInfo = getStopById(upcomingStopId);
-                                                                upcomingStopNames.add(String.valueOf(upcomingStopInfo.get("stop_name")));
-                                                            } catch (Exception e) {
-                                                                upcomingStopNames.add("Unknown Stop");
-                                                            }
-                                                        }
-
-                                                        etaInfo.put("upcomingStops", upcomingStopNames);
-                                                    }
-                                                }
-
-                                                return etaInfo;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                    if (alert.hasEffect()) {
+                        alertDTO.setEffect(alert.getEffect().toString());
                     }
+
+                    alerts.add(alertDTO);
                 }
             }
-
-            throw new RuntimeException("No trip updates found for bus: " + busNum);
         } catch (Exception e) {
-            throw new RuntimeException("Error calculating next stop ETA: " + e.getMessage(), e);
+            throw new IOException("Error fetching service alerts: " + e.getMessage(), e);
         }
+
+        return alerts;
     }
 
     /**
-     * Scheduled task to periodically refresh the caches
+     * Get vehicle position for a specific route ID
      */
-    @Scheduled(fixedRate = CACHE_VALIDITY_PERIOD)
-    public void refreshCaches() {
+    public Optional<VehiclePositionDTO> getVehiclePositionByRouteId(String routeId) throws IOException {
+        return getVehiclePositions().stream()
+                .filter(position -> position.getRouteId().equals(routeId))
+                .findFirst();
+    }
+
+    /**
+     * Get trip updates for a specific route ID
+     */
+    public List<TripUpdateDTO> getTripUpdatesByRouteId(String routeId) throws IOException {
+        return getTripUpdates().stream()
+                .filter(update -> update.getRouteId().equals(routeId))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get service alerts for a specific route ID
+     */
+    public List<ServiceAlertDTO> getServiceAlertsByRouteId(String routeId) throws IOException {
+        return getServiceAlerts().stream()
+                .filter(alert -> alert.getAffectedEntities().stream()
+                        .anyMatch(entity -> routeId.equals(entity.getRouteId())))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Find buses nearest to the provided coordinates
+     */
+    public List<Bus> findNearestBuses(double latitude, double longitude, int limit) throws IOException {
+        // Get the latest vehicle positions
+        List<VehiclePositionDTO> positions = getVehiclePositions();
+
+        positions.stream()
+                .filter(p -> p.getRouteId() == null || p.getRouteId().isBlank())
+                .forEach(p -> System.out.println("Vehicle with missing routeId: " + p.getVehicleId()));
+
+        // Calculate distance for each bus and sort
+        Map<String, Double> vehicleDistances = new HashMap<>();
+
+        for (VehiclePositionDTO position : positions) {
+            if (position.getVehicleId() == null || position.getVehicleId().isBlank()) continue;
+
+            double distance = calculateDistance(latitude, longitude, position.getLatitude(), position.getLongitude());
+            vehicleDistances.put(position.getVehicleId(), distance);
+        }
+
+        // Get buses from our database using route IDs
+        List<Bus> allBuses = busRepository.findAll();
+
+        // Sort buses by distance
+        return allBuses.stream()
+                .filter(bus -> vehicleDistances.containsKey(bus.getVehicleId()))
+                .sorted(Comparator.comparing(bus -> vehicleDistances.get(bus.getVehicleId())))
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Calculate distance between two points using Haversine formula
+     */
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        double earthRadius = 6371000; // meters
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(dLon/2) * Math.sin(dLon/2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return earthRadius * c;
+    }
+
+    /**
+     * Get buses that are currently active (have recent position updates)
+     */
+    public List<Bus> getActiveBuses() throws IOException {
+        // Get the latest vehicle positions
+        List<VehiclePositionDTO> positions = getVehiclePositions();
+
+        // Create a set of active route IDs
+        Set<String> activeRouteIds = positions.stream()
+                .map(VehiclePositionDTO::getRouteId)
+                .collect(Collectors.toSet());
+
+        // Get all buses
+        List<Bus> allBuses = busRepository.findAll();
+
+        // Filter for active buses
+        return allBuses.stream()
+                .filter(bus -> activeRouteIds.contains(bus.getRouteId()) ||
+                        (bus.getLastReportTime() != null &&
+                                bus.getLastReportTime().isAfter(LocalDateTime.now().minusMinutes(15))))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get predicted arrival times for a specific stop
+     */
+    public List<Map<String, Object>> getPredictedArrivals(String stopId) throws IOException {
+        // Get trip updates
+        List<TripUpdateDTO> tripUpdates = getTripUpdates();
+
+        List<Map<String, Object>> arrivals = new ArrayList<>();
+
+        for (TripUpdateDTO tripUpdate : tripUpdates) {
+            for (StopTimeUpdateDTO stopTimeUpdate : tripUpdate.getStopTimeUpdates()) {
+                if (stopTimeUpdate.getStopId().equals(stopId) && stopTimeUpdate.getArrivalTime() != null) {
+                    Map<String, Object> arrival = new HashMap<>();
+                    arrival.put("routeId", tripUpdate.getRouteId());
+                    arrival.put("tripId", tripUpdate.getTripId());
+                    arrival.put("arrivalTime", stopTimeUpdate.getArrivalTime());
+
+                    // Try to get the bus name
+                    List<Bus> buses = busRepository.findByRouteId(tripUpdate.getRouteId());
+                    if (!buses.isEmpty()) {
+                        arrival.put("busName", buses.get(0).getBusName());
+                    }
+
+                    arrivals.add(arrival);
+                }
+            }
+        }
+
+        // Sort by arrival time
+        arrivals.sort(Comparator.comparing(a -> (LocalDateTime) a.get("arrivalTime")));
+
+        return arrivals;
+    }
+
+    /**
+     * Manually refresh real-time data
+     */
+    public void refreshRealTimeData() throws IOException {
+        getVehiclePositions();
+        getTripUpdates();
+        getServiceAlerts();
+        LocalDateTime lastUpdateTime = LocalDateTime.now();
+    }
+
+    /**
+     * Scheduled task to update all buses with real-time data
+     */
+    @Scheduled(fixedRate = 30000) // Update every 30 seconds
+    public void updateRealTimeData() {
         try {
-            getVehiclePositions();
-            getTripUpdates();
-            getAllStops();
-            getAllRoutes();
+            refreshRealTimeData();
         } catch (Exception e) {
-            // Log error but don't rethrow to prevent scheduled task from being disabled
-            System.err.println("Error refreshing GTFS caches: " + e.getMessage());
+            // Log error but don't crash the service
+            System.err.println("Error updating real-time data: " + e.getMessage());
         }
-    }
-
-    /**
-     * Checks if a cache is still valid
-     * @param cacheTime the timestamp when the cache was last updated
-     * @return true if the cache is valid, false otherwise
-     */
-    private boolean isCacheValid(LocalDateTime cacheTime) {
-        if (cacheTime == null) {
-            return false;
-        }
-
-        long millisSinceUpdate = java.time.Duration.between(cacheTime, LocalDateTime.now()).toMillis();
-        return millisSinceUpdate < CACHE_VALIDITY_PERIOD;
     }
 }
