@@ -4,9 +4,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.NetworkResponse;
+import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.own_example.VolleySingleton;
@@ -18,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -204,6 +209,34 @@ public class OrderService {
     // --- ORDER API CALLS ---
 
     /**
+     * Custom JsonObjectRequest that also accepts 201 Created as success
+     */
+    private class CustomJsonObjectRequest extends JsonObjectRequest {
+
+        public CustomJsonObjectRequest(int method, String url, JSONObject jsonRequest,
+                                       Response.Listener<JSONObject> listener,
+                                       Response.ErrorListener errorListener) {
+            super(method, url, jsonRequest, listener, errorListener);
+        }
+
+        @Override
+        protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+            try {
+                // Also accept 201 as success
+                if (response.statusCode == 201) {
+                    String jsonString = new String(response.data,
+                            HttpHeaderParser.parseCharset(response.headers, PROTOCOL_CHARSET));
+                    return Response.success(new JSONObject(jsonString),
+                            HttpHeaderParser.parseCacheHeaders(response));
+                }
+                return super.parseNetworkResponse(response);
+            } catch (UnsupportedEncodingException | JSONException e) {
+                return Response.error(new ParseError(e));
+            }
+        }
+    }
+
+    /**
      * Create an order
      */
     public void createOrder(int personId, final OrderCallback callback) {
@@ -223,7 +256,8 @@ public class OrderService {
             Log.d(TAG, "Creating order with URL: " + url);
             Log.d(TAG, "Order payload: " + orderJson.toString());
 
-            JsonObjectRequest request = new JsonObjectRequest(
+            // Use our custom request that also accepts 201 Created as success
+            CustomJsonObjectRequest request = new CustomJsonObjectRequest(
                     Request.Method.POST,
                     url,
                     orderJson,
@@ -268,6 +302,12 @@ public class OrderService {
                         }
                     }
             );
+
+            // Set a longer timeout in case the server is slow
+            request.setRetryPolicy(new DefaultRetryPolicy(
+                    30000, // 30 seconds timeout
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
             VolleySingleton.getInstance(context).addToRequestQueue(request);
         } catch (JSONException e) {

@@ -47,12 +47,34 @@ public class OrderModels {
     }
 
     /**
+     * Represents a person model to align with backend API
+     */
+    public static class PersonModel {
+        private int id;
+
+        public PersonModel() {
+        }
+
+        public PersonModel(int id) {
+            this.id = id;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+    }
+
+    /**
      * Represents an order
      */
     public static class OrderModel {
         private int id;
         private Date orderDate;
-        private int personId;
+        private PersonModel person;  // Changed from int personId
         private List<OrderItemModel> items;
         private String status;
         private Date estimatedDelivery;
@@ -69,7 +91,7 @@ public class OrderModels {
         // Constructor from cart
         public OrderModel(List<CartItemModel> cartItems, int personId) {
             this();
-            this.personId = personId;
+            this.person = new PersonModel(personId);  // Create Person object with ID
             for (CartItemModel cartItem : cartItems) {
                 this.items.add(new OrderItemModel(0, cartItem.getProduct(), cartItem.getQuantity()));
             }
@@ -78,10 +100,12 @@ public class OrderModels {
         public JSONObject toJson() throws JSONException {
             JSONObject orderJson = new JSONObject();
 
+            // Create person object with ID
             JSONObject personJson = new JSONObject();
-            personJson.put("id", personId);
+            personJson.put("id", person.getId());
             orderJson.put("person", personJson);
 
+            // Create items array
             JSONArray itemsArray = new JSONArray();
             for (OrderItemModel item : items) {
                 itemsArray.put(item.toJson());
@@ -100,7 +124,8 @@ public class OrderModels {
 
             if (jsonObject.has("person") && !jsonObject.isNull("person")) {
                 JSONObject personJson = jsonObject.getJSONObject("person");
-                order.setPersonId(personJson.getInt("id"));
+                int personId = personJson.getInt("id");
+                order.setPerson(new PersonModel(personId));
             }
 
             if (jsonObject.has("orderDate") && !jsonObject.isNull("orderDate")) {
@@ -129,7 +154,7 @@ public class OrderModels {
             return order;
         }
 
-        // Getters and setters
+        // Updated getters and setters
         public int getId() {
             return id;
         }
@@ -146,12 +171,12 @@ public class OrderModels {
             this.orderDate = orderDate;
         }
 
-        public int getPersonId() {
-            return personId;
+        public PersonModel getPerson() {
+            return person;
         }
 
-        public void setPersonId(int personId) {
-            this.personId = personId;
+        public void setPerson(PersonModel person) {
+            this.person = person;
         }
 
         public List<OrderItemModel> getItems() {
@@ -184,6 +209,15 @@ public class OrderModels {
                 total += item.getSubtotal();
             }
             return total;
+        }
+
+        // For backward compatibility
+        public int getPersonId() {
+            return person != null ? person.getId() : -1;
+        }
+
+        public void setPersonId(int personId) {
+            this.person = new PersonModel(personId);
         }
     }
 
