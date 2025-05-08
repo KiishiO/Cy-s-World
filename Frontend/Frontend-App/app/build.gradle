@@ -19,16 +19,15 @@ android {
     }
 
     buildTypes {
-        debug{
-            testCoverageEnabled true
+        debug {
+            testCoverageEnabled true  // Enable code coverage for debug builds
+            // Add this line to fix the BuildConfig issue
+            buildConfigField "String", "GIT_BRANCH", "\"HEAD\""
         }
 
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-        debug {
-            testCoverageEnabled true  // Enable code coverage for debug builds
         }
     }
 
@@ -86,10 +85,6 @@ dependencies {
     // For caching map data
     implementation 'androidx.room:room-runtime:2.6.1'
     annotationProcessor 'androidx.room:room-compiler:2.6.1'
-
-    // REMOVE THESE LINES:
-    // implementation 'com.google.protobuf:protobuf-java:3.19.4'
-    // implementation 'com.google.transit:gtfs-realtime-bindings:0.0.5'
 
     implementation libs.androidx.espresso.contrib
 
