@@ -1,14 +1,28 @@
 package com.example.own_example.models;
 
+import com.google.gson.annotations.SerializedName;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class TestingCenter {
-    private int id;
-    private String centerName;
-    private String location;
-    private String centerDescription;
-    private List<ExamInfo> examInfo;
 
+    @SerializedName("id")
+    private int id;
+
+    @SerializedName("centerName")
+    private String centerName;
+
+    @SerializedName("location")
+    private String location;
+
+    @SerializedName("centerDescription")
+    private String centerDescription;
+
+    @SerializedName("examInfo2")
+    private List<ExamInfo> examInfo2 = new ArrayList<>();
+
+    // Constructors
     public TestingCenter() {
     }
 
@@ -51,11 +65,26 @@ public class TestingCenter {
         this.centerDescription = centerDescription;
     }
 
-    public List<ExamInfo> getExamInfo() {
-        return examInfo;
+    public List<ExamInfo> getExamInfo2() {
+        return examInfo2;
     }
 
-    public void setExamInfo(List<ExamInfo> examInfo) {
-        this.examInfo = examInfo;
+    public void setExamInfo2(List<ExamInfo> examInfo2) {
+        this.examInfo2 = examInfo2;
+    }
+
+    // Helper methods
+    public int getExamCount() {
+        return examInfo2 != null ? examInfo2.size() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return "TestingCenter{" +
+                "id=" + id +
+                ", centerName='" + centerName + '\'' +
+                ", location='" + location + '\'' +
+                ", examCount=" + getExamCount() +
+                '}';
     }
 }

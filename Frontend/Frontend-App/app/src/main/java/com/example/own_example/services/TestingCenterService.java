@@ -9,6 +9,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.own_example.models.ExamInfo;
 import com.example.own_example.models.TestingCenter;
@@ -23,6 +24,10 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Service to handle all Testing Center related API calls.
+ * Updated to match our new backend API structure!
+ */
 public class TestingCenterService {
     private static final String TAG = "TestingCenterService";
     private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu:8080/api";
@@ -34,7 +39,7 @@ public class TestingCenterService {
         gson = new Gson();
     }
 
-    // Callback interfaces for async operations
+    // These callback interfaces let us handle async API calls
     public interface TestingCentersCallback {
         void onSuccess(List<TestingCenter> testingCenters);
         void onError(String error);
@@ -50,12 +55,20 @@ public class TestingCenterService {
         void onError(String error);
     }
 
+    public interface ExamCallback {
+        void onSuccess(ExamInfo exam);
+        void onError(String error);
+    }
+
     public interface OperationCallback {
         void onSuccess();
         void onError(String error);
     }
 
-    // Get all testing centers
+    /**
+     * Gets all testing centers
+     * GET /api/testing-centers
+     */
     public void getAllTestingCenters(final TestingCentersCallback callback) {
         JsonArrayRequest request = new JsonArrayRequest(
                 Request.Method.GET,
@@ -80,7 +93,7 @@ public class TestingCenterService {
                         Log.e(TAG, "Error fetching testing centers: " + error.getMessage());
                         callback.onError("Error connecting to server");
 
-                        // Provide mock data as fallback
+                        // Added mock data fallback to help in development
                         provideMockData(callback);
                     }
                 }
@@ -89,7 +102,10 @@ public class TestingCenterService {
         requestQueue.add(request);
     }
 
-    // Get testing center by ID
+    /**
+     * Gets a single testing center by ID
+     * GET /api/testing-centers/{id}
+     */
     public void getTestingCenterById(int id, final TestingCenterCallback callback) {
         JsonObjectRequest request = new JsonObjectRequest(
                 Request.Method.GET,
@@ -119,7 +135,10 @@ public class TestingCenterService {
         requestQueue.add(request);
     }
 
-    // Create a new testing center - this might need to be updated depending on the server API
+    /**
+     * Creates a new testing center
+     * POST /api/testing-centers
+     */
     public void createTestingCenter(TestingCenter testingCenter, final TestingCenterCallback callback) {
         try {
             JSONObject jsonBody = new JSONObject(gson.toJson(testingCenter));
@@ -156,7 +175,10 @@ public class TestingCenterService {
         }
     }
 
-    // Update a testing center
+    /**
+     * Updates an existing testing center
+     * PUT /api/testing-centers/{id}
+     */
     public void updateTestingCenter(int id, TestingCenter testingCenter, final TestingCenterCallback callback) {
         try {
             JSONObject jsonBody = new JSONObject(gson.toJson(testingCenter));
@@ -193,15 +215,18 @@ public class TestingCenterService {
         }
     }
 
-    // Delete a testing center
+    /**
+     * Deletes a testing center
+     * DELETE /api/testingcenters/{id}
+     * Uses StringRequest instead of JSONObjectRequest to handle empty responses
+     */
     public void deleteTestingCenter(int id, final OperationCallback callback) {
-        JsonObjectRequest request = new JsonObjectRequest(
+        StringRequest request = new StringRequest(
                 Request.Method.DELETE,
-                BASE_URL + "/testingcenters/" + id, // Note the different endpoint path based on backend code
-                null,
-                new Response.Listener<JSONObject>() {
+                BASE_URL + "/testingcenters/" + id, // Updated to match our new backend endpoint naming
+                new Response.Listener<String>() {
                     @Override
-                    public void onResponse(JSONObject response) {
+                    public void onResponse(String response) {
                         callback.onSuccess();
                     }
                 },
@@ -217,7 +242,10 @@ public class TestingCenterService {
         requestQueue.add(request);
     }
 
-    // Get exams for a testing center
+    /**
+     * Gets all exams for a testing center
+     * GET /api/testing-centers/{id}/exams
+     */
     public void getExamsForTestingCenter(int centerId, final ExamsCallback callback) {
         JsonArrayRequest request = new JsonArrayRequest(
                 Request.Method.GET,
@@ -248,19 +276,29 @@ public class TestingCenterService {
         requestQueue.add(request);
     }
 
-    // Add an exam to a testing center - this will need to be updated after reviewing API
-    public void addExamToTestingCenter(int centerId, ExamInfo examInfo, final OperationCallback callback) {
+    /**
+     * Adds an exam to a testing center
+     * POST /api/{id}/exam
+     * Updated to match our new backend API structure!
+     */
+    public void addExamToTestingCenter(int centerId, ExamInfo examInfo, final ExamCallback callback) {
         try {
             JSONObject jsonBody = new JSONObject(gson.toJson(examInfo));
 
             JsonObjectRequest request = new JsonObjectRequest(
                     Request.Method.POST,
-                    BASE_URL + "/exams",  // Based on new API
+                    BASE_URL + "/" + centerId + "/exam",  // Fixed endpoint to match our new API structure
                     jsonBody,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
-                            callback.onSuccess();
+                            try {
+                                ExamInfo createdExam = gson.fromJson(response.toString(), ExamInfo.class);
+                                callback.onSuccess(createdExam);
+                            } catch (Exception e) {
+                                Log.e(TAG, "Error parsing created exam: " + e.getMessage());
+                                callback.onError("Error parsing response");
+                            }
                         }
                     },
                     new Response.ErrorListener() {
@@ -279,7 +317,136 @@ public class TestingCenterService {
         }
     }
 
-    // Provide mock data as fallback when server is unavailable
+    /**
+     * Gets all exams in the system
+     * GET /api/exams
+     */
+    public void getAllExams(final ExamsCallback callback) {
+        JsonArrayRequest request = new JsonArrayRequest(
+                Request.Method.GET,
+                BASE_URL + "/exams",
+                null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        try {
+                            Type listType = new TypeToken<List<ExamInfo>>(){}.getType();
+                            List<ExamInfo> exams = gson.fromJson(response.toString(), listType);
+                            callback.onSuccess(exams);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error parsing exams: " + e.getMessage());
+                            callback.onError("Error parsing data");
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e(TAG, "Error fetching exams: " + error.getMessage());
+                        callback.onError("Error connecting to server");
+                    }
+                }
+        );
+
+        requestQueue.add(request);
+    }
+
+    /**
+     * Deletes an exam
+     * DELETE /api/exams/{id}
+     */
+    public void deleteExam(int examId, final OperationCallback callback) {
+        StringRequest request = new StringRequest(
+                Request.Method.DELETE,
+                BASE_URL + "/exams/" + examId,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        callback.onSuccess();
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e(TAG, "Error deleting exam: " + error.getMessage());
+                        callback.onError("Error deleting exam");
+                    }
+                }
+        );
+
+        requestQueue.add(request);
+    }
+
+    /**
+     * Updates an existing exam
+     * PUT /api/exams/{id}
+     */
+    public void updateExam(int examId, ExamInfo examInfo, final ExamCallback callback) {
+        try {
+            JSONObject jsonBody = new JSONObject(gson.toJson(examInfo));
+
+            JsonObjectRequest request = new JsonObjectRequest(
+                    Request.Method.PUT,
+                    BASE_URL + "/exams/" + examId,
+                    jsonBody,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+                                ExamInfo updatedExam = gson.fromJson(response.toString(), ExamInfo.class);
+                                callback.onSuccess(updatedExam);
+                            } catch (Exception e) {
+                                Log.e(TAG, "Error parsing updated exam: " + e.getMessage());
+                                callback.onError("Error parsing response");
+                            }
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.e(TAG, "Error updating exam: " + error.getMessage());
+                            callback.onError("Error updating exam");
+                        }
+                    }
+            );
+
+            requestQueue.add(request);
+        } catch (Exception e) {
+            Log.e(TAG, "Error preparing update exam request: " + e.getMessage());
+            callback.onError("Error preparing request");
+        }
+    }
+
+    /**
+     * Signs up a student for an exam
+     * POST /api/students/{studentId}/signup-exam/{examId}
+     */
+    public void signUpStudentForExam(int studentId, int examId, final OperationCallback callback) {
+        StringRequest request = new StringRequest(
+                Request.Method.POST,
+                BASE_URL + "/students/" + studentId + "/signup-exam/" + examId,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        callback.onSuccess();
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e(TAG, "Error signing up for exam: " + error.getMessage());
+                        callback.onError("Error signing up for exam");
+                    }
+                }
+        );
+
+        requestQueue.add(request);
+    }
+
+    /**
+     * Provides mock testing center data when the server is unavailable
+     * Great for development and testing when backend is down
+     */
     private void provideMockData(TestingCentersCallback callback) {
         List<TestingCenter> mockCenters = new ArrayList<>();
 

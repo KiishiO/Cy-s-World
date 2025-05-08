@@ -26,6 +26,17 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <!-- Added Student Count TextView -->
+        <TextView
+            android:id="@+id/student_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="0 students registered"
+            android:textColor="@color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/exam_name" />
+
         <TextView
             android:id="@+id/exam_description"
             android:layout_width="0dp"
@@ -33,9 +44,23 @@
             android:layout_marginTop="4dp"
             android:text="Description of the exam"
             android:textColor="@android:color/darker_gray"
+            android:maxLines="2"
+            android:ellipsize="end"
             app:layout_constraintEnd_toStartOf="@id/btn_edit"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/exam_name" />
+            app:layout_constraintTop_toBottomOf="@id/student_count" />
+
+        <!-- Added Register Button -->
+        <Button
+            android:id="@+id/btn_register"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Register"
+            android:backgroundTint="@color/cardinal_red"
+            android:textColor="@color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/exam_description" />
 
         <Button
             android:id="@+id/btn_edit"

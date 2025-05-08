@@ -1,19 +1,19 @@
 package com.example.own_example;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -46,7 +46,7 @@ public class AdminTestingCenterDetailActivity extends AppCompatActivity implemen
     private RecyclerView examsRecyclerView;
     private ProgressBar progressBar;
     private TextView emptyStateTextView;
-    private FloatingActionButton addFab;
+    private FloatingActionButton fab;
 
     public static void start(Context context, int centerId) {
         Intent intent = new Intent(context, AdminTestingCenterDetailActivity.class);
@@ -57,7 +57,7 @@ public class AdminTestingCenterDetailActivity extends AppCompatActivity implemen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_admin_testing_center_detail);
+        setContentView(R.layout.activity_testing_center_detail);
 
         // Get center ID from intent
         centerId = getIntent().getIntExtra(EXTRA_CENTER_ID, -1);
@@ -78,23 +78,34 @@ public class AdminTestingCenterDetailActivity extends AppCompatActivity implemen
         examsRecyclerView = findViewById(R.id.exams_recycler_view);
         progressBar = findViewById(R.id.progress_bar);
         emptyStateTextView = findViewById(R.id.empty_state_text);
-        addFab = findViewById(R.id.fab_add);
+        fab = findViewById(R.id.fab_add_exam);
 
         // Setup toolbar
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("Admin: Testing Center Details");
 
         // Setup RecyclerView
         exams = new ArrayList<>();
-        adapter = new ExamInfoAdapter(this, exams, this, true);
+        adapter = new ExamInfoAdapter(this, exams, this, true); // true = admin view
         examsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         examsRecyclerView.setAdapter(adapter);
 
         // Setup FAB
-        addFab.setOnClickListener(v -> showAddExamDialog());
+        fab.setVisibility(View.VISIBLE);
+        fab.setOnClickListener(v -> showAddExamDialog());
 
         // Load data
         loadTestingCenter();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refresh data when returning to this activity
+        if (testingCenter != null) {
+            loadExams();
+        }
     }
 
     private void loadTestingCenter() {
@@ -123,7 +134,8 @@ public class AdminTestingCenterDetailActivity extends AppCompatActivity implemen
             public void onError(String error) {
                 progressBar.setVisibility(View.GONE);
                 Log.e(TAG, "Error loading testing center: " + error);
-                Toast.makeText(AdminTestingCenterDetailActivity.this, "Error loading testing center details", Toast.LENGTH_SHORT).show();
+                emptyStateTextView.setText("Error loading testing center details");
+                emptyStateTextView.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -139,7 +151,7 @@ public class AdminTestingCenterDetailActivity extends AppCompatActivity implemen
                 adapter.notifyDataSetChanged();
 
                 if (exams.isEmpty()) {
-                    emptyStateTextView.setText("No exams available at this testing center. Add one!");
+                    emptyStateTextView.setText("No exams available at this testing center");
                     emptyStateTextView.setVisibility(View.VISIBLE);
                 } else {
                     emptyStateTextView.setVisibility(View.GONE);
@@ -160,96 +172,109 @@ public class AdminTestingCenterDetailActivity extends AppCompatActivity implemen
     }
 
     private void showAddExamDialog() {
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_edit_exam, null);
-        EditText nameEditText = dialogView.findViewById(R.id.exam_name_edit);
-        EditText descriptionEditText = dialogView.findViewById(R.id.exam_description_edit);
+        // Inflate the dialog layout
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_edit_exam, null);
 
-        new AlertDialog.Builder(this)
-                .setTitle("Add Exam")
+        // Get references to dialog views
+        EditText examNameEditText = dialogView.findViewById(R.id.exam_name_edit);
+        EditText examDescriptionEditText = dialogView.findViewById(R.id.exam_description_edit);
+
+        // Create and show the dialog
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Add New Exam")
                 .setView(dialogView)
-                .setPositiveButton("Add", (dialog, which) -> {
-                    String name = nameEditText.getText().toString().trim();
-                    String description = descriptionEditText.getText().toString().trim();
-
-                    if (name.isEmpty()) {
-                        Toast.makeText(this, "Exam name is required", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    ExamInfo newExam = new ExamInfo(name, description, testingCenter);
-                    addExam(newExam);
-                })
+                .setPositiveButton("Add", null) // Set this to null initially
                 .setNegativeButton("Cancel", null)
-                .show();
+                .create();
+
+        // Show the dialog
+        dialog.show();
+
+        // Override the click listener to prevent automatic dismissal
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
+            // Get input values
+            String examName = examNameEditText.getText().toString().trim();
+            String examDescription = examDescriptionEditText.getText().toString().trim();
+
+            // Validate input
+            if (TextUtils.isEmpty(examName)) {
+                examNameEditText.setError("Exam name is required");
+                return;
+            }
+
+            // Create exam object
+            ExamInfo exam = new ExamInfo();
+            exam.setExamName(examName);
+            exam.setExamDescription(examDescription);
+
+            // Add exam to testing center
+            addExamToTestingCenter(exam);
+
+            // Dismiss the dialog
+            dialog.dismiss();
+        });
     }
 
-    private void showEditExamDialog(ExamInfo exam) {
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_edit_exam, null);
-        EditText nameEditText = dialogView.findViewById(R.id.exam_name_edit);
-        EditText descriptionEditText = dialogView.findViewById(R.id.exam_description_edit);
-
-        // Pre-fill with existing data
-        nameEditText.setText(exam.getExamName());
-        descriptionEditText.setText(exam.getExamDescription());
-
-        new AlertDialog.Builder(this)
-                .setTitle("Edit Exam")
-                .setView(dialogView)
-                .setPositiveButton("Save", (dialog, which) -> {
-                    String name = nameEditText.getText().toString().trim();
-                    String description = descriptionEditText.getText().toString().trim();
-
-                    if (name.isEmpty()) {
-                        Toast.makeText(this, "Exam name is required", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    exam.setExamName(name);
-                    exam.setExamDescription(description);
-
-                    // Update exam (would need an additional API method)
-                    Toast.makeText(this, "Exam updated successfully", Toast.LENGTH_SHORT).show();
-                    loadExams();
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
-
-    private void showDeleteExamConfirmationDialog(ExamInfo exam) {
-        new AlertDialog.Builder(this)
-                .setTitle("Delete Exam")
-                .setMessage("Are you sure you want to delete " + exam.getExamName() + "?")
-                .setPositiveButton("Delete", (dialog, which) -> {
-                    // Delete exam (would need an additional API method)
-                    Toast.makeText(this, "Exam deleted successfully", Toast.LENGTH_SHORT).show();
-                    loadExams();
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
-
-    private void addExam(ExamInfo exam) {
+    private void addExamToTestingCenter(ExamInfo exam) {
         progressBar.setVisibility(View.VISIBLE);
 
-        service.addExamToTestingCenter(centerId, exam, new TestingCenterService.OperationCallback() {
+        // FIXED: Using ExamCallback instead of OperationCallback
+        service.addExamToTestingCenter(centerId, exam, new TestingCenterService.ExamCallback() {
             @Override
-            public void onSuccess() {
+            public void onSuccess(ExamInfo examResult) {
                 progressBar.setVisibility(View.GONE);
-                Toast.makeText(AdminTestingCenterDetailActivity.this, "Exam added successfully", Toast.LENGTH_SHORT).show();
+                Toast.makeText(AdminTestingCenterDetailActivity.this,
+                        "Exam added successfully", Toast.LENGTH_SHORT).show();
+
+                // Refresh the exam list
                 loadExams();
             }
 
             @Override
             public void onError(String error) {
                 progressBar.setVisibility(View.GONE);
-                Toast.makeText(AdminTestingCenterDetailActivity.this, "Error adding exam: " + error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(AdminTestingCenterDetailActivity.this,
+                        "Error adding exam: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void showDeleteConfirmationDialog(ExamInfo exam) {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Exam")
+                .setMessage("Are you sure you want to delete this exam?")
+                .setPositiveButton("Delete", (dialog, which) -> deleteExam(exam))
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void deleteExam(ExamInfo exam) {
+        progressBar.setVisibility(View.VISIBLE);
+
+        service.deleteExam(exam.getId(), new TestingCenterService.OperationCallback() {
+            @Override
+            public void onSuccess() {
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(AdminTestingCenterDetailActivity.this,
+                        "Exam deleted successfully", Toast.LENGTH_SHORT).show();
+
+                // Refresh the list
+                loadExams();
+            }
+
+            @Override
+            public void onError(String error) {
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(AdminTestingCenterDetailActivity.this,
+                        "Error deleting exam: " + error, Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     @Override
     public void onExamClick(ExamInfo exam) {
-        // Could show a detailed view if needed
+        // Show exam details or navigate to edit screen
+        showEditExamDialog(exam);
     }
 
     @Override
@@ -259,113 +284,75 @@ public class AdminTestingCenterDetailActivity extends AppCompatActivity implemen
 
     @Override
     public void onDeleteClick(ExamInfo exam) {
-        showDeleteExamConfirmationDialog(exam);
+        showDeleteConfirmationDialog(exam);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_admin_testing_center_detail, menu);
-        return true;
-    }
+    private void showEditExamDialog(ExamInfo exam) {
+        // Inflate the dialog layout
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_edit_exam, null);
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_edit_center) {
-            showEditTestingCenterDialog();
-            return true;
-        } else if (item.getItemId() == R.id.action_delete_center) {
-            showDeleteTestingCenterDialog();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+        // Get references to dialog views
+        EditText examNameEditText = dialogView.findViewById(R.id.exam_name_edit);
+        EditText examDescriptionEditText = dialogView.findViewById(R.id.exam_description_edit);
 
-    private void showEditTestingCenterDialog() {
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_edit_testing_center, null);
-        EditText nameEditText = dialogView.findViewById(R.id.center_name_edit);
-        EditText locationEditText = dialogView.findViewById(R.id.center_location_edit);
-        EditText descriptionEditText = dialogView.findViewById(R.id.center_description_edit);
+        // Populate with existing data
+        examNameEditText.setText(exam.getExamName());
+        examDescriptionEditText.setText(exam.getExamDescription());
 
-        // Pre-fill with existing data
-        nameEditText.setText(testingCenter.getCenterName());
-        locationEditText.setText(testingCenter.getLocation());
-        descriptionEditText.setText(testingCenter.getCenterDescription());
-
-        new AlertDialog.Builder(this)
-                .setTitle("Edit Testing Center")
+        // Create and show the dialog
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Edit Exam")
                 .setView(dialogView)
-                .setPositiveButton("Save", (dialog, which) -> {
-                    String name = nameEditText.getText().toString().trim();
-                    String location = locationEditText.getText().toString().trim();
-                    String description = descriptionEditText.getText().toString().trim();
-
-                    if (name.isEmpty() || location.isEmpty()) {
-                        Toast.makeText(this, "Name and location are required", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    testingCenter.setCenterName(name);
-                    testingCenter.setLocation(location);
-                    testingCenter.setCenterDescription(description);
-
-                    updateTestingCenter();
-                })
+                .setPositiveButton("Save", null) // Set this to null initially
                 .setNegativeButton("Cancel", null)
-                .show();
-    }
+                .create();
 
-    private void showDeleteTestingCenterDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("Delete Testing Center")
-                .setMessage("Are you sure you want to delete " + testingCenter.getCenterName() + "? This will also delete all exams at this center.")
-                .setPositiveButton("Delete", (dialog, which) -> deleteTestingCenter())
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
+        // Show the dialog
+        dialog.show();
 
-    private void updateTestingCenter() {
-        progressBar.setVisibility(View.VISIBLE);
+        // Override the click listener to prevent automatic dismissal
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
+            // Get input values
+            String examName = examNameEditText.getText().toString().trim();
+            String examDescription = examDescriptionEditText.getText().toString().trim();
 
-        service.updateTestingCenter(centerId, testingCenter, new TestingCenterService.TestingCenterCallback() {
-            @Override
-            public void onSuccess(TestingCenter updatedCenter) {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(AdminTestingCenterDetailActivity.this, "Testing center updated successfully", Toast.LENGTH_SHORT).show();
-
-                // Update UI
-                centerNameTextView.setText(updatedCenter.getCenterName());
-                locationTextView.setText(updatedCenter.getLocation());
-                descriptionTextView.setText(updatedCenter.getCenterDescription());
-
-                // Update toolbar title
-                if (getSupportActionBar() != null) {
-                    getSupportActionBar().setTitle(updatedCenter.getCenterName());
-                }
+            // Validate input
+            if (TextUtils.isEmpty(examName)) {
+                examNameEditText.setError("Exam name is required");
+                return;
             }
 
-            @Override
-            public void onError(String error) {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(AdminTestingCenterDetailActivity.this, "Error updating testing center: " + error, Toast.LENGTH_SHORT).show();
-            }
+            // Update exam object
+            exam.setExamName(examName);
+            exam.setExamDescription(examDescription);
+
+            // Update exam
+            updateExam(exam);
+
+            // Dismiss the dialog
+            dialog.dismiss();
         });
     }
 
-    private void deleteTestingCenter() {
+    private void updateExam(ExamInfo exam) {
         progressBar.setVisibility(View.VISIBLE);
 
-        service.deleteTestingCenter(centerId, new TestingCenterService.OperationCallback() {
+        service.updateExam(exam.getId(), exam, new TestingCenterService.ExamCallback() {
             @Override
-            public void onSuccess() {
+            public void onSuccess(ExamInfo updatedExam) {
                 progressBar.setVisibility(View.GONE);
-                Toast.makeText(AdminTestingCenterDetailActivity.this, "Testing center deleted successfully", Toast.LENGTH_SHORT).show();
-                finish();
+                Toast.makeText(AdminTestingCenterDetailActivity.this,
+                        "Exam updated successfully", Toast.LENGTH_SHORT).show();
+
+                // Refresh the list
+                loadExams();
             }
 
             @Override
             public void onError(String error) {
                 progressBar.setVisibility(View.GONE);
-                Toast.makeText(AdminTestingCenterDetailActivity.this, "Error deleting testing center: " + error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(AdminTestingCenterDetailActivity.this,
+                        "Error updating exam: " + error, Toast.LENGTH_SHORT).show();
             }
         });
     }
