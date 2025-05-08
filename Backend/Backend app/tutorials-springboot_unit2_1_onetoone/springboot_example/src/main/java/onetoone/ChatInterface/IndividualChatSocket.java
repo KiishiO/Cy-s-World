@@ -47,8 +47,8 @@ public class IndividualChatSocket {
     private static Map<String, String> userStatusMap = new Hashtable<>(); //Stores the user status
     private static Map<String, Message> messageIdMap = new Hashtable<>(); //Stores messages by ID for edit/delete
 
-    private final Logger logger = LoggerFactory.getLogger(ChatSocket.class);
-
+    private final Logger logger = LoggerFactory.getLogger(IndividualChatSocket.class);
+//used to be ChatSocket.class
     @OnOpen
     public void onOpen(Session session, @PathParam("username") String username)
             throws IOException {

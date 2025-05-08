@@ -1,0 +1,2 @@
+feed_publisher_name,feed_publisher_url,feed_lang,feed_contact_email,feed_start_date,feed_end_date,feed_version
+CyRide,http://www.cyride.com,en,cyride@cyride.com,20240819,20250516,20240816

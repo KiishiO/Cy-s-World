@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black"
-    tools:context=".ui.theme.BusActivity">
+    tools:context=".BusActivity">
 
     <com.example.own_example.ParticleView
         android:id="@+id/particleView"
@@ -51,6 +51,19 @@
                 android:textStyle="bold"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_map_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="View Map"
+                android:textColor="@android:color/white"
+                app:icon="@android:drawable/ic_dialog_map"
+                app:iconTint="@android:color/white"
+                app:backgroundTint="@color/cardinal_red"
+                app:layout_constraintTop_toTopOf="@id/title_cyclone_bus"
+                app:layout_constraintBottom_toBottomOf="@id/title_cyclone_bus"
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
                 android:id="@+id/swipe_refresh_layout"
