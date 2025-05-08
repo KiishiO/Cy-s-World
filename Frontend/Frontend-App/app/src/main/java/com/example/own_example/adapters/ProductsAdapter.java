@@ -2,9 +2,12 @@ package com.example.own_example.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -25,6 +28,8 @@ public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.ViewHo
 
     public interface ProductClickListener {
         void onAddToCartClick(ProductsModel product);
+        void onEditClick(ProductsModel product);
+        void onDeleteClick(ProductsModel product);
     }
 
     public ProductsAdapter(List<ProductsModel> productsList, Context context, ProductClickListener listener) {
@@ -54,6 +59,23 @@ public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.ViewHo
                 listener.onAddToCartClick(product);
             }
         });
+
+        holder.btnOptions.setOnClickListener(v -> {
+            PopupMenu popup = new PopupMenu(context, holder.btnOptions);
+            popup.inflate(R.menu.menu_product_options);
+            popup.setOnMenuItemClickListener(item -> {
+                int itemId = item.getItemId();
+                if (itemId == R.id.menu_edit) {
+                    listener.onEditClick(product);
+                    return true;
+                } else if (itemId == R.id.menu_delete) {
+                    listener.onDeleteClick(product);
+                    return true;
+                }
+                return false;
+            });
+            popup.show();
+        });
     }
 
     @Override
@@ -61,15 +83,23 @@ public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.ViewHo
         return productsList.size();
     }
 
+    public void updateData(List<ProductsModel> newProducts) {
+        this.productsList.clear();
+        this.productsList.addAll(newProducts);
+        notifyDataSetChanged();
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvItem, tvPrice;
         Button btnAddToCart;
+        ImageButton btnOptions;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvItem = itemView.findViewById(R.id.tvItem);
             tvPrice = itemView.findViewById(R.id.tvPrice);
             btnAddToCart = itemView.findViewById(R.id.btnAddToCart);
+            btnOptions = itemView.findViewById(R.id.btnOptions);
         }
     }
 }
