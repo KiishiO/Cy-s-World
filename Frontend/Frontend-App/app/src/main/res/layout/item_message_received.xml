@@ -29,6 +29,19 @@
         app:layout_constraintTop_toBottomOf="@+id/text_message_name" />
 
     <TextView
+        android:id="@+id/text_edited_tag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:layout_marginStart="4dp"
+        android:text="(edited)"
+        android:textColor="#B3FFFFFF"
+        android:textSize="10sp"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@+id/text_message_time"
+        app:layout_constraintTop_toBottomOf="@+id/text_message_body" />
+
+    <TextView
         android:id="@+id/text_message_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

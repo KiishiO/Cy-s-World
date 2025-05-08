@@ -26,6 +26,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
     private MaterialCardView eventManagementCard;
     private MaterialCardView diningManagementCard;
     private MaterialCardView busRouteCard;
+    private MaterialCardView testingCenterCard;
     private RecyclerView recentActivityRecycler;
 
 //    // Sample data structure for recent activities
@@ -119,6 +120,15 @@ public class AdminDashboardActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // Navigate to office hours activity
                 Intent intent = new Intent(AdminDashboardActivity.this, OfficeHoursActivity.class);//need to change this to map to bus management java class
+                startActivity(intent);
+            }
+        });
+
+        testingCenterCard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navigate to admin testing center activity
+                Intent intent = new Intent(AdminDashboardActivity.this, AdminTestingCenterActivity.class);
                 startActivity(intent);
             }
         });

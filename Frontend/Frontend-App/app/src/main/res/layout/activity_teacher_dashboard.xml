@@ -37,7 +37,7 @@
         android:layout_marginTop="16dp">
     </TextView>
 
-    <!-- Action Buttons Row -->
+    <!-- Action Buttons Row 1 -->
     <LinearLayout
         android:id="@+id/action_buttons_layout"
         android:layout_width="match_parent"
@@ -114,6 +114,87 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
+
+    <!-- Action Buttons Row 2 -->
+    <LinearLayout
+        android:id="@+id/action_buttons_layout_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintTop_toBottomOf="@+id/action_buttons_layout">
+
+        <!-- Testing Center Button -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/testing_center_card"
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#4A6572">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="160dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/university_icon"
+                    android:contentDescription="Testing Centers" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Testing Centers"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Empty placeholder for balance -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+    <!-- Recent Activity Section -->
+    <TextView
+        android:id="@+id/recent_activity_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Recent Activity"
+        android:textColor="@color/cardinal_red"
+        android:textSize="20sp"
+        android:textStyle="italic"
+        android:fontFamily="serif"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/action_buttons_layout_2">
+    </TextView>
+
+    <!-- Recent Activity List -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recent_activity_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintTop_toBottomOf="@id/recent_activity_text"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        tools:listitem="@layout/item_recent_activity" />
 
     <!-- Bottom Navigation Bar -->
     <com.google.android.material.bottomnavigation.BottomNavigationView

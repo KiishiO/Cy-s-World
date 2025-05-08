@@ -278,7 +278,7 @@
                 app:layout_constraintBottom_toBottomOf="parent" />
 
             <TextView
-                android:id="@+id/testing_center_title"
+                android:id="@+id/testing_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="Testing Centers"
@@ -293,7 +293,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/testing_center_description"
+                android:id="@+id/testing_description"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:text="Track testing centers across campus and sign up for exams."
@@ -304,7 +304,7 @@
                 android:layout_marginBottom="16dp"
                 app:layout_constraintStart_toEndOf="@id/testing_icon"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/testing_center_title"
+                app:layout_constraintTop_toBottomOf="@id/testing_title"
                 app:layout_constraintBottom_toBottomOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

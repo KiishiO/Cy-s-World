@@ -26,6 +26,7 @@ public class TeacherDashboardActivity extends AppCompatActivity {
     private MaterialCardView gradingCard;
     private MaterialCardView attendanceCard;
     private MaterialCardView officeHoursCard;
+    private MaterialCardView testingCenterCard;
     private RecyclerView recentActivityRecycler;
     private BottomNavigationView bottomNavigationView;
 
@@ -114,6 +115,15 @@ public class TeacherDashboardActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // Navigate to office hours activity
                 Intent intent = new Intent(TeacherDashboardActivity.this, CampusEventsActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        testingCenterCard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navigate to admin testing center activity
+                Intent intent = new Intent(TeacherDashboardActivity.this, AdminTestingCenterActivity.class);
                 startActivity(intent);
             }
         });

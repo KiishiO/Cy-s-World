@@ -1,9 +1,11 @@
 package com.example.own_example;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,10 +21,13 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
 
-public class ChatActivity extends AppCompatActivity implements ChatWebSocketClient.MessageListener {
+public class ChatActivity extends AppCompatActivity implements
+        ChatWebSocketClient.MessageListener,
+        ChatMessageAdapter.OnMessageActionListener {
+
     private static final String TAG = "ChatActivity";
 
-    // WebSocket server URL - update this with your actual server URL
+    // WebSocket server URL
     private static final String SERVER_URL = "ws://coms-3090-017.class.las.iastate.edu:8080";
 
     private RecyclerView messagesRecyclerView;
@@ -81,6 +86,7 @@ public class ChatActivity extends AppCompatActivity implements ChatWebSocketClie
 
     private void setupRecyclerView() {
         adapter = new ChatMessageAdapter(this);
+        adapter.setOnMessageActionListener(this); // Set this activity as action listener
         messagesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         messagesRecyclerView.setAdapter(adapter);
     }
@@ -148,12 +154,14 @@ public class ChatActivity extends AppCompatActivity implements ChatWebSocketClie
         }
     }
 
+    // ChatWebSocketClient.MessageListener implementations
     @Override
     public void onMessageReceived(ChatMessage message) {
-        runOnUiThread(() -> adapter.addMessage(message));
-
-        // Scroll to the bottom
-        runOnUiThread(() -> messagesRecyclerView.smoothScrollToPosition(adapter.getItemCount() - 1));
+        runOnUiThread(() -> {
+            adapter.addMessage(message);
+            // Scroll to the bottom
+            messagesRecyclerView.smoothScrollToPosition(adapter.getItemCount() - 1);
+        });
     }
 
     @Override
@@ -171,7 +179,66 @@ public class ChatActivity extends AppCompatActivity implements ChatWebSocketClie
 
     @Override
     public void onUserStatusChange(String username, String status) {
-        // You could update a list of online users here if needed
+        // We could update a list of online users here if needed
+    }
+
+    @Override
+    public void onMessageEdited(ChatMessage message) {
+        runOnUiThread(() -> {
+            adapter.updateMessage(message);
+        });
+    }
+
+    @Override
+    public void onMessageDeleted(ChatMessage message) {
+        runOnUiThread(() -> {
+            adapter.updateMessage(message);
+        });
+    }
+
+    // ChatMessageAdapter.OnMessageActionListener implementations
+    @Override
+    public void onEditMessage(ChatMessage message, int position) {
+        // Show edit dialog
+        showEditMessageDialog(message);
+    }
+
+    @Override
+    public void onDeleteMessage(ChatMessage message, int position) {
+        // Show confirmation dialog
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Message")
+                .setMessage("Are you sure you want to delete this message?")
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    ChatMessage deletedMessage = chatClient.deleteMessage(message.getLocalId());
+                    if (deletedMessage != null) {
+                        adapter.updateMessage(deletedMessage);
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void showEditMessageDialog(ChatMessage message) {
+        // Create edit text for dialog
+        final EditText editText = new EditText(this);
+        editText.setText(message.getContent());
+
+        // Build dialog
+        new AlertDialog.Builder(this)
+                .setTitle("Edit Message")
+                .setView(editText)
+                .setPositiveButton("Save", (dialog, which) -> {
+                    String newContent = editText.getText().toString().trim();
+                    if (!newContent.isEmpty()) {
+                        ChatMessage editedMessage = chatClient.editMessage(message.getLocalId(), newContent);
+                        if (editedMessage != null) {
+                            adapter.updateMessage(editedMessage);
+                        }
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     @Override

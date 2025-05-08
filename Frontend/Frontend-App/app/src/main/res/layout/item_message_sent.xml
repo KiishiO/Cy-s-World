@@ -5,6 +5,21 @@
     android:layout_height="wrap_content"
     android:paddingTop="8dp">
 
+    <ImageButton
+        android:id="@+id/message_options"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Message options"
+        android:padding="4dp"
+        android:src="@android:drawable/ic_menu_more"
+        android:tint="@color/cardinal_red"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@+id/text_message_body"
+        app:layout_constraintEnd_toStartOf="@+id/text_message_body"
+        app:layout_constraintTop_toTopOf="@+id/text_message_body" />
+
     <TextView
         android:id="@+id/text_message_body"
         android:layout_width="wrap_content"
@@ -16,6 +31,19 @@
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/text_edited_tag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="4dp"
+        android:text="(edited)"
+        android:textColor="#B3FFFFFF"
+        android:textSize="10sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toStartOf="@+id/text_message_time"
+        app:layout_constraintTop_toBottomOf="@+id/text_message_body" />
 
     <TextView
         android:id="@+id/text_message_time"
