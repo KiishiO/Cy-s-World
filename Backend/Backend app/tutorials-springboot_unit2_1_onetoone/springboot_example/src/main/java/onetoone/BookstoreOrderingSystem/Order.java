@@ -1,11 +1,13 @@
 package onetoone.BookstoreOrderingSystem;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import onetoone.Bookstore.ProductsRepository;
 import onetoone.Persons.Person;
 
 import java.time.LocalDateTime;
@@ -29,8 +31,7 @@ public class Order {
     private Person person;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private List<OrderItem> items = new ArrayList<>();
+    private List<OrderItem> products = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -57,10 +58,10 @@ public class Order {
     }
 
     public List<OrderItem> getItems() {
-        return items;
+        return products;
     }
 
     public void setItems(List<OrderItem> items) {
-        this.items = items;
+        this.products = items;
     }
 }

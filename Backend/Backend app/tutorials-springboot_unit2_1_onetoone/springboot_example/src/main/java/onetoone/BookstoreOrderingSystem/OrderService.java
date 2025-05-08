@@ -6,18 +6,23 @@ import onetoone.Bookstore.Products;
 import onetoone.Bookstore.ProductsRepository;
 import onetoone.Persons.Person;
 import onetoone.Persons.PersonRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class OrderService {
 
-    PersonRepository personRepository;
-    ProductsRepository productRepository;
-    OrderRepository orderRepository;
+    @Autowired
+    private PersonRepository personRepository;
+
+    @Autowired
+    private ProductsRepository productRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
 
     public Order createOrder(Order order) {
         int personId = order.getPerson().getId();
