@@ -1,11 +1,13 @@
 package com.example.own_example;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,9 +15,13 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +35,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.own_example.models.GTFSBus;
 import com.example.own_example.services.GTFSService;
+import com.example.own_example.adapters.ArrivalInfoAdapter;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -40,10 +47,9 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -53,6 +59,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import android.view.LayoutInflater;
+import android.graphics.drawable.GradientDrawable;
 
 public class BusMapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -64,7 +73,7 @@ public class BusMapActivity extends AppCompatActivity implements OnMapReadyCallb
 
     private GoogleMap googleMap;
     private GTFSService gtfsService;
-    private ChipGroup routeChipGroup;
+    private Spinner routeFilterSpinner;
     private FloatingActionButton listViewFab;
     private FloatingActionButton myLocationFab;
     private FloatingActionButton toggleStopsFab;
@@ -78,6 +87,7 @@ public class BusMapActivity extends AppCompatActivity implements OnMapReadyCallb
     private final Map<String, Marker> stopMarkers = new HashMap<>();
     private final Map<String, LatLng> previousBusPositions = new HashMap<>();
     private final Set<String> filteredRouteIds = new HashSet<>();
+    private Map<String, Polyline> routePolylines = new HashMap<>();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     private FusedLocationProviderClient fusedLocationClient;
@@ -116,7 +126,7 @@ public class BusMapActivity extends AppCompatActivity implements OnMapReadyCallb
      * Initialize views and handle null checks safely
      */
     private void initializeViews() {
-        routeChipGroup = findViewById(R.id.route_chip_group);
+        routeFilterSpinner = findViewById(R.id.route_filter_spinner);
         listViewFab = findViewById(R.id.list_view_fab);
         myLocationFab = findViewById(R.id.my_location_fab);
         toggleStopsFab = findViewById(R.id.toggle_stops_fab);
@@ -221,6 +231,153 @@ public class BusMapActivity extends AppCompatActivity implements OnMapReadyCallb
     }
 
     /**
+     * Set up the route filter spinner with data
+     */
+    private void setupRouteFilterSpinner(Map<String, Map<String, String>> routes) {
+        List<RouteItem> routeItems = new ArrayList<>();
+
+        // Add "All Routes" option
+        routeItems.add(new RouteItem("all", "All Routes"));
+
+        // Sort route IDs for better organization
+        List<String> sortedRouteIds = new ArrayList<>(routes.keySet());
+        Collections.sort(sortedRouteIds, (a, b) -> {
+            try {
+                // Try to sort numerically
+                return Integer.parseInt(a) - Integer.parseInt(b);
+            } catch (NumberFormatException e) {
+                // Fall back to string comparison
+                return a.compareTo(b);
+            }
+        });
+
+        // Add all routes without limits
+        for (String routeId : sortedRouteIds) {
+            // Get formatted route name from GTFSService
+            String displayName = gtfsService.getRouteName(routeId);
+            routeItems.add(new RouteItem(routeId, displayName));
+        }
+
+        // Create and set the adapter
+        RouteSpinnerAdapter adapter = new RouteSpinnerAdapter(this, routeItems);
+        routeFilterSpinner.setAdapter(adapter);
+
+        // Set selection listener
+        routeFilterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                RouteItem selectedItem = (RouteItem) parent.getItemAtPosition(position);
+
+                // Clear existing filters
+                filteredRouteIds.clear();
+
+                // Add selected route to filter (unless "All Routes" is selected)
+                if (!selectedItem.getId().equals("all")) {
+                    filteredRouteIds.add(selectedItem.getId());
+                }
+
+                // Update visibility of buses and route lines
+                updateVisibleBuses();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Clear filters
+                filteredRouteIds.clear();
+                updateVisibleBuses();
+            }
+        });
+    }
+
+
+    /**
+     * Helper class for route items
+     */
+    private static class RouteItem {
+        private final String id;
+        private final String name;
+
+        public RouteItem(String id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
+
+    /**
+     * Custom adapter for route spinner
+     */
+    private class RouteSpinnerAdapter extends ArrayAdapter<RouteItem> {
+        public RouteSpinnerAdapter(Context context, List<RouteItem> items) {
+            super(context, android.R.layout.simple_spinner_item, items);
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View view = super.getView(position, convertView, parent);
+            TextView textView = (TextView) view;
+
+            RouteItem item = getItem(position);
+            if (item != null) {
+                textView.setText(item.getName());
+                textView.setTextColor(Color.BLACK);
+                textView.setTextSize(16);
+            }
+
+            return view;
+        }
+
+        @Override
+        public View getDropDownView(int position, View convertView, ViewGroup parent) {
+            View view = super.getDropDownView(position, convertView, parent);
+            TextView textView = (TextView) view;
+
+            RouteItem item = getItem(position);
+            if (item != null) {
+                textView.setText(item.getName());
+                textView.setPadding(24, 16, 24, 16);
+
+                // Add color indicator for routes (except "All Routes")
+                if (!item.getId().equals("all")) {
+                    int routeColor = getRouteColor(item.getId());
+
+                    // Create a colored background with transparency for readability
+                    int r = Color.red(routeColor);
+                    int g = Color.green(routeColor);
+                    int b = Color.blue(routeColor);
+
+                    // Use a very light tint of the color
+                    int bgColor = Color.argb(40, r, g, b);
+
+                    // Set left border with route color
+                    GradientDrawable gd = new GradientDrawable();
+                    gd.setColor(bgColor);
+                    gd.setStroke(8, routeColor);
+                    textView.setBackground(gd);
+                } else {
+                    textView.setBackgroundColor(Color.WHITE);
+                }
+            }
+
+            return view;
+        }
+    }
+
+
+    /**
      * Find stop ID for a given marker
      */
     private String getStopIdForMarker(Marker marker) {
@@ -236,21 +393,59 @@ public class BusMapActivity extends AppCompatActivity implements OnMapReadyCallb
      * Show arrival information for a stop
      */
     private void showArrivalInfo(String stopId) {
-        if (stopId == null || arrivalInfoCard == null) {
+        if (stopId == null || arrivalInfoCard == null || arrivalRecyclerView == null) {
             return;
+        }
+
+        // Get the stop name
+        Map<String, String> stopInfo = gtfsService.getStopInfo(stopId);
+        String stopName = stopInfo != null && stopInfo.containsKey("stop_name")
+                ? stopInfo.get("stop_name") : "Unknown Stop";
+
+        // Set the title of the card to show the stop name
+        TextView cardTitle = arrivalInfoCard.findViewById(R.id.stop_name_title);
+        if (cardTitle != null) {
+            cardTitle.setText(stopName);
         }
 
         // Get arrivals for this stop
         List<Map<String, Object>> arrivals = gtfsService.getUpcomingArrivals(stopId);
 
         if (arrivals.isEmpty()) {
-            Toast.makeText(this, "No upcoming arrivals for this stop", Toast.LENGTH_SHORT).show();
-            return;
+            // Show message if no arrivals
+            TextView noArrivalsText = arrivalInfoCard.findViewById(R.id.no_arrivals_text);
+            if (noArrivalsText != null) {
+                noArrivalsText.setVisibility(View.VISIBLE);
+                arrivalRecyclerView.setVisibility(View.GONE);
+            }
+        } else {
+            // Sort arrivals by time
+            Collections.sort(arrivals, (a, b) -> {
+                long timeA = (long) a.get("arrival_time");
+                long timeB = (long) b.get("arrival_time");
+                return Long.compare(timeA, timeB);
+            });
+
+            // Hide no arrivals message if it exists
+            TextView noArrivalsText = arrivalInfoCard.findViewById(R.id.no_arrivals_text);
+            if (noArrivalsText != null) {
+                noArrivalsText.setVisibility(View.GONE);
+            }
+
+            // Set up the RecyclerView
+            arrivalRecyclerView.setVisibility(View.VISIBLE);
+            ArrivalInfoAdapter adapter = new ArrivalInfoAdapter(this, arrivals);
+            arrivalRecyclerView.setAdapter(adapter);
         }
 
-        // TODO: Create and set an adapter for the RecyclerView to display arrivals
-        // For now, just show the card
+        // Show the card
         arrivalInfoCard.setVisibility(View.VISIBLE);
+
+        // Add close button functionality
+        View closeButton = arrivalInfoCard.findViewById(R.id.close_button);
+        if (closeButton != null) {
+            closeButton.setOnClickListener(v -> arrivalInfoCard.setVisibility(View.GONE));
+        }
     }
 
     private void enableMyLocation() {
@@ -311,6 +506,11 @@ public class BusMapActivity extends AppCompatActivity implements OnMapReadyCallb
                         if (!routesDrawn && googleMap != null) {
                             drawAllRoutes();
                         }
+
+                        // Setup route filter spinner if not done yet
+                        if (routeFilterSpinner.getAdapter() == null) {
+                            setupRouteFilterSpinner(gtfsService.getRouteData());
+                        }
                     }
                 });
             }
@@ -357,9 +557,6 @@ public class BusMapActivity extends AppCompatActivity implements OnMapReadyCallb
      * Update bus markers on the map with smooth animation
      */
     private void updateBusMarkersWithAnimation(List<GTFSBus> buses) {
-        // First, update route filters if needed
-        updateRouteFilters(buses);
-
         // Create a set of current bus IDs
         Set<String> currentBusIds = new HashSet<>();
 
@@ -532,80 +729,11 @@ public class BusMapActivity extends AppCompatActivity implements OnMapReadyCallb
     }
 
     /**
-     * Update route filters in the chip group
-     */
-    private void updateRouteFilters(List<GTFSBus> buses) {
-        // Only update if we don't have any chips yet and the chip group exists
-        if (routeChipGroup == null || routeChipGroup.getChildCount() > 0) {
-            return;
-        }
-
-        // Collect unique routes
-        Set<String> routeIds = new HashSet<>();
-        Map<String, String> routeNames = new HashMap<>();
-
-        for (GTFSBus bus : buses) {
-            if (bus.getRouteId() != null && bus.getBusName() != null) {
-                routeIds.add(bus.getRouteId());
-                routeNames.put(bus.getRouteId(), bus.getBusName());
-            }
-        }
-
-        // Add all routes chip
-        Chip allRoutesChip = new Chip(this);
-        allRoutesChip.setText("All Routes");
-        allRoutesChip.setCheckable(true);
-        allRoutesChip.setChecked(true); // All routes visible by default
-        allRoutesChip.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                // When "All Routes" is checked, check all route chips
-                for (int i = 0; i < routeChipGroup.getChildCount(); i++) {
-                    View view = routeChipGroup.getChildAt(i);
-                    if (view instanceof Chip && view != buttonView) {
-                        ((Chip) view).setChecked(true);
-                    }
-                }
-                updateVisibleBuses();
-            }
-        });
-        routeChipGroup.addView(allRoutesChip);
-
-        // Add chips for each route
-        for (String routeId : routeIds) {
-            String routeName = routeNames.getOrDefault(routeId, "Route " + routeId);
-
-            Chip chip = new Chip(this);
-            chip.setText(routeName);
-            chip.setCheckable(true);
-            chip.setChecked(true); // All routes visible by default
-
-            final String finalRouteId = routeId;
-            chip.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChecked) {
-                    filteredRouteIds.add(finalRouteId);
-                } else {
-                    filteredRouteIds.remove(finalRouteId);
-
-                    // Uncheck "All Routes" chip when any route is unchecked
-                    if (allRoutesChip.isChecked()) {
-                        allRoutesChip.setChecked(false);
-                    }
-                }
-
-                updateVisibleBuses();
-            });
-
-            routeChipGroup.addView(chip);
-            filteredRouteIds.add(routeId); // Add to filtered set initially
-        }
-    }
-
-    /**
      * Update bus visibility based on selected route filters
      */
     private void updateVisibleBuses() {
-        // If no filters selected, show all buses
-        boolean showAllBuses = filteredRouteIds.isEmpty();
+        // Get the set of active filters
+        Set<String> activeFilters = new HashSet<>(filteredRouteIds);
 
         // Update all bus markers
         for (Map.Entry<String, Marker> entry : busMarkers.entrySet()) {
@@ -615,13 +743,66 @@ public class BusMapActivity extends AppCompatActivity implements OnMapReadyCallb
             // Find the routeId for this bus
             String routeId = getBusRouteId(busId);
 
-            // Show if all buses should be shown or if this bus's route is in the filtered routes
-            boolean shouldBeVisible = showAllBuses || filteredRouteIds.contains(routeId);
+            // Show if this bus's route is in the filtered routes
+            boolean shouldBeVisible = activeFilters.isEmpty() || activeFilters.contains(routeId);
             marker.setVisible(shouldBeVisible);
         }
 
-        // Update route polylines visibility if needed
-        // You would add code here to show/hide route polylines based on filters
+        // Update route polylines visibility
+        for (Map.Entry<String, Polyline> entry : routePolylines.entrySet()) {
+            String routeId = entry.getKey();
+            Polyline polyline = entry.getValue();
+
+            // Show the route line if it's in the filtered routes, or if no filters are active
+            boolean shouldBeVisible = activeFilters.isEmpty() || activeFilters.contains(routeId);
+            polyline.setVisible(shouldBeVisible);
+        }
+
+        // Update stop markers if they're showing
+        if (showStops) {
+            updateStopMarkerVisibility(activeFilters);
+        }
+
+        // Update empty state visibility
+        updateEmptyStateVisibility();
+    }
+
+    /**
+     * Update stop marker visibility based on active route filters
+     */
+    private void updateStopMarkerVisibility(Set<String> activeFilters) {
+        // If no filters active, show all stops
+        if (activeFilters.isEmpty()) {
+            for (Marker marker : stopMarkers.values()) {
+                marker.setVisible(true);
+            }
+            return;
+        }
+
+        // Otherwise, only show stops that are served by the selected routes
+        for (Marker marker : stopMarkers.values()) {
+            Object tag = marker.getTag();
+            if (tag instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Set<String> stopRoutes = (Set<String>) ((Map<String, Object>) tag).get("routes");
+
+                // If any of the stop's routes are in the active filters, show the stop
+                boolean shouldBeVisible = false;
+                if (stopRoutes != null) {
+                    for (String routeId : stopRoutes) {
+                        if (activeFilters.contains(routeId)) {
+                            shouldBeVisible = true;
+                            break;
+                        }
+                    }
+                }
+
+                marker.setVisible(shouldBeVisible);
+            } else {
+                // Default to visible if tag is missing
+                marker.setVisible(true);
+            }
+        }
     }
 
     /**
@@ -632,33 +813,13 @@ public class BusMapActivity extends AppCompatActivity implements OnMapReadyCallb
         if (busId.contains("vehicle_")) {
             String[] parts = busId.split("_");
             if (parts.length >= 2) {
+                // Get the second part as route ID
                 return parts[1];
             }
         }
 
-        // Otherwise try to extract from title
-        Marker marker = busMarkers.get(busId);
-        if (marker != null && marker.getTitle() != null) {
-            String title = marker.getTitle();
-
-            // Check for route names in the title
-            if (title.contains("Red Route")) return "1";
-            if (title.contains("Blue Route")) return "2";
-            if (title.contains("Green Route")) return "3";
-
-            // Try to extract from BusNum in title (assuming format "Bus XX: Route Name")
-            if (title.startsWith("Bus ")) {
-                try {
-                    int busNum = Integer.parseInt(title.substring(4, title.indexOf(":")));
-                    // If Bus number format is [routeId][index], extract the routeId
-                    return String.valueOf(busNum / 10);
-                } catch (Exception e) {
-                    // Parsing failed, fall back to default
-                }
-            }
-        }
-
-        return "0"; // Default if we can't determine
+        // If we can't determine, return empty
+        return "";
     }
 
     /**
@@ -743,7 +904,11 @@ public class BusMapActivity extends AppCompatActivity implements OnMapReadyCallb
                 .zIndex(1);  // Draw above other map elements
 
         // Add the polyline to the map
-        googleMap.addPolyline(polylineOptions);
+        Polyline polyline = googleMap.addPolyline(polylineOptions);
+
+        // Store the polyline reference
+        routePolylines.put(routeId, polyline);
+
         Log.d(TAG, "Route " + routeId + " drawn successfully");
     }
 
@@ -802,6 +967,10 @@ public class BusMapActivity extends AppCompatActivity implements OnMapReadyCallb
         // Get all stops from GTFSService
         Map<String, Map<String, String>> stops = gtfsService.getStopData();
 
+        // Show progress while loading stops
+        int totalStops = stops.size();
+        int addedStops = 0;
+
         for (Map.Entry<String, Map<String, String>> entry : stops.entrySet()) {
             String stopId = entry.getKey();
             Map<String, String> stopInfo = entry.getValue();
@@ -817,24 +986,54 @@ public class BusMapActivity extends AppCompatActivity implements OnMapReadyCallb
                 double lon = Double.parseDouble(stopInfo.get("stop_lon"));
                 String stopName = stopInfo.getOrDefault("stop_name", "Unknown Stop");
 
-                // Determine if it's a major stop based on name or other criteria
-                boolean isMajorStop = isMajorStop(stopName, stopInfo);
+                // Create marker with the stop position and name
+                LatLng position = new LatLng(lat, lon);
+                createStopMarker(stopId, position, stopName);
+                addedStops++;
 
-                // Create marker
-                MarkerOptions options = new MarkerOptions()
-                        .position(new LatLng(lat, lon))
-                        .title(stopName)
-                        .icon(isMajorStop ? majorStopIcon : regularStopIcon)
-                        .anchor(0.5f, 0.5f)
-                        .zIndex(0) // Below bus markers
-                        .visible(true);
-
-                // Add to map
-                Marker marker = googleMap.addMarker(options);
-                if (marker != null) {
-                    stopMarkers.put(stopId, marker);
+                // To avoid ANRs, use batch processing for very large datasets
+                if (addedStops % 50 == 0) {
+                    final int progress = addedStops;
+                    // Optional: show a toast with progress
+                    mainHandler.post(() ->
+                            Toast.makeText(BusMapActivity.this,
+                                    "Loaded " + progress + " of " + totalStops + " stops",
+                                    Toast.LENGTH_SHORT).show()
+                    );
                 }
             }
+        }
+
+        // Show final count
+        final int finalCount = addedStops;
+        mainHandler.post(() ->
+                Toast.makeText(BusMapActivity.this,
+                        "Showing " + finalCount + " bus stops",
+                        Toast.LENGTH_SHORT).show()
+        );
+    }
+
+    /**
+     * Create a marker for a bus stop
+     */
+    private void createStopMarker(String stopId, LatLng position, String stopName) {
+        // Get the routes that serve this stop
+        Set<String> stopRoutes = getRoutesForStop(stopId);
+
+        // Store the routes with the marker in the tag
+        MarkerOptions markerOptions = new MarkerOptions()
+                .position(position)
+                .title(stopName)
+                .icon(getBusStopIcon(stopRoutes))
+                .anchor(0.5f, 0.5f);
+
+        Marker marker = googleMap.addMarker(markerOptions);
+        if (marker != null) {
+            marker.setTag(new HashMap<String, Object>() {{
+                put("stopId", stopId);
+                put("routes", stopRoutes);
+            }});
+            stopMarkers.put(stopId, marker);
         }
     }
 
@@ -867,23 +1066,22 @@ public class BusMapActivity extends AppCompatActivity implements OnMapReadyCallb
     private BitmapDescriptor getBusIcon(String routeId) {
         // Get color based on route ID
         int color;
-        if (routeId != null) {
-            switch (routeId) {
-                case "1":
-                    color = Color.parseColor("#FF0000"); // Red
-                    break;
-                case "2":
-                    color = Color.parseColor("#0000FF"); // Blue
-                    break;
-                case "3":
-                    color = Color.parseColor("#00FF00"); // Green
-                    break;
-                default:
-                    color = Color.parseColor("#FFA500"); // Orange (default)
-                    break;
-            }
+        if (routeColors.containsKey(routeId)) {
+            color = routeColors.get(routeId);
         } else {
-            color = Color.parseColor("#FFA500"); // Orange (default)
+            // For real CyRide routes, generate consistent colors based on route ID
+            int hash = routeId.hashCode();
+            int r = (hash & 0xFF0000) >> 16;
+            int g = (hash & 0x00FF00) >> 8;
+            int b = hash & 0x0000FF;
+
+            // Ensure colors aren't too dark
+            r = Math.max(r, 100);
+            g = Math.max(g, 100);
+            b = Math.max(b, 100);
+
+            color = Color.rgb(r, g, b);
+            routeColors.put(routeId, color);
         }
 
         // Create a custom bitmap for the bus marker
@@ -930,27 +1128,132 @@ public class BusMapActivity extends AppCompatActivity implements OnMapReadyCallb
     }
 
     /**
-     * Convert a vector drawable to a bitmap descriptor for map markers
+     * Get routes that serve a specific stop
+     *
+     * @param stopId The ID of the stop
+     * @return Set of route IDs that serve this stop
      */
-    private BitmapDescriptor getBitmapFromVector(@DrawableRes int vectorDrawableResourceId) {
-        Drawable vectorDrawable = ContextCompat.getDrawable(this, vectorDrawableResourceId);
+    private Set<String> getRoutesForStop(String stopId) {
+        // This should come from your GTFS service
+        Set<String> routes = gtfsService.getRoutesForStop(stopId);
 
-        if (vectorDrawable == null) {
-            Log.e(TAG, "Resource not found: " + vectorDrawableResourceId);
-            return BitmapDescriptorFactory.defaultMarker();
+        // If no routes found, log an error and return an empty set
+        if (routes.isEmpty()) {
+            Log.w(TAG, "No routes found for stop: " + stopId);
+        } else {
+            Log.d(TAG, "Routes for stop " + stopId + ": " + routes);
         }
 
-        // Set specific size for bus icon (adjust these values as needed)
-        int width = 48;  // Width in pixels
-        int height = 48; // Height in pixels
+        return routes;
+    }
 
-        vectorDrawable.setBounds(0, 0, width, height);
+    /**
+     * Get a custom icon for a bus stop based on routes that serve it
+     */
+    private BitmapDescriptor getBusStopIcon(Set<String> routes) {
+        float density = getResources().getDisplayMetrics().density;
+        int sizeDp = 24;
+        int sizePx = Math.round(sizeDp * density);
 
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Bitmap bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
-        vectorDrawable.draw(canvas);
+
+        // Background
+        Paint bgPaint = new Paint();
+        bgPaint.setColor(Color.WHITE);
+        bgPaint.setStyle(Paint.Style.FILL);
+        bgPaint.setAntiAlias(true);
+
+        // Border
+        Paint borderPaint = new Paint();
+        borderPaint.setColor(Color.BLACK);
+        borderPaint.setStyle(Paint.Style.STROKE);
+        borderPaint.setStrokeWidth(Math.round(1.5f * density));
+        borderPaint.setAntiAlias(true);
+
+        // Draw the base stop icon (white circle with black border)
+        int centerX = sizePx / 2;
+        int centerY = sizePx / 2;
+        int radius = (sizePx / 2) - Math.round(2 * density);
+        canvas.drawCircle(centerX, centerY, radius, bgPaint);
+
+        // If there are routes, draw color indicators
+        if (!routes.isEmpty()) {
+            // Determine how to display the route indicators
+            if (routes.size() == 1) {
+                // Single route - fill most of the circle
+                String routeId = routes.iterator().next();
+                Paint routePaint = new Paint();
+                routePaint.setColor(getRouteColor(routeId));
+                routePaint.setStyle(Paint.Style.FILL);
+                routePaint.setAntiAlias(true);
+
+                // Draw a slightly smaller circle inside
+                int innerRadius = Math.round(radius * 0.85f);
+                canvas.drawCircle(centerX, centerY, innerRadius, routePaint);
+            } else {
+                // Multiple routes - divide the circle into sections
+                int routeCount = routes.size();
+                float sweepAngle = 360f / routeCount;
+
+                int i = 0;
+                for (String routeId : routes) {
+                    Paint routePaint = new Paint();
+                    routePaint.setColor(getRouteColor(routeId));
+                    routePaint.setStyle(Paint.Style.FILL);
+                    routePaint.setAntiAlias(true);
+
+                    // Calculate arc angles
+                    float startAngle = i * sweepAngle;
+
+                    // Draw the arc
+                    RectF rect = new RectF(centerX - radius + Math.round(3 * density),
+                            centerY - radius + Math.round(3 * density),
+                            centerX + radius - Math.round(3 * density),
+                            centerY + radius - Math.round(3 * density));
+                    canvas.drawArc(rect, startAngle, sweepAngle, true, routePaint);
+
+                    i++;
+                }
+
+                // Draw a small white circle in the middle to make it look nicer
+                Paint centerPaint = new Paint();
+                centerPaint.setColor(Color.WHITE);
+                centerPaint.setStyle(Paint.Style.FILL);
+                centerPaint.setAntiAlias(true);
+                canvas.drawCircle(centerX, centerY, radius * 0.3f, centerPaint);
+            }
+        }
+
+        // Draw the border last so it's on top
+        canvas.drawCircle(centerX, centerY, radius, borderPaint);
 
         return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
+
+    /**
+     * Get color for a route
+     */
+    private int getRouteColor(String routeId) {
+        // Get color from your cached route colors if available
+        if (routeColors.containsKey(routeId)) {
+            return routeColors.get(routeId);
+        }
+
+        // For real CyRide routes, generate consistent colors based on route ID
+        int hash = routeId.hashCode();
+        int r = (hash & 0xFF0000) >> 16;
+        int g = (hash & 0x00FF00) >> 8;
+        int b = hash & 0x0000FF;
+
+        // Ensure colors aren't too dark
+        r = Math.max(r, 100);
+        g = Math.max(g, 100);
+        b = Math.max(b, 100);
+
+        int color = Color.rgb(r, g, b);
+        routeColors.put(routeId, color);
+        return color;
     }
 
     @Override

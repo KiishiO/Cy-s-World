@@ -14,8 +14,10 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +29,8 @@ import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+
+import java.util.Calendar;
 
 /**
  * Service for handling GTFS data from CyRide API
@@ -52,6 +56,10 @@ public class GTFSService {
     private int retryCount = 0;
     private static final int MAX_RETRIES = 3;
     private boolean useRealTimeData = true;
+    private Map<String, Map<String, Long>> stopArrivals = new HashMap<>(); // Map of stopId to Map of routeId to arrival time
+    private long lastUpdateTime = 0; // Last time arrivals were updated
+    private int maxStopsToProcess = 50; // Limit number of stops
+    private int maxRoutesToProcess = 30; // Limit number of routes
 
     // Callback for bus data updates
     public interface GTFSBusCallback {
@@ -511,22 +519,39 @@ public class GTFSService {
     }
 
     /**
-     * Create dynamic bus positions based on routes
-     * This simulates real-time data by placing buses along the route shapes
+     * Create dynamic bus positions based on routes - with better route selection
      */
     private List<GTFSBus> createDynamicBusPositions() {
         List<GTFSBus> buses = new ArrayList<>();
         long currentTime = System.currentTimeMillis() / 1000;
 
-        // For each route, create 1-3 buses at different positions along the route
-        for (String routeId : routeShapes.keySet()) {
+        // Get all route IDs and sort them (we'll prioritize lower numbers which are often main routes)
+        List<String> sortedRouteIds = new ArrayList<>(routeShapes.keySet());
+        Collections.sort(sortedRouteIds, (a, b) -> {
+            try {
+                // Try to sort numerically
+                return Integer.parseInt(a) - Integer.parseInt(b);
+            } catch (NumberFormatException e) {
+                // Fall back to string comparison
+                return a.compareTo(b);
+            }
+        });
+
+        // Process up to maxRoutesToProcess routes
+        int routeCount = 0;
+
+        for (String routeId : sortedRouteIds) {
+            if (routeCount >= maxRoutesToProcess) break;
+
             List<LatLng> shape = routeShapes.get(routeId);
             if (shape == null || shape.isEmpty()) {
                 continue;
             }
 
+            routeCount++;
+
             // Find a trip ID for this route
-            String tripId = null;
+            String tripId = "trip_" + routeId;
             for (Map.Entry<String, Map<String, String>> entry : tripData.entrySet()) {
                 if (entry.getValue().containsKey("route_id") &&
                         entry.getValue().get("route_id").equals(routeId)) {
@@ -535,27 +560,15 @@ public class GTFSService {
                 }
             }
 
-            if (tripId == null) {
-                tripId = "trip_" + routeId; // Fallback
-            }
-
             // Get route name
-            String routeName = "Route " + routeId;
-            Map<String, String> route = routeData.get(routeId);
-            if (route != null) {
-                if (route.containsKey("route_short_name")) {
-                    routeName = route.get("route_short_name");
-                } else if (route.containsKey("route_long_name")) {
-                    routeName = route.get("route_long_name");
-                }
-            }
+            String routeName = getRouteDisplayName(routeId);
 
-            // Number of buses depends on route ID (for variety)
-            int numBuses = (Integer.parseInt(routeId) % 3) + 1;
+            // For dynamic bus generation, use 2-3 buses per route
+            int numBuses = Math.min(3, (Integer.parseInt(routeId) % 3) + 2); // Generate 2-3 buses
 
             for (int i = 0; i < numBuses; i++) {
-                // Get position along route based on time
-                int timeOffset = i * 1000;
+                // Get position along route based on time and offset
+                int timeOffset = (routeId.hashCode() + i * 500) % 1000;
                 int shapeIndex = (int)((currentTime + timeOffset) / 10) % shape.size();
                 LatLng position = shape.get(shapeIndex);
 
@@ -566,7 +579,7 @@ public class GTFSService {
 
                 // Create bus
                 GTFSBus bus = new GTFSBus();
-                bus.setBusNum(Integer.parseInt(routeId) * 10 + i);
+                bus.setBusNum((routeId.hashCode() % 100) + i); // Use a manageable number
                 bus.setBusName(routeName);
                 bus.setLatitude(position.latitude);
                 bus.setLongitude(position.longitude);
@@ -577,24 +590,59 @@ public class GTFSService {
                 bus.setTripId(tripId);
                 bus.setInService(true);
 
-                // Find nearby stop
+                // Find nearby stop for info only (don't check all stops)
                 String nearestStopId = findNearestStop(position);
-                if (nearestStopId != null) {
+                if (nearestStopId != null && stopData.containsKey(nearestStopId)) {
                     bus.setStopLocation(stopData.get(nearestStopId).get("stop_name"));
                     bus.setNextStop(nearestStopId);
+
+                    // Set arrival time if available
+                    if (stopArrivals.containsKey(nearestStopId) &&
+                            stopArrivals.get(nearestStopId).containsKey(routeId)) {
+                        bus.setPredictedArrivalTime(stopArrivals.get(nearestStopId).get(routeId));
+                    } else {
+                        // Default arrival time
+                        bus.setPredictedArrivalTime(currentTime + 300);
+                    }
                 }
 
-                // Add arrival time (a few minutes in the future)
-                bus.setPredictedArrivalTime(currentTime + 60 * (3 + i));
-
-                // Add rating
                 bus.setBusRating('A');
-
                 buses.add(bus);
             }
         }
 
         return buses;
+    }
+    /**
+     * Create a bus that's at a stop
+     */
+    private GTFSBus createBusAtStop(String routeId, String routeName, int busIndex,
+                                    LatLng position, String stopId, String tripId, long currentTime) {
+        GTFSBus bus = new GTFSBus();
+        bus.setBusNum(Integer.parseInt(routeId) * 10 + busIndex);
+        bus.setBusName(routeName);
+        bus.setLatitude(position.latitude);
+        bus.setLongitude(position.longitude);
+        bus.setBearing(0); // Stopped at station
+        bus.setSpeed(0); // Not moving
+        bus.setRouteId(routeId);
+        bus.setVehicleId("vehicle_" + routeId + "_" + busIndex);
+        bus.setTripId(tripId);
+        bus.setInService(true);
+
+        // Set stop info
+        if (stopData.containsKey(stopId)) {
+            bus.setStopLocation(stopData.get(stopId).get("stop_name"));
+            bus.setNextStop(stopId);
+        }
+
+        // Update arrival time to now (bus is at the stop)
+        bus.setPredictedArrivalTime(currentTime);
+
+        // Add rating
+        bus.setBusRating('A');
+
+        return bus;
     }
 
     /**
@@ -744,34 +792,123 @@ public class GTFSService {
     }
 
     /**
-     * Get upcoming arrivals for a specific stop
-     * @param stopId The stop ID
-     * @return List of arrival information
+     * Get upcoming arrivals for a specific stop - streamlined version
      */
     public List<Map<String, Object>> getUpcomingArrivals(String stopId) {
         List<Map<String, Object>> arrivals = new ArrayList<>();
 
-        // For now, return mock data
-        // In a real implementation, this would use the trip_updates feed
+        // Get current time
+        long currentTime = System.currentTimeMillis() / 1000;
 
-        // Example mock data
-        Map<String, Object> arrival1 = new HashMap<>();
-        arrival1.put("route_id", "1");
-        arrival1.put("route_name", "Red Route");
-        arrival1.put("trip_id", "trip_1");
-        arrival1.put("arrival_time", System.currentTimeMillis() / 1000 + 300); // 5 minutes
+        // Initialize arrivals for this stop if needed
+        if (!stopArrivals.containsKey(stopId)) {
+            Map<String, Long> routeArrivals = new HashMap<>();
+            Set<String> routesForStop = getRoutesForStop(stopId);
 
-        Map<String, Object> arrival2 = new HashMap<>();
-        arrival2.put("route_id", "2");
-        arrival2.put("route_name", "Blue Route");
-        arrival2.put("trip_id", "trip_2");
-        arrival2.put("arrival_time", System.currentTimeMillis() / 1000 + 600); // 10 minutes
+            // Assign initial arrival times - one per route
+            int minutesOffset = 2;
+            for (String routeId : routesForStop) {
+                // Initial arrival: current time + offset
+                long arrivalTime = currentTime + (minutesOffset * 60);
+                routeArrivals.put(routeId, arrivalTime);
+                minutesOffset += 3; // Space arrivals by 3 minutes
+            }
 
-        arrivals.add(arrival1);
-        arrivals.add(arrival2);
+            stopArrivals.put(stopId, routeArrivals);
+        }
+
+        // Get routes that serve this stop
+        Set<String> routesForStop = getRoutesForStop(stopId);
+
+        // Add arrival info for each route
+        for (String routeId : routesForStop) {
+            if (!stopArrivals.get(stopId).containsKey(routeId)) {
+                continue;
+            }
+
+            // Get arrival time
+            long arrivalTime = stopArrivals.get(stopId).get(routeId);
+
+            // If arrival has passed, create a new one
+            if (arrivalTime <= currentTime) {
+                // Next bus in 10-15 minutes
+                arrivalTime = currentTime + (10 + (Math.abs(routeId.hashCode()) % 5)) * 60;
+                stopArrivals.get(stopId).put(routeId, arrivalTime);
+            }
+
+            // Create arrival info
+            Map<String, Object> arrival = new HashMap<>();
+            arrival.put("route_id", routeId);
+            arrival.put("route_name", getRouteDisplayName(routeId));
+            arrival.put("trip_id", "trip_" + routeId);
+            arrival.put("arrival_time", arrivalTime);
+
+            arrivals.add(arrival);
+        }
+
+        // Sort by arrival time
+        Collections.sort(arrivals, (a, b) -> {
+            long timeA = (long) a.get("arrival_time");
+            long timeB = (long) b.get("arrival_time");
+            return Long.compare(timeA, timeB);
+        });
 
         return arrivals;
     }
+
+    /**
+     * Get display name for a route
+     */
+    private String getRouteDisplayName(String routeId) {
+        Map<String, String> route = routeData.get(routeId);
+        if (route != null) {
+            if (route.containsKey("route_short_name") && !route.get("route_short_name").isEmpty()) {
+                return route.get("route_short_name");
+            } else if (route.containsKey("route_long_name") && !route.get("route_long_name").isEmpty()) {
+                return route.get("route_long_name");
+            }
+        }
+        return "Route " + routeId;
+    }
+
+    /**
+     * Initialize arrival times for a stop
+     */
+    private void initializeArrivalsForStop(String stopId, long currentTime) {
+        Map<String, Long> routeArrivals = new HashMap<>();
+        Set<String> routesForStop = getRoutesForStop(stopId);
+
+        // Assign initial arrival times
+        for (String routeId : routesForStop) {
+            // Use a hash of stopId and routeId to generate consistent but varied arrival times
+            int hashCode = (stopId + routeId).hashCode();
+            int minutesOffset = Math.abs(hashCode % 10) + 1; // 1-10 minutes
+
+            // Initial arrival: current time + offset minutes
+            long arrivalTime = currentTime + (minutesOffset * 60);
+            routeArrivals.put(routeId, arrivalTime);
+        }
+
+        stopArrivals.put(stopId, routeArrivals);
+    }
+
+    /**
+     * Check if a bus is at or near a stop
+     * Used to synchronize bus positions with arrivals
+     */
+    public boolean isBusAtStop(String routeId, String stopId) {
+        if (!stopArrivals.containsKey(stopId) || !stopArrivals.get(stopId).containsKey(routeId)) {
+            return false;
+        }
+
+        long arrivalTime = stopArrivals.get(stopId).get(routeId);
+        long currentTime = System.currentTimeMillis() / 1000;
+
+        // Bus is at stop if it's within 30 seconds of arrival time
+        return Math.abs(arrivalTime - currentTime) <= 30;
+    }
+
+
 
     /**
      * Get shape points for a specific route
@@ -1292,5 +1429,110 @@ public class GTFSService {
         }
 
         Log.d(TAG, "Parsed shapes for " + routeShapes.size() + " routes");
+    }
+
+    /**
+     * Get all routes that serve a specific stop
+     * @param stopId The ID of the stop
+     * @return Set of route IDs that serve this stop
+     */
+    public Set<String> getRoutesForStop(String stopId) {
+        Set<String> routes = new HashSet<>();
+
+        // Look through all trip data to find trips that stop at this stop
+        for (Map.Entry<String, List<Map<String, String>>> entry : stopTimesData.entrySet()) {
+            String tripId = entry.getKey();
+            List<Map<String, String>> stopTimes = entry.getValue();
+
+            // Check if this trip stops at our target stop
+            boolean stopsHere = false;
+            for (Map<String, String> stopTime : stopTimes) {
+                if (stopTime.containsKey("stop_id") && stopTime.get("stop_id").equals(stopId)) {
+                    stopsHere = true;
+                    break;
+                }
+            }
+
+            // If this trip stops at our target stop, find its route
+            if (stopsHere && tripData.containsKey(tripId)) {
+                Map<String, String> trip = tripData.get(tripId);
+                if (trip.containsKey("route_id")) {
+                    routes.add(trip.get("route_id"));
+                }
+            }
+        }
+
+        // If we don't find any routes, look through our mock data
+        if (routes.isEmpty()) {
+            // For red route stops
+            if (stopId.equals("stop_1") || stopId.equals("stop_2") || stopId.equals("stop_3")) {
+                routes.add("1");
+            }
+
+            // For blue route stops
+            if (stopId.equals("stop_4") || stopId.equals("stop_5")) {
+                routes.add("2");
+            }
+
+            // For green route stops
+            if (stopId.equals("stop_6") || stopId.equals("stop_7")) {
+                routes.add("3");
+            }
+
+            // If still empty, include all routes as a fallback
+            if (routes.isEmpty()) {
+                routes.addAll(getAllRouteIds());
+            }
+        }
+
+        // Log the routes for debugging
+        Log.d(TAG, "Routes for stop " + stopId + ": " + routes);
+
+        return routes;
+    }
+
+    /**
+     * Get all route IDs from the GTFS data
+     * @return Set of all route IDs
+     */
+    public Set<String> getAllRouteIds() {
+        return new HashSet<>(routeData.keySet());
+    }
+
+    /**
+     * Get the formatted name for a route
+     * @param routeId The route ID
+     * @return A formatted display name for the route
+     */
+    public String getRouteName(String routeId) {
+        Map<String, String> routeInfo = getRouteData().get(routeId);
+
+        // Check various route name fields in priority order
+        if (routeInfo != null) {
+            // First choice: route_short_name if available
+            if (routeInfo.containsKey("route_short_name") && !routeInfo.get("route_short_name").isEmpty()) {
+                return routeInfo.get("route_short_name");
+            }
+
+            // Second choice: route long name
+            if (routeInfo.containsKey("route_long_name") && !routeInfo.get("route_long_name").isEmpty()) {
+                return routeInfo.get("route_long_name");
+            }
+
+            // For CyRide, create formatted name based on route ID
+            if (routeId.equals("1")) return "1 Red";
+            if (routeId.equals("2")) return "2 Green";
+            if (routeId.equals("3")) return "3 Blue";
+            if (routeId.equals("4")) return "4 Gray";
+            if (routeId.equals("5")) return "5 Yellow";
+            if (routeId.equals("6")) return "6 Brown";
+            if (routeId.equals("7")) return "7 Purple";
+            if (routeId.equals("9")) return "9 Plum";
+            if (routeId.equals("11")) return "11 Cherry";
+            if (routeId.equals("12")) return "12 Lilac";
+        }
+
+        // Fallback
+        return "Route " + routeId;
     }
 }
