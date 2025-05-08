@@ -16,6 +16,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        jcenter() // For older dependencies
+        maven { url "https://jitpack.io" } // Add JitPack repository for GTFS-RT bindings
     }
 }
 

@@ -5,4 +5,6 @@
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="dark_background">#1C1C1C</color>
+    <color name="colorGraded">#4CAF50</color>  <!-- Green for graded assignments -->
+    <color name="colorPending">#FF9800</color> <!-- Orange for pending assignments -->
 </resources>

@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -18,6 +19,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
     private MaterialCardView friendRequestsCard;
     private MaterialCardView classesCard;
     private MaterialCardView testingCenterCard;
+    private MaterialCardView bookstoreCard;
     private BottomNavigationView bottomNavigationView;
 
     @Override
@@ -25,6 +27,33 @@ public class StudentDashboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         try {
+
+            // Check if user has student role or if role checking should be bypassed
+            SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+            String userRoleStr = prefs.getString("user_role", "STUDENT");
+
+            try {
+                UserRoles userRole = UserRoles.valueOf(userRoleStr);
+                if (userRole != UserRoles.STUDENT) {
+                    // User is not a student, redirect to appropriate dashboard
+                    Toast.makeText(this, "Redirecting to your dashboard", Toast.LENGTH_SHORT).show();
+                    Intent intent;
+
+                    if (userRole == UserRoles.ADMIN) {
+                        intent = new Intent(this, AdminDashboardActivity.class);
+                    } else {
+                        intent = new Intent(this, TeacherDashboardActivity.class);
+                    }
+
+                    startActivity(intent);
+                    finish();
+                    return;
+                }
+            } catch (IllegalArgumentException e) {
+                // Continue loading student dashboard (the default)
+                Log.e(TAG, "Error parsing role, defaulting to student: " + e.getMessage());
+            }
+
             setContentView(R.layout.activity_student_dashboard);
             Log.d(TAG, "StudentDashboardActivity onCreate");
 
@@ -33,6 +62,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
             friendRequestsCard = findViewById(R.id.friends_request_card);
             classesCard = findViewById(R.id.classes_card);
             testingCenterCard = findViewById(R.id.testing_center_card);
+            bookstoreCard = findViewById(R.id.bookstore_card);
             bottomNavigationView = findViewById(R.id.bottom_navigation);
 
             // Make sure bottom navigation isn't null before using it
@@ -91,19 +121,6 @@ public class StudentDashboardActivity extends AppCompatActivity {
                 });
             }
 
-            // Set click listener for testing center card
-            if (testingCenterCard != null) {
-                testingCenterCard.setOnClickListener(v -> {
-                    try {
-                        Intent intent = new Intent(StudentDashboardActivity.this, TestingCenterActivity.class);
-                        startActivity(intent);
-                        Log.d(TAG, "Navigating to TestingCenterActivity");
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error navigating to TestingCenterActivity: " + e.getMessage());
-                    }
-                });
-            }
-
             // Set up bottom navigation
             if (bottomNavigationView != null) {
                 bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -150,6 +167,30 @@ public class StudentDashboardActivity extends AppCompatActivity {
                         startActivity(intent);
                     } catch (Exception e) {
                         Log.e(TAG, "Error navigating to StudyGroupsActivity: " + e.getMessage());
+                    }
+                });
+            }
+
+            // Set click listener for testing center card
+            if (testingCenterCard != null) {
+                testingCenterCard.setOnClickListener(v -> {
+                    try {
+                        Intent intent = new Intent(StudentDashboardActivity.this, BusActivity.class); //change this to testing center activity once implemented
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error navigating to BusActivity: " + e.getMessage());
+                    }
+                });
+            }
+
+            // Set click listener for bookstore card
+            if (bookstoreCard != null) {
+                bookstoreCard.setOnClickListener(v -> {
+                    try {
+                        Intent intent = new Intent(StudentDashboardActivity.this, BookstoreActivity.class);
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error navigating to BookstoreActivity: " + e.getMessage());
                     }
                 });
             }

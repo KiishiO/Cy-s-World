@@ -1,3 +1,10 @@
+/**
+ * Activity for managing friend connections in the CyWorld application.
+ * This activity allows users to view their friends, manage friend requests,
+ * search for other users, and initiate chats with friends.
+ *
+ * @author Jawad Ali
+ */
 package com.example.own_example;
 
 import android.content.Intent;
@@ -29,29 +36,61 @@ public class FriendsActivity extends AppCompatActivity implements
         FriendsAdapter.OnFriendActionListener,
         RequestsAdapter.OnRequestActionListener {
 
+    /** Tag for logging purposes */
     private static final String TAG = "FriendsActivity";
+
+    /** RecyclerView for displaying the friends list */
     private RecyclerView friendsRecyclerView;
+
+    /** RecyclerView for displaying friend requests */
     private RecyclerView requestsRecyclerView;
+
+    /** Adapter for the friends list */
     private FriendsAdapter friendsAdapter;
+
+    /** Adapter for the friend requests list */
     private RequestsAdapter requestsAdapter;
+
+    /** Text field for searching users by Net-ID */
     private TextInputEditText searchNetIdEditText;
+
+    /** Button to trigger the search */
     private MaterialButton searchButton;
+
+    /** Layout to display search results */
     private LinearLayout searchResultLayout;
+
+    /** Text displayed when the user has no friends */
     private TextView noFriendsTextView;
+
+    /** Text displayed when the user has no friend requests */
     private TextView noRequestsTextView;
+
+    /** Counter displaying the number of friends */
     private TextView friendsCountTextView;
+
+    /** Counter displaying the number of friend requests */
     private TextView requestsCountTextView;
 
-    // Data lists
+    /** List of friends */
     private List<Friend> friendsList = new ArrayList<>();
+
+    /** List of friend requests */
     private List<FriendRequest> requestsList = new ArrayList<>();
 
-    // Service
+    /** Service for friend-related API calls */
     private FriendService friendService;
 
-    // User ID
+    /** ID of the current user */
     private long currentUserId = 1; // Default to 1 for testing
 
+    /**
+     * Initializes the activity, sets up UI components, and loads initial data.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after
+     *     previously being shut down, this contains the data it most recently
+     *     supplied in onSaveInstanceState(Bundle).
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,6 +139,10 @@ public class FriendsActivity extends AppCompatActivity implements
         loadFriendRequests();
     }
 
+    /**
+     * Called when the activity becomes visible to the user.
+     * Refreshes friend and request data.
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -108,8 +151,16 @@ public class FriendsActivity extends AppCompatActivity implements
         loadFriendRequests();
     }
 
+    /**
+     * Loads the friends list from the server.
+     */
     private void loadFriends() {
         friendService.getFriends(currentUserId, new FriendService.FriendsCallback() {
+            /**
+             * Called when friends are successfully loaded.
+             *
+             * @param friends The list of friends
+             */
             @Override
             public void onSuccess(List<Friend> friends) {
                 friendsList.clear();
@@ -117,6 +168,11 @@ public class FriendsActivity extends AppCompatActivity implements
                 updateUI();
             }
 
+            /**
+             * Called when there's an error loading friends.
+             *
+             * @param error The error message
+             */
             @Override
             public void onError(String error) {
                 showSnackbar("Error loading Cyclones: " + error);
@@ -126,8 +182,16 @@ public class FriendsActivity extends AppCompatActivity implements
         });
     }
 
+    /**
+     * Loads the friend requests from the server.
+     */
     private void loadFriendRequests() {
         friendService.getFriendRequests(currentUserId, new FriendService.RequestsCallback() {
+            /**
+             * Called when friend requests are successfully loaded.
+             *
+             * @param requests The list of friend requests
+             */
             @Override
             public void onSuccess(List<FriendRequest> requests) {
                 requestsList.clear();
@@ -135,6 +199,11 @@ public class FriendsActivity extends AppCompatActivity implements
                 updateUI();
             }
 
+            /**
+             * Called when there's an error loading friend requests.
+             *
+             * @param error The error message
+             */
             @Override
             public void onError(String error) {
                 showSnackbar("Error loading connection requests: " + error);
@@ -144,6 +213,9 @@ public class FriendsActivity extends AppCompatActivity implements
         });
     }
 
+    /**
+     * Loads mock friends data for testing or when the API fails.
+     */
     private void loadTestFriends() {
         // Mock friends data for testing
         friendsList.clear();
@@ -153,6 +225,9 @@ public class FriendsActivity extends AppCompatActivity implements
         updateUI();
     }
 
+    /**
+     * Loads mock friend requests for testing or when the API fails.
+     */
     private void loadTestRequests() {
         // Mock friend requests for testing
         requestsList.clear();
@@ -161,6 +236,9 @@ public class FriendsActivity extends AppCompatActivity implements
         updateUI();
     }
 
+    /**
+     * Updates the friend and request count displays.
+     */
     private void updateCounters() {
         try {
             if (friendsCountTextView != null) {
@@ -174,6 +252,9 @@ public class FriendsActivity extends AppCompatActivity implements
         }
     }
 
+    /**
+     * Updates the UI based on the current state of friends and requests lists.
+     */
     private void updateUI() {
         try {
             runOnUiThread(() -> {
@@ -211,6 +292,10 @@ public class FriendsActivity extends AppCompatActivity implements
         }
     }
 
+    /**
+     * Searches for a user by Net-ID.
+     * Triggered when the search button is clicked.
+     */
     private void searchNetId() {
         String netId = searchNetIdEditText.getText().toString().trim();
         if (netId.isEmpty()) {
@@ -223,6 +308,11 @@ public class FriendsActivity extends AppCompatActivity implements
 
         // First search for the user
         friendService.searchNetId(netId, new FriendService.ActionCallback() {
+            /**
+             * Called when the search is successful.
+             *
+             * @param message The response message
+             */
             @Override
             public void onSuccess(String message) {
                 // Show search result if "User found" is in the message
@@ -233,6 +323,11 @@ public class FriendsActivity extends AppCompatActivity implements
                 }
             }
 
+            /**
+             * Called when there's an error searching.
+             *
+             * @param error The error message
+             */
             @Override
             public void onError(String error) {
                 showSnackbar("Error searching: " + error);
@@ -240,6 +335,11 @@ public class FriendsActivity extends AppCompatActivity implements
         });
     }
 
+    /**
+     * Displays the search result for a found user.
+     *
+     * @param netId The Net-ID of the found user
+     */
     private void showSearchResult(String netId) {
         // Show mock search result for now
         try {
@@ -262,17 +362,32 @@ public class FriendsActivity extends AppCompatActivity implements
         }
     }
 
+    /**
+     * Sends a friend request to another user.
+     *
+     * @param netId The Net-ID of the recipient
+     */
     private void sendFriendRequest(String netId) {
         // For a real implementation, you would need to get the user ID for the netId
         // For now, use a dummy receiver ID of 2
         long receiverId = 2;
 
         friendService.sendFriendRequest(currentUserId, receiverId, new FriendService.ActionCallback() {
+            /**
+             * Called when the friend request is successfully sent.
+             *
+             * @param message The success message
+             */
             @Override
             public void onSuccess(String message) {
                 showSnackbar("Connection request sent to " + netId);
             }
 
+            /**
+             * Called when there's an error sending the friend request.
+             *
+             * @param error The error message
+             */
             @Override
             public void onError(String error) {
                 showSnackbar("Error sending request: " + error);
@@ -280,7 +395,13 @@ public class FriendsActivity extends AppCompatActivity implements
         });
     }
 
-    // Implement FriendsAdapter.OnFriendActionListener
+    /**
+     * Called when a user removes a friend.
+     * Implements FriendsAdapter.OnFriendActionListener.
+     *
+     * @param friendId The ID of the friend to remove
+     * @param position The position of the friend in the list
+     */
     @Override
     public void onRemoveFriend(int friendId, int position) {
         if (position < 0 || position >= friendsList.size()) {
@@ -289,6 +410,11 @@ public class FriendsActivity extends AppCompatActivity implements
         }
 
         friendService.removeFriend(friendId, new FriendService.ActionCallback() {
+            /**
+             * Called when the friend is successfully removed.
+             *
+             * @param message The success message
+             */
             @Override
             public void onSuccess(String message) {
                 try {
@@ -305,6 +431,11 @@ public class FriendsActivity extends AppCompatActivity implements
                 }
             }
 
+            /**
+             * Called when there's an error removing the friend.
+             *
+             * @param error The error message
+             */
             @Override
             public void onError(String error) {
                 showSnackbar("Error removing connection: " + error);
@@ -312,7 +443,12 @@ public class FriendsActivity extends AppCompatActivity implements
         });
     }
 
-    // NEW METHOD: Implement chat functionality
+    /**
+     * Initiates a chat with a friend.
+     * Implements FriendsAdapter.OnFriendActionListener.
+     *
+     * @param friend The friend to chat with
+     */
     @Override
     public void onChatWithFriend(Friend friend) {
         try {
@@ -339,7 +475,13 @@ public class FriendsActivity extends AppCompatActivity implements
         }
     }
 
-    // Implement RequestsAdapter.OnRequestActionListener
+    /**
+     * Called when a user accepts a friend request.
+     * Implements RequestsAdapter.OnRequestActionListener.
+     *
+     * @param requestId The ID of the request to accept
+     * @param position The position of the request in the list
+     */
     @Override
     public void onAcceptRequest(int requestId, int position) {
         if (position < 0 || position >= requestsList.size()) {
@@ -350,6 +492,11 @@ public class FriendsActivity extends AppCompatActivity implements
         final FriendRequest request = requestsList.get(position);
 
         friendService.respondToRequest(requestId, true, new FriendService.ActionCallback() {
+            /**
+             * Called when the request is successfully accepted.
+             *
+             * @param message The success message
+             */
             @Override
             public void onSuccess(String message) {
                 try {
@@ -381,6 +528,11 @@ public class FriendsActivity extends AppCompatActivity implements
                 }
             }
 
+            /**
+             * Called when there's an error accepting the request.
+             *
+             * @param error The error message
+             */
             @Override
             public void onError(String error) {
                 showSnackbar("Error accepting request: " + error);
@@ -388,6 +540,13 @@ public class FriendsActivity extends AppCompatActivity implements
         });
     }
 
+    /**
+     * Called when a user rejects a friend request.
+     * Implements RequestsAdapter.OnRequestActionListener.
+     *
+     * @param requestId The ID of the request to reject
+     * @param position The position of the request in the list
+     */
     @Override
     public void onRejectRequest(int requestId, int position) {
         if (position < 0 || position >= requestsList.size()) {
@@ -396,6 +555,11 @@ public class FriendsActivity extends AppCompatActivity implements
         }
 
         friendService.respondToRequest(requestId, false, new FriendService.ActionCallback() {
+            /**
+             * Called when the request is successfully rejected.
+             *
+             * @param message The success message
+             */
             @Override
             public void onSuccess(String message) {
                 try {
@@ -413,6 +577,11 @@ public class FriendsActivity extends AppCompatActivity implements
                 }
             }
 
+            /**
+             * Called when there's an error rejecting the request.
+             *
+             * @param error The error message
+             */
             @Override
             public void onError(String error) {
                 showSnackbar("Error declining request: " + error);
@@ -420,6 +589,12 @@ public class FriendsActivity extends AppCompatActivity implements
         });
     }
 
+    /**
+     * Displays a snackbar message at the bottom of the screen.
+     * Falls back to a toast message if the snackbar fails.
+     *
+     * @param message The message to display
+     */
     private void showSnackbar(String message) {
         try {
             runOnUiThread(() -> {

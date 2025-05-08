@@ -9,7 +9,7 @@ import android.util.Log;
  */
 public class UserService {
     private static final String TAG = "UserService";
-    private static final String PREF_NAME = "user_preferences";
+    private static final String PREF_NAME = "user_prefs";
     private static final String KEY_USER_ID = "user_id";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_USER_ROLE = "user_role";
@@ -29,6 +29,7 @@ public class UserService {
     private String email;
     private String fullName;
     private boolean isInitialized = false;
+    private Context context;
 
     private UserService() {
         // Private constructor to enforce singleton pattern
@@ -47,55 +48,80 @@ public class UserService {
             return;
         }
 
+        // Store the context for future use
+        this.context = context.getApplicationContext();
+
         // Try to load from both preference stores
-        // First try "LoginPrefs"
         preferences = context.getApplicationContext()
                 .getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
 
-        // Load user data with proper type handling
+        // Load user data
         try {
-            // Try to get user_id as a long first (matching how it's stored)
             long longUserId = preferences.getLong(KEY_USER_ID, 0);
             if (longUserId > 0) {
                 currentUserId = String.valueOf(longUserId);
             } else {
-                // Fall back to string if needed
                 currentUserId = preferences.getString(KEY_USER_ID, null);
             }
-        } catch (ClassCastException e) {
-            // If there's a type mismatch, try the other way
-            try {
-                currentUserId = preferences.getString(KEY_USER_ID, null);
-            } catch (Exception ex) {
-                Log.e(TAG, "Error loading user_id: " + ex.getMessage());
-                currentUserId = null;
-            }
-        }
 
-        // Load other user data
-        try {
             currentUsername = preferences.getString(KEY_USERNAME, null);
             userRole = preferences.getString(KEY_USER_ROLE, null);
+
+            // Debug logging to see what's being loaded
+            Log.d(TAG, "UserService initialized. User ID: " + currentUserId +
+                    ", User: " + currentUsername +
+                    ", Role: " + userRole);
+
             email = preferences.getString(KEY_EMAIL, null);
             fullName = preferences.getString(KEY_FULL_NAME, null);
         } catch (Exception e) {
             Log.e(TAG, "Error loading user data: " + e.getMessage());
         }
 
-
         isInitialized = true;
-
-        Log.d(TAG, "UserService initialized. User ID: " + currentUserId +
-                ", User: " + (currentUsername != null ? currentUsername : "not logged in") +
-                ", Role: " + (userRole != null ? userRole : "none"));
     }
 
     public boolean isInitialized() {
         return isInitialized;
     }
 
-    public String getCurrentUserId() {
-        return currentUserId;
+    public int getCurrentUserId() {
+        // Default user ID to return if anything goes wrong
+        int defaultUserId = 1;
+
+        try {
+            // Check if context is initialized
+            if (context == null) {
+                Log.e(TAG, "Context is null in getCurrentUserId!");
+                return defaultUserId;
+            }
+
+            // Get the SharedPreferences
+            SharedPreferences prefs = context.getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
+
+            // First try string version
+            String userIdStr = prefs.getString(KEY_USER_ID, null);
+            if (userIdStr != null && !userIdStr.isEmpty()) {
+                try {
+                    return Integer.parseInt(userIdStr);
+                } catch (NumberFormatException e) {
+                    Log.e(TAG, "Failed to parse user ID string: " + userIdStr);
+                }
+            }
+
+            // Then try long version
+            long longUserId = prefs.getLong(KEY_USER_ID, 0);
+            if (longUserId > 0) {
+                return (int) longUserId;
+            }
+
+            // If we get here, no valid ID was found
+            Log.w(TAG, "No user ID found in preferences");
+            return defaultUserId;
+        } catch (Exception e) {
+            Log.e(TAG, "Error in getCurrentUserId: " + e.getMessage(), e);
+            return defaultUserId;
+        }
     }
 
     public String getCurrentUsername() {
@@ -119,7 +145,18 @@ public class UserService {
     }
 
     public boolean isAdmin() {
-        return ROLE_ADMIN.equals(userRole);
+        if (userRole == null) return false;
+
+        // Check for string-based role
+        if (ROLE_ADMIN.equals(userRole)) return true;
+
+        // Check for enum-based role
+        try {
+            return "ADMIN".equals(userRole) || "ADMIN".equals(userRole.toUpperCase());
+        } catch (Exception e) {
+            Log.e(TAG, "Error checking admin role: " + e.getMessage());
+            return false;
+        }
     }
 
     public boolean isTeacher() {

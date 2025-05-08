@@ -5,7 +5,8 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/white">
+    android:background="@color/white"
+    android:paddingTop="100dp">
 
     <!--Teacher Profile Icon-->
     <ImageView
@@ -80,7 +81,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Office Hours Button -->
+        <!-- Office Hours Button / Now for campus news -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/office_hours_card"
             android:layout_width="0dp"
@@ -101,12 +102,12 @@
                     android:layout_width="160dp"
                     android:layout_height="60dp"
                     android:src="@drawable/ic_hours"
-                    android:contentDescription="Office Hours" />
+                    android:contentDescription="Campus News" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Office Hours"
+                    android:text="Campus News"
                     android:textColor="@color/white"
                     android:textSize="16sp"
                     android:layout_marginTop="4dp" />

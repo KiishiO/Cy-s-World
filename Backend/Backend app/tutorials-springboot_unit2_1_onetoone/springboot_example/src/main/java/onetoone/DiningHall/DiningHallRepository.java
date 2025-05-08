@@ -3,6 +3,8 @@ package onetoone.DiningHall;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 /**
@@ -21,5 +23,5 @@ public interface DiningHallRepository extends JpaRepository<DiningHall, Integer>
     List<DiningHall> findByMenuItemsNameContainingIgnoreCase(String menuItemName);
 
     // Find dining halls with menu items below a certain price
-    List<DiningHall> findDistinctByMenuItemsPriceLessThanEqual(double maxPrice);
+    //List<DiningHall> findDistinctByMenuItemsPriceLessThanEqual(double maxPrice);
 }

@@ -1,31 +1,28 @@
 package onetoone;
 
-import jakarta.transaction.Transactional;
 import onetoone.DiningHall.DiningHall;
+import onetoone.DiningHall.DiningHallRepository;
 import onetoone.Login.Login;
 import onetoone.Login.LoginRepository;
+import onetoone.Persons.Person;
+import onetoone.Persons.PersonRepository;
 import onetoone.Signup.Signup;
 import onetoone.Signup.SignupRepository;
-import onetoone.StudyTable.StudyTable;
+import onetoone.TestingCenter.ExamInfo;
+import onetoone.TestingCenter.ExamInfoRepository;
+import onetoone.TestingCenter.TestingCenter;
+import onetoone.TestingCenter.TestingCenterRepository;
 import onetoone.UserRoles.UserRoles;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
-//import onetoone.Laptops.Laptop;
-//import onetoone.Laptops.LaptopRepository;
-import onetoone.Persons.Person;
-import onetoone.Persons.PersonRepository;
-import onetoone.DiningHall.DiningHallRepository;
-import onetoone.Signup.SignupRepository;
-import org.springframework.context.annotation.ComponentScan;
-
 /**
- * 
+ *
  * @author Sonia Patil
- * 
- */ 
+ *
+ */
 
 @SpringBootApplication
 //@ComponentScan(basePackages = {"onetoone.CampusEvents"})
@@ -73,7 +70,7 @@ class Main {
 
 
     @Bean
-    CommandLineRunner initData(LoginRepository loginRepository, PersonRepository personRepository, SignupRepository signupRepository, DiningHallRepository diningHallRepository) {
+    CommandLineRunner initData(LoginRepository loginRepository, PersonRepository personRepository, SignupRepository signupRepository, DiningHallRepository diningHallRepository, TestingCenterRepository testingCenterRepository, ExamInfoRepository examInfoRepository) {
         return args -> {
             // Creating Person entities
             Person person1 = new Person("Michael Johnson", "515-789-9852", UserRoles.ADMIN);
@@ -160,9 +157,9 @@ class Main {
             personRepository.save(person4);
 
             // Saving Login details
-           login4.setPerson(person4);            person4.setLogin(login4);
-           login4.setSignup(signup4);
-           loginRepository.save(login4);
+            login4.setPerson(person4);            person4.setLogin(login4);
+            login4.setSignup(signup4);
+            loginRepository.save(login4);
 
             person4.setLogin(login4);
             signup4.setLogin(login4);
@@ -171,11 +168,27 @@ class Main {
 
 //            StudyTable studyTable1 = new StudyTable(1L, person1, person2);
 
-            DiningHall diningHall1 = new DiningHall("UDCC", "central campus");
-            DiningHall diningHall2 = new DiningHall("Windows", "Friley");
+            DiningHall diningHall1 = new DiningHall("Union Drive Community Center", "West Campus");
+            DiningHall diningHall2 = new DiningHall("Seasons Dining", "Central Campus");
+            DiningHall diningHall3 = new DiningHall("Memorial Union", "Central Campus");
             diningHallRepository.save(diningHall1);
             diningHallRepository.save(diningHall2);
+            diningHallRepository.save(diningHall3);
 
+            TestingCenter testingCenter1 = new TestingCenter("Carver 101", "central campus", "math department building");
+            TestingCenter testingCenter2 = new TestingCenter("Troxel 1001", "north side", "chemistry building");
+            testingCenterRepository.save(testingCenter1);
+            testingCenterRepository.save(testingCenter2);
+
+            ExamInfo examInfo1 = new ExamInfo("math", "Calc 1 exam");
+            ExamInfo examInfo2 = new ExamInfo("physics", "PHYS 2 midterm");
+            examInfoRepository.save(examInfo1);
+            examInfoRepository.save(examInfo2);
+
+            ExamInfo examInfo3 = new ExamInfo("JAVA Intro", "Coms 288");
+            ExamInfo examInfo4 = new ExamInfo("English Intro", "Expressive writing");
+            examInfoRepository.save(examInfo3);
+            examInfoRepository.save(examInfo4);
 
             // Logging to console (optional, for verification)
             System.out.println("Sample login and person data inserted into the database.");

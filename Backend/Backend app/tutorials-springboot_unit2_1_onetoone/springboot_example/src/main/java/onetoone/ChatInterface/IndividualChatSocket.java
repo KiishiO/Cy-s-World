@@ -45,9 +45,10 @@ public class IndividualChatSocket {
     private static Map<Session, String> sessionUsernameMap = new Hashtable<>();
     private static Map<String, Session> usernameSessionMap = new Hashtable<>();
     private static Map<String, String> userStatusMap = new Hashtable<>(); //Stores the user status
+    private static Map<String, Message> messageIdMap = new Hashtable<>(); //Stores messages by ID for edit/delete
 
-    private final Logger logger = LoggerFactory.getLogger(ChatSocket.class);
-
+    private final Logger logger = LoggerFactory.getLogger(IndividualChatSocket.class);
+//used to be ChatSocket.class
     @OnOpen
     public void onOpen(Session session, @PathParam("username") String username)
             throws IOException {
@@ -83,6 +84,54 @@ public class IndividualChatSocket {
                 broadcast(username + " is now " + status);
             }
             return;
+        }
+
+        //editing a message
+        // Handle editing message
+        if (message.startsWith("__edit__")) {
+            // Format: __edit__ messageId newContent
+            String[] parts = message.split(" ", 3);
+            if (parts.length >= 3) {
+                String messageId = parts[1];
+                String newContent = parts[2];
+
+                Message storedMessage = messageIdMap.get(messageId);
+                if (storedMessage != null && storedMessage.getUserName().equals(username)) {
+                    // Update the message in repository
+                    storedMessage.setContent(newContent);
+                    msgRepo.save(storedMessage);
+
+                    // Broadcast the edit
+                    broadcast("__edited__ " + messageId + " " + username + ": " + newContent);
+                    return;
+                } else {
+                    sendMessageToPArticularUser(username, "Cannot edit message: not found or not yours");
+                    return;
+                }
+            }
+        }
+
+        // Handle deleting message
+        if (message.startsWith("__delete__")) {
+            // Format: __delete__ messageId
+            String[] parts = message.split(" ", 2);
+            if (parts.length == 2) {
+                String messageId = parts[1];
+
+                Message storedMessage = messageIdMap.get(messageId);
+                if (storedMessage != null && storedMessage.getUserName().equals(username)) {
+                    // Delete the message from repository
+                    msgRepo.delete(storedMessage);
+                    messageIdMap.remove(messageId);
+
+                    // Broadcast the deletion
+                    broadcast("__deleted__ " + messageId + " " + username);
+                    return;
+                } else {
+                    sendMessageToPArticularUser(username, "Cannot delete message: not found or not yours");
+                    return;
+                }
+            }
         }
 
         // Direct message to a user using the format "@username <message>"

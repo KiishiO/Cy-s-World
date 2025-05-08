@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.VolleyError;
+import com.example.own_example.services.AuthService;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -43,7 +44,8 @@ public class SignUpActivity extends AppCompatActivity {
     private CircularProgressIndicator loadingProgress;
     private MaterialButton btnNext;
     private MaterialButton btnRoleSelection;
-    private String selectedRole = "";
+    private UserRoles selectedRole = null;
+    private TextInputEditText etAuthCode;
 
     // Let's try the Login endpoint as a last resort
     private static final String BASE_URL = "http://coms-3090-017.class.las.iastate.edu:8080/Logins/new";
@@ -57,6 +59,7 @@ public class SignUpActivity extends AppCompatActivity {
         // Initialize views
         MaterialCardView signUpCard = findViewById(R.id.signUpCard);
         TextInputEditText etUsername = findViewById(R.id.signUp_etUsername);
+        etAuthCode = findViewById(R.id.signUp_etAuthCode);
         TextInputEditText etConfirmPassword = findViewById(R.id.signUp_et_Confirm_Password);
         TextInputEditText etPassword = findViewById((R.id.signUp_etPassword));
         TextInputEditText etEmail = findViewById(R.id.signUp_etEmail);
@@ -120,7 +123,7 @@ public class SignUpActivity extends AppCompatActivity {
             if (username.isEmpty() || password.isEmpty() || email.isEmpty() || passwordConfirmed.isEmpty()) {
                 showError("Please fill in all fields");
                 shakeView(username.isEmpty() ? etUsername : etPassword);
-            } else if (selectedRole.isEmpty()) {
+            } else if (selectedRole == null) {
                 showError("Please select a role");
                 shakeView(btnRoleSelection);
             } else if (!isPasswordMatch(password, passwordConfirmed)) {
@@ -140,15 +143,24 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void showRoleSelectionDialog() {
-        final String[] roles = {"Teacher", "Student", "Admin"};
+        final String[] roleNames = {"Teacher", "Student", "Admin"};
+        final UserRoles[] roleValues = {UserRoles.TEACHER, UserRoles.STUDENT, UserRoles.ADMIN};
 
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Select Your Role")
                 .setBackground(getDrawable(R.drawable.dialog_background))
-                .setItems(roles, (dialog, which) -> {
-                    selectedRole = roles[which];
-                    btnRoleSelection.setText(selectedRole);
+                .setItems(roleNames, (dialog, which) -> {
+                    selectedRole = roleValues[which];
+                    btnRoleSelection.setText(roleNames[which]);
                     btnRoleSelection.setIcon(null);
+
+                    // Show auth code field for admin and teacher roles
+                    if (selectedRole == UserRoles.ADMIN || selectedRole == UserRoles.TEACHER) {
+                        etAuthCode.setVisibility(View.VISIBLE);
+                        etAuthCode.setHint("Enter " + roleNames[which] + " Authentication Code");
+                    } else {
+                        etAuthCode.setVisibility(View.GONE);
+                    }
                 })
                 .show();
     }
@@ -181,7 +193,21 @@ public class SignUpActivity extends AppCompatActivity {
         return password.equals(confirm);
     }
 
-    private void performSignUp(String username, String password, String email, String role) {
+    private void performSignUp(String username, String password, String email, UserRoles role) {
+        // Authorization check for admin and teacher roles
+        String authCode = null;
+        if (role == UserRoles.ADMIN || role == UserRoles.TEACHER) {
+            authCode = etAuthCode.getText().toString().trim();
+
+            String requiredCode = (role == UserRoles.ADMIN) ?
+                    "admin-secret-2025" : "teacher-access-2025";
+
+            if (authCode.isEmpty() || !authCode.equals(requiredCode)) {
+                resetSignUpAnimation();
+                showError("Invalid authentication code for " + role + " role");
+                return;
+            }
+        }
         // Use a background thread for network operations
         new Thread(() -> {
             HttpURLConnection urlConnection = null;
@@ -191,8 +217,8 @@ public class SignUpActivity extends AppCompatActivity {
                 jsonBody.put("name", username);
                 jsonBody.put("password", password);
                 jsonBody.put("emailId", email);
-                // Add role field
-                jsonBody.put("role", role);
+                // Add role field - convert enum to string for JSON
+                jsonBody.put("role", role.toString());
                 // Add ifActive field which may be required
                 jsonBody.put("ifActive", true);
 

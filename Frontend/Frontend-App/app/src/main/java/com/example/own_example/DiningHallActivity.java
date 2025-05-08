@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -31,6 +32,7 @@ public class DiningHallActivity extends AppCompatActivity implements DiningHallS
     private List<DiningHall> diningHalls = new ArrayList<>();
 
     private DiningHallService diningHallService;
+    private Button viewOrderHistoryButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +49,13 @@ public class DiningHallActivity extends AppCompatActivity implements DiningHallS
         diningHallsRecyclerView = findViewById(R.id.dining_halls_recycler);
         emptyStateView = findViewById(R.id.empty_state_view);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
+        viewOrderHistoryButton = findViewById(R.id.view_order_history_button);
+
+        //set up view order history button
+        viewOrderHistoryButton.setOnClickListener(v -> {
+            Intent intent = new Intent(DiningHallActivity.this, OrderHistoryActivity.class);
+            startActivity(intent);
+        });
 
         // Set up RecyclerView
         diningHallsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -121,6 +130,8 @@ public class DiningHallActivity extends AppCompatActivity implements DiningHallS
 
     @Override
     public void onDiningHallsLoaded(List<DiningHall> loadedDiningHalls) {
+        // Clear the list again to be safe, in case it was modified between loadDiningHalls() and here
+        diningHalls.clear();
         diningHalls.addAll(loadedDiningHalls);
         updateUI();
     }

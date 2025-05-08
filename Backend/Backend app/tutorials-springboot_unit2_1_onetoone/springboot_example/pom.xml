@@ -69,6 +69,49 @@
           <version>6.2.3</version>
       </dependency>
 
+    <dependency>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+      <version>2.5.0</version>
+    </dependency>
+
+      <!--    Junit Testing     -->
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-test</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>io.rest-assured</groupId>
+          <artifactId>rest-assured</artifactId>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <version>4.13.2</version>
+          <scope>test</scope>
+      </dependency>
+
+      <!-- GTFS Realtime Protobuf library -->
+      <dependency>
+          <groupId>org.mobilitydata</groupId>
+          <artifactId>gtfs-realtime-bindings</artifactId>
+          <version>0.0.8</version>
+      </dependency>
+
+      <!-- Protobuf Java -->
+      <dependency>
+          <groupId>com.google.protobuf</groupId>
+          <artifactId>protobuf-java</artifactId>
+          <version>3.25.1</version>
+      </dependency>
+
+      <!-- For API documentation with Swagger UI -->
+      <dependency>
+          <groupId>org.springdoc</groupId>
+          <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+          <version>2.3.0</version>
+      </dependency>
 
   </dependencies>
 

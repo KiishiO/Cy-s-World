@@ -1,17 +1,19 @@
 package onetoone.Persons;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
+
+
+import onetoone.DiningHallOrderingSystem.DiningOrder;
+
+import onetoone.BookstoreOrderingSystem.Order;
 
 import onetoone.Laptops.Laptop;
 import onetoone.Login.Login;
 import onetoone.Signup.Signup;
 import onetoone.StudentClasses.StudentClasses;
+import onetoone.TestingCenter.ExamInfo;
 import onetoone.UserRoles.UserRoles;
-import org.apache.catalina.User;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,6 +27,7 @@ import java.util.Set;
  * 
  */
 @Entity
+@Table(name = "Person")
 public class Person {
 
      /* 
@@ -33,6 +36,7 @@ public class Person {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column
     private int id;
     private String name;
     private String phoneNumber;
@@ -49,7 +53,8 @@ public class Person {
      * @JoinColumn defines the ownership of the foreign key i.e. the Person table will have a field called laptop_id
      */
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "laptop_id")
+//    @JoinColumn(name = "laptop_id")
+    @JsonIgnore
     private Laptop laptop;
 
 //    @ManyToOne(fetch = FetchType.EAGER)
@@ -61,6 +66,9 @@ public class Person {
     @OneToOne
     @JoinColumn
     private Signup signup;
+
+    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL)
+    private List<Order> orders = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(
@@ -84,6 +92,12 @@ public class Person {
     )
     @JsonIgnore
     private Set<StudentClasses> enrolledClasses = new HashSet<>();
+
+    @ManyToMany(mappedBy = "persons")  // This is the inverse side of the relationship
+    private List<ExamInfo> examInfos = new ArrayList<>();
+
+    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL)
+    private List<DiningOrder> diningOrders = new ArrayList<>();
 
     // =============================== Constructors ================================== //
 
@@ -209,7 +223,5 @@ public class Person {
     public boolean isStudent() {
         return this.role == UserRoles.STUDENT;
     }
-
-
 
 }

@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     alias(libs.plugins.kotlin.android)
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin' version '2.0.1'
 }
 
 android {
@@ -9,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.own_example"
-        minSdk 25
+        minSdk 26
         targetSdk 34
         versionCode 1
         versionName "1.0"
@@ -18,17 +19,31 @@ android {
     }
 
     buildTypes {
+        debug{
+            testCoverageEnabled true
+        }
+
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        debug {
+            testCoverageEnabled true  // Enable code coverage for debug builds
+        }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+
+    // This is important to make sure the plugin can access the API key
+    buildFeatures {
+        buildConfig true
     }
 }
 
@@ -46,11 +61,36 @@ dependencies {
 
     // SwipeRefreshLayout for pull-to-refresh functionality
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
 
-    // OkHttp for WebSocket support
+    // OkHttp for network requests
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
 
+    // Google Maps for showing bus locations
+    implementation 'com.google.android.gms:play-services-maps:18.2.0'
+    implementation 'com.google.android.gms:play-services-location:21.1.0'
+
+    // For handling ZIP files (static GTFS data)
+    implementation 'commons-io:commons-io:2.15.1'
+    implementation 'org.apache.commons:commons-csv:1.10.0'
+
+    // For caching map data
+    implementation 'androidx.room:room-runtime:2.6.1'
+    annotationProcessor 'androidx.room:room-compiler:2.6.1'
+
+    // REMOVE THESE LINES:
+    // implementation 'com.google.protobuf:protobuf-java:3.19.4'
+    // implementation 'com.google.transit:gtfs-realtime-bindings:0.0.5'
+
+    implementation libs.androidx.espresso.contrib
+
     testImplementation 'junit:junit:4.13.2'
+
+    // Testing dependencies
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test:core:1.5.0'
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    androidTestImplementation 'androidx.test:rules:1.5.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.5.1'
 }
