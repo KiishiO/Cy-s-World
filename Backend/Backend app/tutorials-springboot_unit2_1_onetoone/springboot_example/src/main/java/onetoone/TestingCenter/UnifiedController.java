@@ -53,32 +53,21 @@ public class UnifiedController {
     }
 
     // === Exam Operations ===
-    @Operation(summary = "Create a new exam", description = "Create a new exam")
-    @ApiResponse(responseCode = "201", description = "Successfully created exam", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExamInfo.class)))
-    @PostMapping("/exams")
-    public ResponseEntity<ExamInfo> createExam(@RequestBody ExamInfo examInfo) {
-        return new ResponseEntity<>(examInfoRepo.save(examInfo), HttpStatus.CREATED);
+    //create an exam - this one works
+    @Operation(summary = "create a new exam and add to testing center")
+    @ApiResponse(responseCode = "201", description = "sucessfully created an exam and added to testing center")
+    @PostMapping("/{id}/exam")
+    public ResponseEntity<ExamInfo> createNewExam(@PathVariable int id, @RequestBody ExamInfo examInfo){
+        return testingCenterRepo.findById(id)
+                .map(testingcenter -> {
+                    examInfo.setTestingCenter(testingcenter);
+                    testingcenter.getExamInfo2().add(examInfo);
+                    testingCenterRepo.save(testingcenter);
+                    return new ResponseEntity<>(examInfo, HttpStatus.CREATED);
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @Operation(summary = "Create a new exam with validation", description = "Create a new exam and validate its details")
-    @ApiResponse(responseCode = "201", description = "Exam created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExamInfo.class)))
-    @ApiResponse(responseCode = "400", description = "Bad request due to missing or invalid exam name", content = @Content(mediaType = "application/json"))
-    @PostMapping("/examsinfo")
-    public ResponseEntity<ExamInfo> createExam2(@RequestBody ExamInfo examInfo) {
-        try {
-            // Validate the examInfo object
-            if (examInfo.getExamName() == null || examInfo.getExamName().trim().isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-
-            // Save the examInfo object
-            ExamInfo savedExamInfo = examInfoRepo.save(examInfo);
-            return new ResponseEntity<>(savedExamInfo, HttpStatus.CREATED);
-        } catch (Exception e) {
-            // Log the error
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
 
     @Operation(summary = "Add testing centers to an exam", description = "Assign testing centers to a specific exam")
     @ApiResponse(responseCode = "200", description = "Successfully added testing centers to exam", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExamInfo.class)))
