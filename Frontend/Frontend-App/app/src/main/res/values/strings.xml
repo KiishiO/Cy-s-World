@@ -21,4 +21,15 @@
     <string name="success_add_bus">Bus added successfully</string>
     <string name="success_update_location">Location updated successfully</string>
     <string name="success_rate_bus">Rating updated successfully</string>
+
+    <!-- Bus Map Activity Strings -->
+    <string name="title_activity_bus_map">Bus Map</string>
+    <string name="switch_to_list_view">Switch to List View</string>
+    <string name="my_location">My Location</string>
+    <string name="no_buses_found">No buses found. Try again later.</string>
+    <string name="loading_buses">Loading bus data…</string>
+    <string name="error_loading_bus_data">Error loading bus data</string>
+    <string name="all_routes">All Routes</string>
+    <string name="filter_routes">Filter Routes</string>
+    <string name="disclaimer_text">This app is not officially supported or endorsed by CyRide.</string>
 </resources>
