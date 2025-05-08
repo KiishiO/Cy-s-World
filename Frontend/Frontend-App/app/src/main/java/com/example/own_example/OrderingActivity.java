@@ -1,5 +1,6 @@
 package com.example.own_example;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -132,6 +133,12 @@ public class OrderingActivity extends AppCompatActivity implements DiningHallSer
         placeOrderButton.setEnabled(hasItems);
     }
 
+    // DiningHallService.DiningHallListener implementation
+    @Override
+    public void onDiningHallsLoaded(List<DiningHall> diningHalls) {
+        // Not used in this activity
+    }
+
     private void placeOrder() {
         // Create list of selected items
         List<OrderItem> selectedItems = new ArrayList<>();
@@ -146,19 +153,19 @@ public class OrderingActivity extends AppCompatActivity implements DiningHallSer
             return;
         }
 
-        // Get current user ID
-        int userId = Integer.parseInt(UserService.getInstance().getCurrentUserId());
+        // Get current user ID (default to 1 if there's any issue)
+        int userId = 1;
+        try {
+            // Try to get the real user ID, but use default if there's an issue
+            userId = UserService.getInstance().getCurrentUserId();
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting user ID: " + e.getMessage());
+            Toast.makeText(this, "Using guest account for ordering", Toast.LENGTH_SHORT).show();
+        }
 
         // Place order
         orderingService.placeOrder(diningHallId, userId, selectedItems);
     }
-
-    // DiningHallService.DiningHallListener implementation
-    @Override
-    public void onDiningHallsLoaded(List<DiningHall> diningHalls) {
-        // Not used in this activity
-    }
-
     @Override
     public void onDiningHallLoaded(DiningHall diningHall) {
         currentDiningHall = diningHall;

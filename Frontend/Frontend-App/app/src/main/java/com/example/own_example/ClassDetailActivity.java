@@ -1,5 +1,6 @@
 package com.example.own_example;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.own_example.adapters.AssignmentsAdapter;
@@ -37,8 +39,8 @@ import java.util.Map;
  * Activity for displaying class details
  */
 public class ClassDetailActivity extends AppCompatActivity implements
-        StudentsAdapter.OnGradeUpdatedListener,
-        AssignmentsAdapter.OnAssignmentClickListener {
+        StudentsAdapter.OnStudentClickListener,
+        AssignmentsAdapter.OnAssignmentActionListener {
 
     private static final String TAG = "ClassDetailActivity";
 
@@ -70,7 +72,7 @@ public class ClassDetailActivity extends AppCompatActivity implements
 
     // Data
     private int classId;
-    private int userId;
+    private long userId;
     private ClassModel currentClassModel;
     private String userRole;
     private List<Student> studentsList = new ArrayList<>();
@@ -93,7 +95,7 @@ public class ClassDetailActivity extends AppCompatActivity implements
             // Get user information
             SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
             userRole = prefs.getString("user_role", "student");
-            userId = prefs.getInt("user_id", -1);
+            userId = prefs.getLong("user_id", -1);
 
             // Initialize API services
             classesService = new ClassesService(this);
@@ -105,11 +107,10 @@ public class ClassDetailActivity extends AppCompatActivity implements
             // Initialize views for assignments
             initAssignmentsViews();
 
-            // Setup students adapter
+            // Update the adapters to use the new interfaces
             studentsAdapter = new StudentsAdapter(this, new ArrayList<>(), classId, this);
             studentsRecyclerView.setAdapter(studentsAdapter);
 
-            // Setup assignments adapter
             assignmentsAdapter = new AssignmentsAdapter(this, assignmentsList,
                     userRole.equalsIgnoreCase("teacher"), this);
             assignmentsRecyclerView.setAdapter(assignmentsAdapter);
@@ -227,6 +228,155 @@ public class ClassDetailActivity extends AppCompatActivity implements
             @Override
             public void onError(String errorMessage) {
                 showError("Error loading students: " + errorMessage);
+            }
+        });
+    }
+
+    /**
+     * Handle student click event
+     */
+    @Override
+    public void onStudentClick(Student student, int position) {
+        // Show student assignments in a dialog
+        gradesService.getStudentClassAssignments(classId, student.getId(),
+                new GradesService.ApiCallback<List<AssignmentModel>>() {
+                    @Override
+                    public void onSuccess(List<AssignmentModel> result) {
+                        runOnUiThread(() -> {
+                            showStudentAssignmentsDialog(student, result);
+                        });
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        showSnackbar("Error loading student assignments: " + errorMessage);
+                    }
+                });
+    }
+
+    /**
+     * Show dialog with student's assignments
+     */
+    private void showStudentAssignmentsDialog(Student student, List<AssignmentModel> assignments) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Assignments for " + student.getName());
+
+        if (assignments.isEmpty()) {
+            builder.setMessage("No assignments found for this student.");
+        } else {
+            // Create a custom view with a recycler view
+            View view = getLayoutInflater().inflate(R.layout.dialog_student_assignments, null);
+            RecyclerView recyclerView = view.findViewById(R.id.student_assignments_recycler_view);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+            // Create a new adapter for the dialog
+            AssignmentsAdapter adapter = new AssignmentsAdapter(this, assignments, true, this);
+            recyclerView.setAdapter(adapter);
+
+            builder.setView(view);
+        }
+
+        builder.setPositiveButton("Close", null);
+        builder.show();
+    }
+
+    /**
+     * Dialog layout for student assignments
+     */
+    private void createStudentAssignmentsDialogLayout() {
+        // Create layout file: res/layout/dialog_student_assignments.xml
+        /*
+        <?xml version="1.0" encoding="utf-8"?>
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/student_assignments_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="true"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+        </LinearLayout>
+        */
+    }
+
+    /**
+     * Handle assignment click event
+     */
+    @Override
+    public void onAssignmentClick(AssignmentModel assignment, int position) {
+        // Use your existing showAssignmentDialog method
+        showAssignmentDialog(assignment, position);
+    }
+
+    /**
+     * Handle edit assignment event
+     */
+    @Override
+    public void onEditAssignment(AssignmentModel assignment, int position) {
+        // Use your existing showAssignmentDialog method
+        showAssignmentDialog(assignment, position);
+    }
+
+    /**
+     * Handle delete assignment event
+     */
+    @Override
+    public void onDeleteAssignment(AssignmentModel assignment, int position) {
+        // Show confirmation dialog
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Assignment")
+                .setMessage("Are you sure you want to delete this assignment?")
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    deleteAssignment(assignment, position);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    /**
+     * Delete an assignment
+     */
+    private void deleteAssignment(AssignmentModel assignment, int position) {
+        showLoading(true);
+
+        gradesService.deleteAssignment(assignment.getId(), new GradesService.ApiCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+                runOnUiThread(() -> {
+                    showLoading(false);
+
+                    if (result) {
+                        // Remove from list and update UI
+                        assignmentsList.remove(position);
+                        updateAssignmentsUI();
+
+                        // Refresh class average if in teacher view
+                        if (userRole.equalsIgnoreCase("teacher")) {
+                            loadClassAverage();
+                        } else {
+                            // Refresh student's overall grade if in student view
+                            loadStudentOverallGrade();
+                        }
+
+                        showSnackbar("Assignment deleted successfully");
+                    } else {
+                        showSnackbar("Failed to delete assignment");
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(() -> {
+                    showLoading(false);
+                    showSnackbar("Error deleting assignment: " + errorMessage);
+                });
             }
         });
     }
@@ -811,26 +961,4 @@ public class ClassDetailActivity extends AppCompatActivity implements
         });
     }
 
-    /**
-     * Handle grade updated event from StudentsAdapter
-     */
-    @Override
-    public void onGradeUpdated(int studentId, String grade) {
-        // Show confirmation message
-        runOnUiThread(() -> {
-            new AlertDialog.Builder(this)
-                    .setTitle("Success")
-                    .setMessage("Grade updated successfully")
-                    .setPositiveButton("OK", null)
-                    .show();
-        });
-    }
-
-    /**
-     * Handle assignment click event
-     */
-    @Override
-    public void onAssignmentClick(AssignmentModel assignment, int position) {
-        showAssignmentDialog(assignment, position);
-    }
 }

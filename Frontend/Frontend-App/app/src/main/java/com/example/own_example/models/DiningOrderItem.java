@@ -30,7 +30,7 @@ public class DiningOrderItem {
     }
 
     public static class MenuItem {
-        private int id;
+        private int id = 0;
 
         public int getId() {
             return id;

@@ -1,12 +1,25 @@
 package com.example.own_example.api;
 
 import com.example.own_example.models.DiningHall;
+import com.example.own_example.models.DiningOrder;
 
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
+import java.lang.reflect.Type;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -39,6 +52,40 @@ public class RetrofitClient {
         // Create a custom Gson instance with proper type adapters
         Gson gson = new GsonBuilder()
                 .setLenient()
+                // Add LocalDateTime adapter to handle date serialization/deserialization
+                .registerTypeAdapter(LocalDateTime.class, new JsonSerializer<LocalDateTime>() {
+                    @Override
+                    public JsonElement serialize(LocalDateTime src, Type typeOfSrc, JsonSerializationContext context) {
+                        return src == null ? null : new JsonPrimitive(src.toString());
+                    }
+                })
+                .registerTypeAdapter(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
+                    @Override
+                    public LocalDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+                        return json == null ? null : LocalDateTime.parse(json.getAsString());
+                    }
+                })
+                .registerTypeAdapter(DiningHall.MenuItem.class, new JsonDeserializer<DiningHall.MenuItem>() {
+                    @Override
+                    public DiningHall.MenuItem deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+                        JsonObject jsonObject = json.getAsJsonObject();
+
+                        DiningHall.MenuItem menuItem = new DiningHall.MenuItem();
+
+                        if (jsonObject.has("id")) menuItem.setId(jsonObject.get("id").getAsInt());
+                        if (jsonObject.has("name")) menuItem.setName(jsonObject.get("name").getAsString());
+                        if (jsonObject.has("description")) menuItem.setDescription(jsonObject.get("description").getAsString());
+                        if (jsonObject.has("menuType")) menuItem.setMenuType(jsonObject.get("menuType").getAsString());
+
+                        // Set defaults for UI-only properties
+                        menuItem.setVegetarian(false);
+                        menuItem.setVegan(false);
+                        menuItem.setGlutenFree(false);
+                        menuItem.setAllergens(new ArrayList<>());
+
+                        return menuItem;
+                    }
+                })
                 .setExclusionStrategies(new ExclusionStrategy() {
                     @Override
                     public boolean shouldSkipField(FieldAttributes f) {

@@ -138,7 +138,7 @@ public class GradesService {
     /**
      * Get all assignments for a student in a specific class
      */
-    public void getStudentClassAssignments(int classId, int studentId, ApiCallback<List<AssignmentModel>> callback) {
+    public void getStudentClassAssignments(int classId, long studentId, ApiCallback<List<AssignmentModel>> callback) {
         String url = BASE_URL + GPA_PATH + "/class/" + classId + "/student/" + studentId;
 
         Log.d(TAG, "Getting student class assignments from: " + url);
@@ -181,7 +181,7 @@ public class GradesService {
     /**
      * Get student's overall grade for a class
      */
-    public void getStudentOverallGrade(int classId, int studentId, ApiCallback<Map<String, Object>> callback) {
+    public void getStudentOverallGrade(int classId, long studentId, ApiCallback<Map<String, Object>> callback) {
         String url = BASE_URL + GPA_PATH + "/class/" + classId + "/student/" + studentId + "/overall";
 
         Log.d(TAG, "Getting student overall grade from: " + url);
@@ -368,7 +368,7 @@ public class GradesService {
     /**
      * Grade an assignment
      */
-    public void gradeAssignment(int assignmentId, double grade, int gradedById, String comments, ApiCallback<AssignmentModel> callback) {
+    public void gradeAssignment(int assignmentId, double grade, long gradedById, String comments, ApiCallback<AssignmentModel> callback) {
         String url = BASE_URL + GPA_PATH + "/" + assignmentId + "/grade";
 
         Log.d(TAG, "Grading assignment at: " + url);

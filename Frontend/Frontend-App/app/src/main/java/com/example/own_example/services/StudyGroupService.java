@@ -190,6 +190,7 @@ public class StudyGroupService {
                 null,
                 response -> {
                     try {
+                        logJsonResponse("getMyStudyGroups", response.toString());
                         List<StudyGroup> studyGroups = new ArrayList<>();
 
                         for (int i = 0; i < response.length(); i++) {
@@ -222,6 +223,7 @@ public class StudyGroupService {
                 null,
                 response -> {
                     try {
+                        logJsonResponse("getMyStudyGroups", response.toString());
                         List<StudyGroup> studyGroups = new ArrayList<>();
 
                         for (int i = 0; i < response.length(); i++) {
@@ -268,10 +270,18 @@ public class StudyGroupService {
                 url,
                 requestBody,
                 response -> {
-                    callback.onSuccess("Study table created successfully");
+                    try {
+                        // Log the response
+                        logJsonResponse("createStudyGroup", response.toString());
+                        callback.onSuccess("Study group created successfully");
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error processing response: " + e.getMessage());
+                        callback.onSuccess("Study group created but response processing failed");
+                    }
                 },
                 error -> {
-                    callback.onError("Error creating study table: " + getVolleyErrorMessage(error));
+                    Log.e(TAG, "Error creating study table: " + error.toString());
+                    callback.onError("Error creating study group: " + getVolleyErrorMessage(error));
                 }
         );
 
@@ -325,27 +335,53 @@ public class StudyGroupService {
     }
 
     private StudyGroup parseStudyTableFromJson(JSONObject json) throws JSONException {
-        long id = json.getLong("studyTableId");
-        String status = json.getString("status");
+        try {
+            long id = json.getLong("studyTableId");
+            // Use optString to provide a default value if status is missing
+            String status = json.optString("status", "PENDING");
 
-        JSONObject leaderObj = json.getJSONObject("TableLeader");
-        String leaderName = leaderObj.getString("name");
-        long leaderId = leaderObj.getLong("id");
+            JSONObject leaderObj = json.getJSONObject("TableLeader");
+            String leaderName = leaderObj.getString("name");
+            long leaderId = leaderObj.getLong("id");
 
-        StudyGroup table = new StudyGroup(id, leaderName, leaderId, status);
+            // Create the StudyGroup with name and status
+            StudyGroup table = new StudyGroup(id, leaderName, leaderId, "");
+            table.setStatus(status);
 
-        JSONArray membersArray = json.getJSONArray("friendGroup");
-        for (int i = 0; i < membersArray.length(); i++) {
-            JSONObject memberObj = membersArray.getJSONObject(i);
-            long memberId = memberObj.getLong("id");
-            String memberName = memberObj.getString("name");
-            String memberEmail = memberObj.getString("email");
+            // Check if friendGroup exists and is not null
+            if (json.has("friendGroup") && !json.isNull("friendGroup")) {
+                JSONArray membersArray = json.getJSONArray("friendGroup");
+                for (int i = 0; i < membersArray.length(); i++) {
+                    JSONObject memberObj = membersArray.getJSONObject(i);
+                    long memberId = memberObj.getLong("id");
+                    String memberName = memberObj.getString("name");
 
-            StudyGroupMember member = new StudyGroupMember(memberId, memberName, memberEmail);
-            table.addMember(member);
+                    // Use a placeholder email since the backend doesn't provide one
+                    String memberEmail = memberObj.optString("email", memberName + "@iastate.edu");
+
+                    StudyGroupMember member = new StudyGroupMember(memberId, memberName, memberEmail);
+                    table.addMember(member);
+                }
+            }
+
+            return table;
+        } catch (Exception e) {
+            Log.e(TAG, "Error parsing study table JSON: " + e.getMessage());
+            throw e;
         }
+    }
 
-        return table;
+    private void logJsonResponse(String methodName, String jsonStr) {
+        try {
+            // Truncate very long responses for logging
+            String logJson = jsonStr;
+            if (logJson.length() > 500) {
+                logJson = logJson.substring(0, 500) + "... (truncated)";
+            }
+            Log.d(TAG, methodName + " response: " + logJson);
+        } catch (Exception e) {
+            Log.e(TAG, "Error logging JSON: " + e.getMessage());
+        }
     }
 
     private String getVolleyErrorMessage(VolleyError error) {

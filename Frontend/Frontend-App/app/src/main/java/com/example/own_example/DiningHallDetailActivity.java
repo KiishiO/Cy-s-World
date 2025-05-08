@@ -114,14 +114,6 @@ public class DiningHallDetailActivity extends AppCompatActivity implements Dinin
             return;
         }
 
-        // Check if user is logged in
-        if (!UserService.getInstance().isLoggedIn()) {
-            Toast.makeText(this, "Please log in to place orders", Toast.LENGTH_SHORT).show();
-            Intent loginIntent = new Intent(this, LoginActivity.class);
-            startActivity(loginIntent);
-            return;
-        }
-
         // Launch ordering activity
         Intent intent = new Intent(this, OrderingActivity.class);
         intent.putExtra("dining_hall_id", diningHallId);

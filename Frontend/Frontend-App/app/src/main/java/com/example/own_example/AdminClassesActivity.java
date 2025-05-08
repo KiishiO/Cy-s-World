@@ -630,6 +630,8 @@ public class AdminClassesActivity extends AppCompatActivity implements
                                 // If we can't find the class, show a message and reload
                                 showLoading(false);
                                 editDialog.dismiss();
+                                // In saveClass() after creating a new class
+                                Log.d(TAG, "Created new class, ID: " + finalClassModel.getId());
                                 showSnackbar("Class created successfully but couldn't add students");
                                 loadClasses();
                             }
@@ -669,10 +671,18 @@ public class AdminClassesActivity extends AppCompatActivity implements
 
         // Log for debugging
         Log.d(TAG, "Updating class " + classModel.getId() + " with " + students.size() + " students");
+        Log.d(TAG, "Current student IDs in class: " + classModel.getStudentIds());
+        Log.d(TAG, "Students to assign: " + students);
 
         // Reset operation counters
         pendingOperations[0] = 0;
         hasErrors[0] = false;
+
+        // Create a list to keep track of new student IDs
+        List<Integer> updatedStudentIds = new ArrayList<>();
+        for (Student student : students) {
+            updatedStudentIds.add(student.getId());
+        }
 
         // Add new students
         for (Student student : students) {
@@ -689,6 +699,8 @@ public class AdminClassesActivity extends AppCompatActivity implements
                     public void onError(String errorMessage) {
                         Log.e(TAG, "Error adding student: " + errorMessage);
                         hasErrors[0] = true;
+                        // Remove the student ID from the updated list since it failed
+                        updatedStudentIds.remove(Integer.valueOf(student.getId()));
                         checkCompletion();
                     }
                 });
@@ -718,11 +730,16 @@ public class AdminClassesActivity extends AppCompatActivity implements
                     public void onError(String errorMessage) {
                         Log.e(TAG, "Error removing student: " + errorMessage);
                         hasErrors[0] = true;
+                        // Add the student ID back to the updated list since removal failed
+                        updatedStudentIds.add(studentId);
                         checkCompletion();
                     }
                 });
             }
         }
+
+        // Update the class model with the new student IDs
+        classModel.setStudentIds(new ArrayList<>(updatedStudentIds));
 
         // If no operations are pending, complete now
         if (pendingOperations[0] == 0) {
@@ -736,6 +753,7 @@ public class AdminClassesActivity extends AppCompatActivity implements
     private void checkCompletion() {
         pendingOperations[0]--;
         Log.d(TAG, "Operations remaining: " + pendingOperations[0]);
+        Log.d(TAG, "Pending operations: " + pendingOperations[0] + ", hasErrors: " + hasErrors[0]);
         if (pendingOperations[0] <= 0) {
             finishOperation(hasErrors[0]);
         }
@@ -745,12 +763,34 @@ public class AdminClassesActivity extends AppCompatActivity implements
      * Helper method to finish and update UI
      */
     private void finishOperation(boolean hasErrors) {
-        // Reload classes to get updated data
+        // Get the position of the current class if we're editing
+        int position = -1;
+        if (currentEditClass != null && currentEditPosition >= 0) {
+            position = currentEditPosition;
+        } else if (currentEditClass != null) {
+            // Find the class in the list if position wasn't provided
+            for (int i = 0; i < classesList.size(); i++) {
+                if (classesList.get(i).getId() == currentEditClass.getId()) {
+                    position = i;
+                    break;
+                }
+            }
+        }
+
+        // If we found the class position, update it in the list
+        if (position >= 0 && position < classesList.size()) {
+            classesList.set(position, currentEditClass);
+            classesAdapter.notifyItemChanged(position);
+        }
+
+        // Reload classes to get updated data from server
         loadClasses();
+
         showLoading(false);
         if (editDialog != null && editDialog.isShowing()) {
             editDialog.dismiss();
         }
+
         if (hasErrors) {
             showSnackbar("Class updated but some student updates failed");
         } else {

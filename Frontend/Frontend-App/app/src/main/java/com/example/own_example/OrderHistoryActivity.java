@@ -57,7 +57,7 @@ public class OrderHistoryActivity extends AppCompatActivity implements OrderingS
         orderHistoryRecyclerView.setAdapter(orderHistoryAdapter);
 
         // Load orders
-        int userId = Integer.parseInt(UserService.getInstance().getCurrentUserId());
+        int userId = UserService.getInstance().getCurrentUserId();
         orderingService.getOrderHistory(userId);
     }
 
