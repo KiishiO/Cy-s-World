@@ -43,6 +43,7 @@ public class DiningOrderService {
             item.setMenuItems(menuItem);
             item.setDiningOrder(diningOrder);
         }
+        diningOrder.setItems(diningOrder.getItems());
         return diningOrderRepository.save(diningOrder);
     }
 

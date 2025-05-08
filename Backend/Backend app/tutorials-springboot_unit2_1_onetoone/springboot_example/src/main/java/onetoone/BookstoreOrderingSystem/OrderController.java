@@ -13,7 +13,7 @@ import java.util.List;
 public class OrderController {
 
     @Autowired
-    private OrderService orderService;
+    private  OrderService orderService;
 
     @PostMapping
     public ResponseEntity<Order> createOrder(@RequestBody Order order) {
@@ -26,4 +26,11 @@ public class OrderController {
         List<Order> orders = orderService.getAllOrders();
         return ResponseEntity.ok(orders);
     }
+
+    // For debugging - get detailed error information
+    @GetMapping("/test")
+    public ResponseEntity<String> testConnection() {
+        return ResponseEntity.ok("OrderController is working!");
+    }
+
 }
