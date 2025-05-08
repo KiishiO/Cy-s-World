@@ -26,10 +26,11 @@ public class AdminDashboardActivity extends AppCompatActivity {
     private MaterialCardView eventManagementCard;
     private MaterialCardView diningManagementCard;
     private MaterialCardView busRouteCard;
+    private MaterialCardView testingCenterCard;
     private RecyclerView recentActivityRecycler;
 
-    // Sample data structure for recent activities
-    private List<RecentActivity> recentActivities = new ArrayList<>();
+//    // Sample data structure for recent activities
+//    private List<RecentActivity> recentActivities = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,16 +74,16 @@ public class AdminDashboardActivity extends AppCompatActivity {
         eventManagementCard = findViewById(R.id.admin_event_management_card);
         diningManagementCard = findViewById(R.id.admin_dining_management_card);
         busRouteCard = findViewById(R.id.admin_bus_management_card);
-        recentActivityRecycler = findViewById(R.id.recent_activity_recycler);
+        //recentActivityRecycler = findViewById(R.id.recent_activity_recycler);
 
         // Set up click listeners for action cards
         setupCardClickListeners();
 
-        // Initialize recent activities
-        populateRecentActivities();
-
-        // Set up RecyclerView for recent activities
-        setupRecentActivitiesRecyclerView();
+//        // Initialize recent activities
+//        populateRecentActivities();
+//
+//        // Set up RecyclerView for recent activities
+//        setupRecentActivitiesRecyclerView();
     }
 
 
@@ -122,94 +123,103 @@ public class AdminDashboardActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-    }
 
-    private void populateRecentActivities() {
-        // Sample data - just a placeholder for now, this would come from the server database or an API
-        recentActivities.add(new RecentActivity("Created new Campus Event: Cyclone Cinema - Dune", "Today, 10:30 AM"));
-        recentActivities.add(new RecentActivity("Created new class: COM S 288", "Yesterday, 3:45 PM"));
-    }
-
-    private void setupRecentActivitiesRecyclerView() {
-        RecentActivityAdapter adapter = new RecentActivityAdapter(recentActivities);
-        recentActivityRecycler.setLayoutManager(new LinearLayoutManager(this));
-        recentActivityRecycler.setAdapter(adapter);
-    }
-
-    // Inner class to represent a recent activity
-    public static class RecentActivity {
-        private String activityTitle;
-        private String activityTime;
-
-        public RecentActivity(String activityTitle, String activityTime) {
-            this.activityTitle = activityTitle;
-            this.activityTime = activityTime;
-        }
-
-        public String getActivityTitle() {
-            return activityTitle;
-        }
-
-        public String getActivityTime() {
-            return activityTime;
-        }
-    }
-
-    // Adapter for the RecentActivity RecyclerView
-    private class RecentActivityAdapter extends RecyclerView.Adapter<RecentActivityAdapter.ViewHolder> {
-        private List<RecentActivity> activities;
-
-        public RecentActivityAdapter(List<RecentActivity> activities) {
-            this.activities = activities;
-        }
-
-        @NonNull
-        @Override
-        public ViewHolder onCreateViewHolder(@NonNull android.view.ViewGroup parent, int viewType) {
-            View view = getLayoutInflater().inflate(R.layout.item_recent_activity, parent, false);
-            return new ViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            RecentActivity activity = activities.get(position);
-            holder.titleTextView.setText(activity.getActivityTitle());
-            holder.timeTextView.setText(activity.getActivityTime());
-
-            // Set click listener for the item
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // Handle item click - perhaps navigate to a detail view
-                    Toast.makeText(AdminDashboardActivity.this,
-                            "Selected: " + activity.getActivityTitle(),
-                            Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-
-        @Override
-        public int getItemCount() {
-            return activities.size();
-        }
-
-        public class ViewHolder extends RecyclerView.ViewHolder {
-            TextView titleTextView;
-            TextView timeTextView;
-
-            public ViewHolder(@NonNull View itemView) {
-                super(itemView);
-                titleTextView = itemView.findViewById(R.id.activity_title);
-                timeTextView = itemView.findViewById(R.id.activity_timestamp);
+        testingCenterCard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navigate to admin testing center activity
+                Intent intent = new Intent(AdminDashboardActivity.this, AdminTestingCenterActivity.class);
+                startActivity(intent);
             }
-        }
+        });
     }
+
+//    private void populateRecentActivities() {
+//        // Sample data - just a placeholder for now, this would come from the server database or an API
+//        recentActivities.add(new RecentActivity("Created new Campus Event: Cyclone Cinema - Dune", "Today, 10:30 AM"));
+//        recentActivities.add(new RecentActivity("Created new class: COM S 288", "Yesterday, 3:45 PM"));
+//    }
+//
+//    private void setupRecentActivitiesRecyclerView() {
+//        RecentActivityAdapter adapter = new RecentActivityAdapter(recentActivities);
+//        recentActivityRecycler.setLayoutManager(new LinearLayoutManager(this));
+//        recentActivityRecycler.setAdapter(adapter);
+//    }
+//
+//    // Inner class to represent a recent activity
+//    public static class RecentActivity {
+//        private String activityTitle;
+//        private String activityTime;
+//
+//        public RecentActivity(String activityTitle, String activityTime) {
+//            this.activityTitle = activityTitle;
+//            this.activityTime = activityTime;
+//        }
+//
+//        public String getActivityTitle() {
+//            return activityTitle;
+//        }
+//
+//        public String getActivityTime() {
+//            return activityTime;
+//        }
+//    }
+//
+//    // Adapter for the RecentActivity RecyclerView
+//    private class RecentActivityAdapter extends RecyclerView.Adapter<RecentActivityAdapter.ViewHolder> {
+//        private List<RecentActivity> activities;
+//
+//        public RecentActivityAdapter(List<RecentActivity> activities) {
+//            this.activities = activities;
+//        }
+//
+//        @NonNull
+//        @Override
+//        public ViewHolder onCreateViewHolder(@NonNull android.view.ViewGroup parent, int viewType) {
+//            View view = getLayoutInflater().inflate(R.layout.item_recent_activity, parent, false);
+//            return new ViewHolder(view);
+//        }
+//
+//        @Override
+//        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+//            RecentActivity activity = activities.get(position);
+//            holder.titleTextView.setText(activity.getActivityTitle());
+//            holder.timeTextView.setText(activity.getActivityTime());
+//
+//            // Set click listener for the item
+//            holder.itemView.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    // Handle item click - perhaps navigate to a detail view
+//                    Toast.makeText(AdminDashboardActivity.this,
+//                            "Selected: " + activity.getActivityTitle(),
+//                            Toast.LENGTH_SHORT).show();
+//                }
+//            });
+//        }
+//
+//        @Override
+//        public int getItemCount() {
+//            return activities.size();
+//        }
+//
+//        public class ViewHolder extends RecyclerView.ViewHolder {
+//            TextView titleTextView;
+//            TextView timeTextView;
+//
+//            public ViewHolder(@NonNull View itemView) {
+//                super(itemView);
+//                titleTextView = itemView.findViewById(R.id.activity_title);
+//                timeTextView = itemView.findViewById(R.id.activity_timestamp);
+//            }
+//        }
+//    }
 
     @Override
     protected void onResume() {
         super.onResume();
         // Refresh data when returning to this activity
-        populateRecentActivities();
-        setupRecentActivitiesRecyclerView();
+//        populateRecentActivities();
+//        setupRecentActivitiesRecyclerView();
     }
 }

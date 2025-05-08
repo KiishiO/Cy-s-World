@@ -7,7 +7,9 @@
     android:layout_marginBottom="12dp"
     app:cardCornerRadius="16dp"
     app:cardElevation="4dp"
-    app:cardBackgroundColor="#E9E9E9">
+    app:strokeColor="@color/cardinal_red"
+    app:strokeWidth="1dp"
+    app:cardBackgroundColor="#FFFFFF">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -17,9 +19,11 @@
         <!-- Study Group Icon -->
         <ImageView
             android:id="@+id/study_group_icon"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:src="@drawable/student_icon"
+            android:background="@drawable/circle_background"
+            android:padding="8dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -52,6 +56,24 @@
             app:layout_constraintEnd_toStartOf="@id/manage_group_button"
             app:layout_constraintTop_toBottomOf="@id/study_group_name"
             android:text="3/4 Members" />
+
+        <!-- Status Indicator (New) -->
+        <TextView
+            android:id="@+id/group_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="16dp"
+            android:textSize="12sp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:background="@drawable/status_background"
+            android:textColor="#FFFFFF"
+            app:layout_constraintStart_toEndOf="@id/study_group_icon"
+            app:layout_constraintTop_toBottomOf="@id/member_count"
+            android:text="Active" />
 
         <!-- Manage Group Button -->
         <ImageButton

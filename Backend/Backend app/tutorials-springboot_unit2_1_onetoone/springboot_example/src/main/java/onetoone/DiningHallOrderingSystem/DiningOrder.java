@@ -30,7 +30,7 @@ public class DiningOrder {
     @JoinColumn(name = "person_id")
     private Person person;
 
-    @OneToMany(mappedBy = "diningOrder", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "diningOrder", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<DiningOrderItem> items = new ArrayList<>();
 

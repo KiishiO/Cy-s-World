@@ -14,9 +14,16 @@ public class ChatMessage {
     private String recipient;
     private boolean isMine;
     private String messageType; // "CHAT", "STATUS", "JOIN", "LEAVE"
+    private boolean isEdited = false;
+    private boolean isDeleted = false;
+    private String originalContent;
+
+    // Local identifier for tracking messages
+    private String localId;
 
     public ChatMessage() {
         this.sent = new Date();
+        this.localId = String.valueOf(System.currentTimeMillis());
     }
 
     public ChatMessage(String userName, String content) {
@@ -25,6 +32,7 @@ public class ChatMessage {
         this.sent = new Date();
         this.isDirectMessage = false;
         this.messageType = "CHAT";
+        this.localId = String.valueOf(System.currentTimeMillis());
     }
 
     public ChatMessage(String userName, String content, String recipient) {
@@ -34,12 +42,45 @@ public class ChatMessage {
         this.isDirectMessage = true;
         this.recipient = recipient;
         this.messageType = "CHAT";
+        this.localId = String.valueOf(System.currentTimeMillis());
     }
 
     public static ChatMessage createStatusMessage(String content) {
         ChatMessage message = new ChatMessage();
         message.setContent(content);
         message.setMessageType("STATUS");
+        return message;
+    }
+
+    public static ChatMessage createEditedMessage(ChatMessage original, String newContent) {
+        ChatMessage message = new ChatMessage();
+        message.setId(original.getId());
+        message.setLocalId(original.getLocalId());
+        message.setUserName(original.getUserName());
+        message.setContent(newContent);
+        message.setOriginalContent(original.getContent());
+        message.setSent(new Date());
+        message.setDirectMessage(original.isDirectMessage());
+        message.setRecipient(original.getRecipient());
+        message.setMine(original.isMine());
+        message.setMessageType("CHAT");
+        message.setEdited(true);
+        return message;
+    }
+
+    public static ChatMessage createDeletedMessage(ChatMessage original) {
+        ChatMessage message = new ChatMessage();
+        message.setId(original.getId());
+        message.setLocalId(original.getLocalId());
+        message.setUserName(original.getUserName());
+        message.setContent("This message has been deleted");
+        message.setOriginalContent(original.getContent());
+        message.setSent(original.getSent());
+        message.setDirectMessage(original.isDirectMessage());
+        message.setRecipient(original.getRecipient());
+        message.setMine(original.isMine());
+        message.setMessageType("CHAT");
+        message.setDeleted(true);
         return message;
     }
 
@@ -122,6 +163,14 @@ public class ChatMessage {
         this.id = id;
     }
 
+    public String getLocalId() {
+        return localId;
+    }
+
+    public void setLocalId(String localId) {
+        this.localId = localId;
+    }
+
     public String getUserName() {
         return userName;
     }
@@ -176,5 +225,29 @@ public class ChatMessage {
 
     public void setMessageType(String messageType) {
         this.messageType = messageType;
+    }
+
+    public boolean isEdited() {
+        return isEdited;
+    }
+
+    public void setEdited(boolean edited) {
+        isEdited = edited;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
+    }
+
+    public String getOriginalContent() {
+        return originalContent;
+    }
+
+    public void setOriginalContent(String originalContent) {
+        this.originalContent = originalContent;
     }
 }

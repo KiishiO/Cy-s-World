@@ -13,11 +13,10 @@ import android.util.Log;
 
 import com.example.own_example.models.ChatMessage;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -25,7 +24,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
-import okio.ByteString;
 
 public class ChatWebSocketClient {
     /** Tag for logging purposes */
@@ -55,11 +53,9 @@ public class ChatWebSocketClient {
     /** Handler for executing callbacks on the main thread */
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
-    /**
-     * Interface for listening to chat events.
-     * Implementors can receive messages, connection status changes,
-     * and user status updates.
-     */
+    // Store messages by localId for local edit/delete operations
+    private final Map<String, ChatMessage> messageCache = new HashMap<>();
+
     public interface MessageListener {
         /**
          * Called when a new chat message is received.
@@ -82,6 +78,8 @@ public class ChatWebSocketClient {
          * @param status The new status
          */
         void onUserStatusChange(String username, String status);
+        void onMessageEdited(ChatMessage message);
+        void onMessageDeleted(ChatMessage message);
     }
 
     /**
@@ -171,6 +169,12 @@ public class ChatWebSocketClient {
                 Log.d(TAG, "Received message: " + text);
 
                 ChatMessage chatMessage = ChatMessage.createFromWebSocketMessage(text, username);
+
+                // Store regular chat messages in cache for later edit/delete
+                if (chatMessage.getMessageType().equals("CHAT")) {
+                    messageCache.put(chatMessage.getLocalId(), chatMessage);
+                }
+
                 notifyMessageReceived(chatMessage);
 
                 // Handle status changes
@@ -240,9 +244,48 @@ public class ChatWebSocketClient {
         sendMessage("__status__ " + status);
     }
 
-    /**
-     * Disconnects from the chat server.
-     */
+    // Method to edit a message (frontend-only for now)
+    public ChatMessage editMessage(String localId, String newContent) {
+        ChatMessage originalMessage = messageCache.get(localId);
+        if (originalMessage != null && originalMessage.isMine()) {
+            // Create edited message
+            ChatMessage editedMessage = ChatMessage.createEditedMessage(originalMessage, newContent);
+
+            // Cache the edited message
+            messageCache.put(localId, editedMessage);
+
+            // For future backend support
+            // sendMessage("__edit__ " + editedMessage.getId() + " " + newContent);
+
+            // Notify listeners
+            notifyMessageEdited(editedMessage);
+
+            return editedMessage;
+        }
+        return null;
+    }
+
+    // Method to delete a message (frontend-only for now)
+    public ChatMessage deleteMessage(String localId) {
+        ChatMessage originalMessage = messageCache.get(localId);
+        if (originalMessage != null && originalMessage.isMine()) {
+            // Create deleted message
+            ChatMessage deletedMessage = ChatMessage.createDeletedMessage(originalMessage);
+
+            // Cache the deleted message
+            messageCache.put(localId, deletedMessage);
+
+            // For future backend support
+            // sendMessage("__delete__ " + deletedMessage.getId());
+
+            // Notify listeners
+            notifyMessageDeleted(deletedMessage);
+
+            return deletedMessage;
+        }
+        return null;
+    }
+
     public void disconnect() {
         if (webSocket != null) {
             webSocket.close(1000, "User disconnected");
@@ -311,11 +354,22 @@ public class ChatWebSocketClient {
         });
     }
 
-    /**
-     * Checks if the client is currently connected to the server.
-     *
-     * @return true if connected, false otherwise
-     */
+    private void notifyMessageEdited(final ChatMessage message) {
+        mainHandler.post(() -> {
+            for (MessageListener listener : listeners) {
+                listener.onMessageEdited(message);
+            }
+        });
+    }
+
+    private void notifyMessageDeleted(final ChatMessage message) {
+        mainHandler.post(() -> {
+            for (MessageListener listener : listeners) {
+                listener.onMessageDeleted(message);
+            }
+        });
+    }
+
     public boolean isConnected() {
         return isConnected;
     }

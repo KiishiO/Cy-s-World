@@ -24,6 +24,7 @@ import com.android.volley.Request;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.example.own_example.services.UserService;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.checkbox.MaterialCheckBox;
@@ -60,6 +61,9 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         Log.d(TAG, "Starting login activity...");
+
+        // Initialize UserService
+        UserService.getInstance().initialize(getApplicationContext());
 
         // Initialize views
         MaterialCardView loginCard = findViewById(R.id.loginCard);

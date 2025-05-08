@@ -78,6 +78,7 @@
         android:orientation="vertical"
         android:gravity="center"
         android:visibility="gone"
+        android:padding="32dp"
         app:layout_constraintTop_toBottomOf="@+id/study_groups_header"
         app:layout_constraintBottom_toTopOf="@+id/bottom_navigation">
 
@@ -85,35 +86,60 @@
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:src="@drawable/student_icon"
+            android:alpha="0.7"
             android:contentDescription="No Study Groups" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="No Study Groups Yet"
-            android:textSize="18sp"
+            android:textSize="20sp"
+            android:textStyle="bold"
             android:textColor="@color/cardinal_red"
             android:layout_marginTop="16dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Create a study group to get started!"
-            android:textSize="14sp"
+            android:text="Create a study group to collaborate with classmates!"
+            android:textSize="16sp"
+            android:gravity="center"
             android:layout_marginTop="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/empty_state_create_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create New Group"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/gold"
+            app:cornerRadius="8dp"
+            android:layout_marginTop="24dp" />
+
+        <!-- Add loading indicator -->
+        <ProgressBar
+            android:id="@+id/loading_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminateTint="@color/cardinal_red"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@+id/study_groups_header"
+            app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
     </LinearLayout>
 
-    <!-- Bottom Navigation Bar -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_navigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/cardinal_red"
-        app:itemIconTint="@color/white"
-        app:itemTextColor="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:menu="@menu/student_bottom_navigation_menu" />
+<!--    &lt;!&ndash; Bottom Navigation Bar &ndash;&gt;-->
+<!--    <com.google.android.material.bottomnavigation.BottomNavigationView-->
+<!--        android:id="@+id/bottom_navigation"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:background="@color/cardinal_red"-->
+<!--        app:itemIconTint="@color/white"-->
+<!--        app:itemTextColor="@color/white"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:menu="@menu/student_bottom_navigation_menu" />-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

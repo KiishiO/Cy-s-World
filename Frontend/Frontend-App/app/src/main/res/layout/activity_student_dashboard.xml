@@ -7,6 +7,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/white">
 
+    <!-- Toolbar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/cardinal_red"
+        app:titleTextColor="@color/white"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- Student Profile Icon -->
     <ImageView
         android:id="@+id/studentProfile_image"
@@ -15,7 +26,7 @@
         android:src="@drawable/iconpic_studentprofile"
         android:layout_marginTop="16dp"
         android:scaleType="fitCenter"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent">
     </ImageView>
@@ -258,13 +269,10 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
         app:cardBackgroundColor="#E9E9E9"
         app:cardCornerRadius="24dp"
         app:cardElevation="4dp"
-        app:layout_constraintTop_toBottomOf="@+id/second_info_card"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
-        app:layout_constraintVertical_bias="0.0">
+        app:layout_constraintTop_toBottomOf="@+id/second_info_card">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -281,7 +289,7 @@
                 app:layout_constraintBottom_toBottomOf="parent" />
 
             <TextView
-                android:id="@+id/testing_center_title"
+                android:id="@+id/testing_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="Testing Centers"
@@ -296,7 +304,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/testing_center_description"
+                android:id="@+id/testing_description"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:text="Track testing centers across campus and sign up for exams."
@@ -307,7 +315,70 @@
                 android:layout_marginBottom="16dp"
                 app:layout_constraintStart_toEndOf="@id/testing_icon"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/testing_center_title"
+                app:layout_constraintTop_toBottomOf="@id/testing_title"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Bookstore Card -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/bookstore_card"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        app:cardBackgroundColor="#E9E9E9"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="4dp"
+        app:layout_constraintTop_toBottomOf="@+id/testing_center_card"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
+        app:layout_constraintVertical_bias="0.0">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/bookstore_icon"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@drawable/ic_school"
+                android:layout_margin="16dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+            <TextView
+                android:id="@+id/bookstore_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="ISU Bookstore"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/cardinal_red"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintStart_toEndOf="@id/bookstore_icon"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/bookstore_description"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:text="Browse and purchase books, supplies, and ISU merchandise."
+                android:textSize="14sp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp"
+                app:layout_constraintStart_toEndOf="@id/bookstore_icon"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/bookstore_title"
                 app:layout_constraintBottom_toBottomOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

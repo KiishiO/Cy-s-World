@@ -2,10 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.own_example">
+
+    <!-- Internet permissions -->
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <!-- Location permissions -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -19,6 +25,11 @@
         tools:replace="android:label,android:icon,android:theme"
         tools:node="merge">
 
+        <!-- Google Maps API Key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -29,6 +40,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".BusMapActivity"
+            android:exported="false"
+            android:label="CyRide Bus Map"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
 
         <activity
             android:name=".CampusEventsActivity"
@@ -103,12 +121,6 @@
             tools:ignore="DuplicateActivity,Instantiatable"/>
 
         <activity
-            android:name=".CampusEventsActivity"
-            android:exported="false"
-            tools:node="merge"
-            tools:ignore="DuplicateActivity,Instantiatable"/>
-
-        <activity
             android:name=".DiningHallActivity"
             android:exported="false"
             tools:node="merge"
@@ -154,6 +166,38 @@
 
         <activity
             android:name=".ClassDetailActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".BookstoreActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".CartActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <activity
+            android:name=".OrderConfirmationActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <!-- Add TestingCenterActivity -->
+        <activity
+            android:name=".TestingCenterActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <!-- Add TestingCenterDetailActivity -->
+        <activity
+            android:name=".TestingCenterDetailActivity"
             android:exported="false"
             tools:node="merge"
             tools:ignore="DuplicateActivity,Instantiatable"/>

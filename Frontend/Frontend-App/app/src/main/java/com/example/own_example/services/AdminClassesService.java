@@ -486,7 +486,7 @@ public class AdminClassesService {
      */
     public void addStudentToClass(int classId, int studentId, ActionCallback callback) {
         // Based on backend code, the URL would be something like:
-        String url = AuthService.getAdminAuthUrl(BASE_URL + CLASSES_PATH + "/" + classId + "/student/" + studentId);
+        String url = AuthService.getAdminAuthUrl(BASE_URL + CLASSES_PATH + "/" + classId + "/students/" + studentId);
 
         Log.d(TAG, "Adding student " + studentId + " to class " + classId + " with URL: " + url);
 
@@ -542,7 +542,7 @@ public class AdminClassesService {
      */
     public void removeStudentFromClass(int classId, int studentId, ActionCallback callback) {
         // Based on backend code, the URL would be something like:
-        String url = AuthService.getAdminAuthUrl(BASE_URL + CLASSES_PATH + "/" + classId + "/student/" + studentId);
+        String url = AuthService.getAdminAuthUrl(BASE_URL + CLASSES_PATH + "/" + classId + "/students/" + studentId);
 
         Log.d(TAG, "Removing student from class at URL: " + url);
 
