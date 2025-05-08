@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -239,266 +240,174 @@ public class BusController {
         }
     }
 
-    // ============= REAL-TIME API ENDPOINTS =============
+    // GTFS Real-time API Endpoints
 
-    @Operation(summary = "Get real-time bus positions", description = "Retrieves real-time locations of all buses from the Iowa-GTFS API")
-    @ApiResponse(responseCode = "200", description = "Successfully retrieved real-time bus positions")
-    @GetMapping("/realtime/positions")
-    public ResponseEntity<Map<String, Object>> getRealTimeBusPositions() {
+    @Operation(summary = "Get all real-time vehicle positions",
+            description = "Retrieves current positions of all buses from GTFS-RT feed")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved vehicle positions",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = VehiclePositionDTO.class)))
+    @GetMapping("/realtime/vehiclePositions")
+    public ResponseEntity<List<VehiclePositionDTO>> getAllVehiclePositions() {
         try {
-            Map<String, Object> vehiclePositions = iowaGtfsService.getVehiclePositions();
-            return ResponseEntity.ok(vehiclePositions);
-        } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to fetch real-time bus positions");
-            errorResponse.put("message", e.getMessage());
-            return ResponseEntity.status(500).body(errorResponse);
+            List<VehiclePositionDTO> positions = iowaGtfsService.getVehiclePositions();
+            return ResponseEntity.ok(positions);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
         }
     }
 
-    @Operation(summary = "Get real-time bus position by route", description = "Retrieves real-time location of buses on a specific route")
+    @Operation(summary = "Get all trip updates",
+            description = "Retrieves arrival and departure predictions for all buses from GTFS-RT feed")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved trip updates",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = TripUpdateDTO.class)))
+    @GetMapping("/realtime/tripUpdates")
+    public ResponseEntity<List<TripUpdateDTO>> getAllTripUpdates() {
+        try {
+            List<TripUpdateDTO> tripUpdates = iowaGtfsService.getTripUpdates();
+            return ResponseEntity.ok(tripUpdates);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @Operation(summary = "Get all service alerts",
+            description = "Retrieves service disruptions, detours and other alerts from GTFS-RT feed")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved service alerts",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ServiceAlertDTO.class)))
+    @GetMapping("/realtime/alerts")
+    public ResponseEntity<List<ServiceAlertDTO>> getAllServiceAlerts() {
+        try {
+            List<ServiceAlertDTO> alerts = iowaGtfsService.getServiceAlerts();
+            return ResponseEntity.ok(alerts);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @Operation(summary = "Get real-time data for specific bus",
+            description = "Retrieves real-time position, trip updates and alerts for a specific bus")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved real-time bus position"),
-            @ApiResponse(responseCode = "404", description = "Route not found or no active buses on route")
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved real-time data"),
+            @ApiResponse(responseCode = "404", description = "Bus with specified number not found")
     })
-    @GetMapping("/realtime/positions/{routeId}")
-    public ResponseEntity<Map<String, Object>> getRealTimeBusPositionByRoute(
-            @Parameter(description = "Route ID", required = true)
-            @PathVariable String routeId) {
+    @GetMapping("/{vehicleId}/realtime")
+    public ResponseEntity<Map<String, Object>> getBusRealTimeDataByVehicleId(
+            @Parameter(description = "GTFS Vehicle ID", required = true)
+            @PathVariable String vehicleId) {
+
+        Map<String, Object> realTimeData = new HashMap<>();
+
         try {
-            Map<String, Object> vehiclePosition = iowaGtfsService.getVehiclePositionByRoute(routeId);
-            return ResponseEntity.ok(vehiclePosition);
-        } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to fetch real-time bus position for route: " + routeId);
-            errorResponse.put("message", e.getMessage());
-            return ResponseEntity.status(500).body(errorResponse);
+            // Get all current vehicle positions
+            List<VehiclePositionDTO> positions = iowaGtfsService.getVehiclePositions();
+
+            // Find the one matching the requested vehicleId
+            Optional<VehiclePositionDTO> match = positions.stream()
+                    .filter(pos -> vehicleId.equals(pos.getVehicleId()))
+                    .findFirst();
+
+            if (match.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            VehiclePositionDTO vehicle = match.get();
+            realTimeData.put("position", vehicle);
+
+            // You can now use vehicle.getRouteId() to fetch other info:
+            String routeId = vehicle.getRouteId();
+
+            // Get trip updates for this vehicle's route
+            List<TripUpdateDTO> tripUpdates = iowaGtfsService.getTripUpdatesByRouteId(routeId);
+            if (!tripUpdates.isEmpty()) {
+                realTimeData.put("tripUpdates", tripUpdates);
+            }
+
+            // Get service alerts affecting this route
+            List<ServiceAlertDTO> alerts = iowaGtfsService.getServiceAlertsByRouteId(routeId);
+            if (!alerts.isEmpty()) {
+                realTimeData.put("alerts", alerts);
+            }
+
+            return ResponseEntity.ok(realTimeData);
+
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
         }
     }
 
-    @Operation(summary = "Get all bus stops", description = "Retrieves all bus stops from the Iowa-GTFS API")
-    @ApiResponse(responseCode = "200", description = "Successfully retrieved all bus stops")
-    @GetMapping("/realtime/stops")
-    public ResponseEntity<List<Map<String, Object>>> getAllBusStops() {
+    @Operation(summary = "Find nearest buses",
+            description = "Finds buses nearest to the provided coordinates")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved nearest buses",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Bus.class)))
+    @GetMapping("/nearestBuses")
+    public ResponseEntity<List<Bus>> getNearestBuses(
+            @Parameter(description = "Latitude coordinate", required = true)
+            @RequestParam double latitude,
+            @Parameter(description = "Longitude coordinate", required = true)
+            @RequestParam double longitude,
+            @Parameter(description = "Maximum number of buses to return", required = false)
+            @RequestParam(required = false, defaultValue = "5") int limit) {
         try {
-            List<Map<String, Object>> stops = iowaGtfsService.getAllStops();
-            return ResponseEntity.ok(stops);
-        } catch (Exception e) {
-            // Fix: Add error information instead of empty list
-            List<Map<String, Object>> errorList = new ArrayList<>();
-            Map<String, Object> errorInfo = new HashMap<>();
-            errorInfo.put("error", "Failed to fetch bus stops");
-            errorInfo.put("message", e.getMessage());
-            errorList.add(errorInfo);
-            return ResponseEntity.status(500).body(errorList);
+            List<Bus> nearestBuses = iowaGtfsService.findNearestBuses(latitude, longitude, limit);
+
+            return ResponseEntity.ok(nearestBuses);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
         }
     }
 
-    @Operation(summary = "Get bus stop by ID", description = "Retrieves details of a specific bus stop by ID")
+    @Operation(summary = "Get active buses",
+            description = "Retrieves all buses that are currently active/in service")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved active buses",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Bus.class)))
+    @GetMapping("/activeBuses")
+    public ResponseEntity<List<Bus>> getActiveBuses() {
+        try {
+            List<Bus> activeBuses = iowaGtfsService.getActiveBuses();
+            return ResponseEntity.ok(activeBuses);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @Operation(summary = "Get predicted arrival times",
+            description = "Retrieves predicted arrival times for a specific stop")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved bus stop details"),
-            @ApiResponse(responseCode = "404", description = "Bus stop not found")
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved arrival predictions"),
+            @ApiResponse(responseCode = "404", description = "Stop not found")
     })
-    @GetMapping("/realtime/stops/{stopId}")
-    public ResponseEntity<Map<String, Object>> getBusStopById(
+    @GetMapping("/stop/{stopId}/arrivals")
+    public ResponseEntity<List<Map<String, Object>>> getPredictedArrivals(
             @Parameter(description = "Stop ID", required = true)
             @PathVariable String stopId) {
         try {
-            Map<String, Object> stop = iowaGtfsService.getStopById(stopId);
-            if (stop == null || stop.isEmpty()) {
+            List<Map<String, Object>> arrivals = iowaGtfsService.getPredictedArrivals(stopId);
+            if (arrivals.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
-            return ResponseEntity.ok(stop);
-        } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to fetch bus stop with ID: " + stopId);
-            errorResponse.put("message", e.getMessage());
-            return ResponseEntity.status(500).body(errorResponse);
+            return ResponseEntity.ok(arrivals);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
         }
     }
 
-    @Operation(summary = "Get trip updates", description = "Retrieves real-time trip updates (arrival predictions) for all routes")
-    @ApiResponse(responseCode = "200", description = "Successfully retrieved trip updates")
-    @GetMapping("/realtime/tripUpdates")
-    public ResponseEntity<Map<String, Object>> getTripUpdates() {
+    @Operation(summary = "Manually update GTFS-RT data",
+            description = "Triggers an immediate refresh of all GTFS real-time data")
+    @ApiResponse(responseCode = "200", description = "Successfully updated GTFS-RT data")
+    @PostMapping("/realtime/refresh")
+    public ResponseEntity<String> refreshRealTimeData() {
         try {
-            Map<String, Object> tripUpdates = iowaGtfsService.getTripUpdates();
-            return ResponseEntity.ok(tripUpdates);
-        } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to fetch trip updates");
-            errorResponse.put("message", e.getMessage());
-            return ResponseEntity.status(500).body(errorResponse);
+            iowaGtfsService.refreshRealTimeData();
+            return ResponseEntity.ok("Real-time data successfully refreshed");
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().body("Failed to refresh real-time data: " + e.getMessage());
         }
     }
 
-    @Operation(summary = "Get trip updates by route", description = "Retrieves real-time trip updates for a specific route")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved trip updates for route"),
-            @ApiResponse(responseCode = "404", description = "Route not found or no active trips")
-    })
-    @GetMapping("/realtime/tripUpdates/{routeId}")
-    public ResponseEntity<Map<String, Object>> getTripUpdatesByRoute(
-            @Parameter(description = "Route ID", required = true)
-            @PathVariable String routeId) {
-        try {
-            Map<String, Object> tripUpdates = iowaGtfsService.getTripUpdatesByRoute(routeId);
-            if (tripUpdates == null || tripUpdates.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-            return ResponseEntity.ok(tripUpdates);
-        } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to fetch trip updates for route: " + routeId);
-            errorResponse.put("message", e.getMessage());
-            return ResponseEntity.status(500).body(errorResponse);
-        }
-    }
 
-    @Operation(summary = "Get all routes", description = "Retrieves all bus routes from the Iowa-GTFS API")
-    @ApiResponse(responseCode = "200", description = "Successfully retrieved all routes")
-    @GetMapping("/realtime/routes")
-    public ResponseEntity<List<Map<String, Object>>> getAllRoutes() {
-        try {
-            List<Map<String, Object>> routes = iowaGtfsService.getAllRoutes();
-            return ResponseEntity.ok(routes);
-        } catch (Exception e) {
-            // Fix: Add error information instead of empty list
-            List<Map<String, Object>> errorList = new ArrayList<>();
-            Map<String, Object> errorInfo = new HashMap<>();
-            errorInfo.put("error", "Failed to fetch routes");
-            errorInfo.put("message", e.getMessage());
-            errorList.add(errorInfo);
-            return ResponseEntity.status(500).body(errorList);
-        }
-    }
-
-    @Operation(summary = "Get route by ID", description = "Retrieves details of a specific bus route by ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved route details"),
-            @ApiResponse(responseCode = "404", description = "Route not found")
-    })
-    @GetMapping("/realtime/routes/{routeId}")
-    public ResponseEntity<Map<String, Object>> getRouteById(
-            @Parameter(description = "Route ID", required = true)
-            @PathVariable String routeId) {
-        try {
-            Map<String, Object> route = iowaGtfsService.getRouteById(routeId);
-            if (route == null || route.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-            return ResponseEntity.ok(route);
-        } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to fetch route with ID: " + routeId);
-            errorResponse.put("message", e.getMessage());
-            return ResponseEntity.status(500).body(errorResponse);
-        }
-    }
-
-    @Operation(summary = "Get next stop ETA", description = "Gets the estimated time of arrival to the next stop for a specific bus")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved ETA information"),
-            @ApiResponse(responseCode = "404", description = "Bus with specified number not found")
-    })
-    @GetMapping("/{busNum}/nextStopETA")
-    public ResponseEntity<Map<String, Object>> getNextStopETA(
-            @Parameter(description = "Bus number", required = true)
-            @PathVariable int busNum) {
-        try {
-            Optional<Bus> busOptional = busRepository.findByBusNum(busNum);
-            if (busOptional.isPresent()) {
-                Map<String, Object> etaInfo = iowaGtfsService.getNextStopETA(busNum);
-                return ResponseEntity.ok(etaInfo);
-            } else {
-                return ResponseEntity.notFound().build();
-            }
-        } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to fetch next stop ETA for bus: " + busNum);
-            errorResponse.put("message", e.getMessage());
-            return ResponseEntity.status(500).body(errorResponse);
-        }
-    }
-
-    @Operation(summary = "Sync bus with real-time data", description = "Manually triggers synchronization of a specific bus with real-time data")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Bus successfully synchronized with real-time data"),
-            @ApiResponse(responseCode = "404", description = "Bus with specified number not found")
-    })
-    @PostMapping("/{busNum}/syncRealTime")
-    public ResponseEntity<String> syncBusWithRealTimeData(
-            @Parameter(description = "Bus number", required = true)
-            @PathVariable int busNum) {
-        Optional<Bus> busOptional = busRepository.findByBusNum(busNum);
-        if (busOptional.isPresent()) {
-            Bus bus = busOptional.get();
-            String routeId = String.valueOf(bus.getBusNum());
-
-            try {
-                // Get vehicle position data
-                Map<String, Object> vehiclePosition = iowaGtfsService.getVehiclePositionByRoute(routeId);
-
-                if (vehiclePosition != null && vehiclePosition.containsKey("entity")) {
-                    // Fix: Use safe casting with type checking
-                    Object entityObj = vehiclePosition.get("entity");
-                    if (entityObj instanceof List<?>) {
-                        List<?> entities = (List<?>) entityObj;
-
-                        if (!entities.isEmpty() && entities.get(0) instanceof Map) {
-                            Map<?, ?> entity = (Map<?, ?>) entities.get(0);
-                            Object vehicleObj = entity.get("vehicle");
-
-                            if (vehicleObj instanceof Map) {
-                                Map<?, ?> vehicle = (Map<?, ?>) vehicleObj;
-                                Object positionObj = vehicle.get("position");
-
-                                if (positionObj instanceof Map) {
-                                    Map<?, ?> position = (Map<?, ?>) positionObj;
-
-                                    // Extract and update position data with safe conversions
-                                    if (position.get("latitude") instanceof Number &&
-                                            position.get("longitude") instanceof Number) {
-
-                                        double latitude = ((Number) position.get("latitude")).doubleValue();
-                                        double longitude = ((Number) position.get("longitude")).doubleValue();
-                                        double bearing = position.containsKey("bearing") && position.get("bearing") instanceof Number ?
-                                                ((Number) position.get("bearing")).doubleValue() : 0.0;
-                                        double speed = position.containsKey("speed") && position.get("speed") instanceof Number ?
-                                                ((Number) position.get("speed")).doubleValue() : 0.0;
-
-                                        bus.updatePosition(latitude, longitude, speed, bearing);
-
-                                        // Update vehicle and trip IDs
-                                        if (vehicle.containsKey("vehicle") && vehicle.get("vehicle") instanceof Map) {
-                                            Map<?, ?> vehicleInfo = (Map<?, ?>) vehicle.get("vehicle");
-                                            if (vehicleInfo.containsKey("id") && vehicleInfo.get("id") instanceof String) {
-                                                bus.setVehicleId((String) vehicleInfo.get("id"));
-                                            }
-                                        }
-
-                                        if (vehicle.containsKey("trip") && vehicle.get("trip") instanceof Map) {
-                                            Map<?, ?> trip = (Map<?, ?>) vehicle.get("trip");
-                                            if (trip.containsKey("trip_id") && trip.get("trip_id") instanceof String) {
-                                                bus.setTripId((String) trip.get("trip_id"));
-                                            }
-                                        }
-
-                                        busRepository.save(bus);
-                                        return ResponseEntity.ok("Bus synchronized with real-time data successfully");
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                return ResponseEntity.ok("No real-time data available for this bus at the moment");
-            } catch (Exception e) {
-                return ResponseEntity.status(500).body("Failed to sync bus with real-time data: " + e.getMessage());
-            }
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
 }
