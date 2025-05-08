@@ -25,10 +25,10 @@
         tools:replace="android:label,android:icon,android:theme"
         tools:node="merge">
 
-        <!-- Google Maps API Key -->
+        <!-- Google Maps API Key - Hardcoded for CI/CD pipeline -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="${MAPS_API_KEY}" />
+            android:value="AIzaSyCjTH8eQdm-Ld3DKcd54zga8LO38cM34q8" />
 
         <activity
             android:name=".MainActivity"
