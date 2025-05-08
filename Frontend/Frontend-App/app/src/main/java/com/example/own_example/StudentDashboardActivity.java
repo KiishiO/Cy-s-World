@@ -4,10 +4,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
@@ -56,6 +60,13 @@ public class StudentDashboardActivity extends AppCompatActivity {
 
             setContentView(R.layout.activity_student_dashboard);
             Log.d(TAG, "StudentDashboardActivity onCreate");
+
+            // Initialize toolbar and set it as the action bar
+            Toolbar toolbar = findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle("Student Dashboard");
+            }
 
             // Initialize views with null checks
             welcomeText = findViewById(R.id.welcome_text);
@@ -175,10 +186,10 @@ public class StudentDashboardActivity extends AppCompatActivity {
             if (testingCenterCard != null) {
                 testingCenterCard.setOnClickListener(v -> {
                     try {
-                        Intent intent = new Intent(StudentDashboardActivity.this, BusActivity.class); //change this to testing center activity once implemented
+                        Intent intent = new Intent(StudentDashboardActivity.this, TestingCenterActivity.class);
                         startActivity(intent);
                     } catch (Exception e) {
-                        Log.e(TAG, "Error navigating to BusActivity: " + e.getMessage());
+                        Log.e(TAG, "Error navigating to TestingCenterActivity: " + e.getMessage());
                     }
                 });
             }
@@ -206,6 +217,60 @@ public class StudentDashboardActivity extends AppCompatActivity {
                 Log.e(TAG, "Could not even navigate back to MainActivity: " + e2.getMessage());
             }
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.dashboard_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_sign_out) {
+            signOut();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void signOut() {
+        // Show confirmation dialog
+        new AlertDialog.Builder(this)
+                .setTitle("Sign Out")
+                .setMessage("Are you sure you want to sign out?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    try {
+                        // Clear user session data
+                        SharedPreferences loginPrefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = loginPrefs.edit();
+                        editor.clear();
+                        editor.apply();
+
+                        // Clear any other user data stored in SharedPreferences
+                        SharedPreferences userPrefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+                        SharedPreferences.Editor userEditor = userPrefs.edit();
+                        userEditor.clear();
+                        userEditor.apply();
+
+                        Log.d(TAG, "User signed out successfully");
+                        Toast.makeText(this, "Signed out successfully", Toast.LENGTH_SHORT).show();
+
+                        // Navigate back to login screen
+                        Intent intent = new Intent(this, LoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error signing out: " + e.getMessage());
+                        Toast.makeText(this, "Error signing out", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("No", null)
+                .show();
     }
 
     // Method to handle back button presses

@@ -187,5 +187,19 @@
             android:exported="false"
             tools:node="merge"
             tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <!-- Add TestingCenterActivity -->
+        <activity
+            android:name=".TestingCenterActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
+
+        <!-- Add TestingCenterDetailActivity -->
+        <activity
+            android:name=".TestingCenterDetailActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:ignore="DuplicateActivity,Instantiatable"/>
     </application>
 </manifest>
