@@ -1,1 +1,0 @@
-typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"com.example.own_example.models","l":"Bus"},{"p":"com.example.own_example.services","l":"ChatWebSocketClient"},{"p":"com.example.own_example","l":"FriendsActivity"},{"p":"com.example.own_example.services","l":"ChatWebSocketClient.MessageListener"}];updateSearchResults();
