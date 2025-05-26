@@ -139,7 +139,7 @@ Through this project, our team gained experience in:
 - **Collaborative software development**
 - **User interface design principles**
 
-## 📸 Demo Link
+## 📸 Demo
 
 View demo video here --> (https://youtu.be/u3hlZZZqzDs?si=wqZq28XTUW7NKTZV)
 
